@@ -9,3 +9,10 @@ bool filterRemoveB(const char * ch)
     }
     return false;
 }
+
+int comp(const char c1, const char c2)
+{
+    return 0;
+}
+
+

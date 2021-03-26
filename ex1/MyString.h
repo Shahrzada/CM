@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 // -------------------------- const definitions -------------------------
 
@@ -42,6 +43,7 @@
  */
 #define MYSTR_ERROR_CODE -999
 //#define NULL_CHECK(val) if (val == NULL) return MYSTR_ERROR_CODE else return 0;
+#define ASCII_ZERO_DEC 48
 
 /*
  * MyString represents a manipulable string.
@@ -270,14 +272,14 @@ void myStringCustomSort(MyString **arr, unsigned int size,
  */
 void myStringSort(MyString **arr, unsigned int len);
 
-int myStringSetValue(MyString *str, char * value);
-
 /**
  * @brief returns the length of a char array
  * @param str
  *
  * RETURN VALUE: the length of the char array, -1 if str is NULL
  */
-int charArrayLen(char * str);
+int charArrayLen(const char * str);
+
+void intToChar(char * ch, int n);
 
 #endif // _MYSTRING_H
