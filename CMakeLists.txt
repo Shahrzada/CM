@@ -9,5 +9,6 @@ add_executable(bebi
         ex1/main.c
         ex1/MyString.c
         ex1/MyStringUtils.c
-        ex1/MyStringUnitTests.c
+        ex1/MyStringTest.c
+        ex1/MyStringUtils.h
         ex1/MyString.h)

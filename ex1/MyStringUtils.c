@@ -1,4 +1,68 @@
-#include "MyString.h"
+
+// ------------------------------ includes ------------------------------
+
+#include "MyStringUtils.h"
+
+// -------------------------- private functions -------------------------
+
+int quicksortMoveRight(MyString **arr, int (*comparator)(const void *, const void *),
+                       int i, int pivot, unsigned int last)
+{
+    if (arr == NULL || comparator == NULL)
+    {
+        return MYSTR_ERROR_CODE;
+    }
+
+    int result_i_pivot;
+    while(true)  // while (arr[i] <= arr[pivot] and i < last)
+    {
+        if (arr[i] == NULL)
+        {
+            return MYSTR_ERROR_CODE;
+        }
+        result_i_pivot = comparator(arr[i], arr[pivot]);
+        if (result_i_pivot == MYSTR_ERROR_CODE)
+        {
+            return MYSTR_ERROR_CODE;
+        }
+        if (result_i_pivot > 0 || i >= last)
+        {
+            return i;
+        }
+        i++;
+    }
+}
+
+int quicksortMoveLeft(MyString **arr, int (*comparator)(const void *, const void *),
+                      int j, int pivot)
+{
+    if (arr == NULL || comparator == NULL)
+    {
+        return MYSTR_ERROR_CODE;
+    }
+
+    int result_j_pivot;
+    while (true)
+    {
+        if (arr[j] == NULL)
+        {
+            return MYSTR_ERROR_CODE;
+        }
+        result_j_pivot = comparator(arr[j], arr[pivot]);
+        if (result_j_pivot == MYSTR_ERROR_CODE)
+        {
+            return MYSTR_ERROR_CODE;
+        }
+        if (result_j_pivot <= 0)
+        {
+            return j;
+        }
+        j--;
+    }
+}
+
+
+// -------------------------- functions -------------------------
 
 int charArrayLen(const char * str)
 {
@@ -13,14 +77,50 @@ int charArrayLen(const char * str)
         }
         return n;
     }
-    return -1;
+    return MYSTRING_ERROR;
 }
 
-char * intToCharHelper(char * output, int n)
+int charToInt(char * ch, unsigned int size)
 {
+    if (ch != NULL && size > 0)
+    {
+        char * current = ch;
+        unsigned int decile = size - 1;
+        int output = 0;
+        int sign = 1;
+        int i = 0;
+
+        if (*current == MINUS_SYMBOL)
+        {
+            sign = -1;
+            i++;
+            decile--;
+        }
+
+        while (i < size)
+        {
+            int digit = current[i] - ASCII_ZERO_DEC;
+            if (digit < 0 || 9 < digit)
+            {
+                return MYSTR_ERROR_CODE;
+            }
+            double position = pow(10, decile);
+            output += ((int)position) * digit;
+            decile--;
+            i++;
+        }
+        return output * sign;
+    }
+    return MYSTR_ERROR_CODE;
+}
+
+char *intToCharHelper(char * output, int n)
+{
+    IF_NULL_RETURN_NULL(output);
     if (n <= -10)
     {
         output = intToCharHelper(output, n/10);
+        IF_NULL_RETURN_NULL(output);
     }
     int digit = - n%10;
     *output = ASCII_ZERO_DEC + digit;
@@ -30,6 +130,7 @@ char * intToCharHelper(char * output, int n)
 
 void intToChar(char * ch, int n)
 {
+    IF_NULL_RETURN_NOTHING(ch);
     char * output = ch;
     if (n < 0)
     {
@@ -41,6 +142,58 @@ void intToChar(char * ch, int n)
         n = -n;
     }
     output = intToCharHelper(output, n);
+    IF_NULL_RETURN_NOTHING(output);
     *output = '\0';
 }
 
+void quicksortCharArraysUsingComp(MyString **arr, int (*comparator)(const void *, const void *),
+                                  int first, int last)
+{
+    if (arr == NULL || comparator == NULL)
+    {
+        return;
+    }
+
+    int i, j, pivot;
+    MyString * temp;
+
+    if (first < last){
+        pivot = first;
+        i = first;
+        j = last;
+
+        while(i < j)
+        {
+            if (arr[i] == NULL || arr[j] == NULL || arr[pivot] == NULL)
+            {
+                return;
+            }
+
+            i = quicksortMoveRight(arr, comparator, i, pivot, last);
+            if (i == MYSTR_ERROR_CODE)
+            {
+                return;
+            }
+
+            j = quicksortMoveLeft(arr, comparator, j, pivot);
+            if (j == MYSTR_ERROR_CODE)
+            {
+                return;
+            }
+
+            if (i < j)
+            {
+                temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+
+        temp = arr[pivot];
+        arr[pivot] = arr[j];
+        arr[j] = temp;
+
+        quicksortCharArraysUsingComp(arr, comparator, first, j - 1);
+        quicksortCharArraysUsingComp(arr, comparator, j + 1, last);
+    }
+}

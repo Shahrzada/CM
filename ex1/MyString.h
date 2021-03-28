@@ -34,7 +34,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 // -------------------------- const definitions -------------------------
 
@@ -42,8 +41,6 @@
  * mystr error code
  */
 #define MYSTR_ERROR_CODE -999
-//#define NULL_CHECK(val) if (val == NULL) return MYSTR_ERROR_CODE else return 0;
-#define ASCII_ZERO_DEC 48
 
 /*
  * MyString represents a manipulable string.
@@ -56,6 +53,11 @@ typedef enum {
   MYSTRING_ERROR = -1,
   MYSTRING_SUCCESS = 0,
 } MyStringRetVal;
+
+// ------------------------------ macros -----------------------------
+
+#define IF_NULL_RETURN_MYSTRING_ERROR(val) if (val == NULL) return MYSTRING_ERROR
+#define IF_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(val) if (val == MYSTRING_ERROR) return MYSTRING_ERROR
 
 // ------------------------------ functions -----------------------------
 
@@ -95,7 +97,7 @@ MyString *myStringClone(const MyString *str);
 MyStringRetVal myStringSetFromMyString(MyString *str, const MyString *other);
 
 /**
- * @brief filter the value of str acording to a filter.
+ * @brief filter the value of str according to a filter.
  * 	remove from str all the occurrence of chars that are filtered by filt
  *	(i.e. filr(char)==true)
  * @param str the MyString to filter
@@ -271,15 +273,5 @@ void myStringCustomSort(MyString **arr, unsigned int size,
  * RETURN VALUE: none
  */
 void myStringSort(MyString **arr, unsigned int len);
-
-/**
- * @brief returns the length of a char array
- * @param str
- *
- * RETURN VALUE: the length of the char array, -1 if str is NULL
- */
-int charArrayLen(const char * str);
-
-void intToChar(char * ch, int n);
 
 #endif // _MYSTRING_H
