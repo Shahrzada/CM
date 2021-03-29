@@ -41,7 +41,11 @@ MyString *myStringAlloc()
     IF_NULL_RETURN_NULL(str);
 
     str->value = (char *) malloc(sizeof(char));
-    IF_NULL_RETURN_NULL(str->value);
+    if (str->value == NULL)
+    {
+        free(str);
+        return NULL;
+    }
 
     str->len = 0;
     *(str->value) = EMPTY_STR;
@@ -127,10 +131,7 @@ MyStringRetVal myStringSetFromCString(MyString *str, const char *cString)
         }
         free(str->value);
         str->value = (char *) malloc(sizeof(char)*n);
-        if (str->value == NULL)
-        {
-            return MYSTRING_ERROR;
-        }
+        IF_NULL_RETURN_MYSTRING_ERROR(str->value);
         str->len = n;
         memcpy(str->value, cString, sizeof(char)*str->len);
         str->value[n] = '\0';
@@ -150,6 +151,7 @@ MyStringRetVal myStringSetFromInt(MyString *str, int n)
         int len = charArrayLen(output);
         if (len == MYSTRING_ERROR)
         {
+            free(output);
             return MYSTRING_ERROR;
         }
         free(str->value);

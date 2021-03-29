@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.17)
-project(bebi C)
+project(ex1 C)
 
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD 99)
 
 include_directories(ex1)
 
-add_executable(bebi
+add_executable(ex1
         ex1/main.c
         ex1/MyString.c
         ex1/MyStringUtils.c
