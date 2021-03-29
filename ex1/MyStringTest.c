@@ -12,36 +12,36 @@ bool filterRemoveB(const char * ch);
 int comparatorReverse(const char c1, const char c2);
 
 
-int main()
-{
-    MyStringRetVal result;
-
-    result = basicMyStringTest();
-    if (result == MYSTRING_ERROR)
-    {
-        printf("Failed a basic MyString test.\n");
-        return -1;
-    }
-    printf("Passed all basic MyString tests.\n");
-
-    result = nullMyStringTest();
-    if (result == MYSTRING_ERROR)
-    {
-        printf("Failed a NULL MyString test.\n");
-        return -1;
-    }
-    printf("Passed all NULL MyString tests.\n");
-
-    result = comparingMyStringTest();
-    if (result == MYSTRING_ERROR)
-    {
-        printf("Failed a comparing MyString test.\n");
-        return -1;
-    }
-    printf("Passed all comparing MyString tests.\n");
-
-    return 0;
-}
+//int main()
+//{
+//    MyStringRetVal result;
+//
+//    result = basicMyStringTest();
+//    if (result == MYSTRING_ERROR)
+//    {
+//        printf("Failed a basic MyString test.\n");
+//        return -1;
+//    }
+//    printf("Passed all basic MyString tests.\n");
+//
+//    result = nullMyStringTest();
+//    if (result == MYSTRING_ERROR)
+//    {
+//        printf("Failed a NULL MyString test.\n");
+//        return -1;
+//    }
+//    printf("Passed all NULL MyString tests.\n");
+//
+//    result = comparingMyStringTest();
+//    if (result == MYSTRING_ERROR)
+//    {
+//        printf("Failed a comparing MyString test.\n");
+//        return -1;
+//    }
+//    printf("Passed all comparing MyString tests.\n");
+//
+//    return 0;
+//}
 
 MyStringRetVal basicMyStringTest() {
     const char * cString = "I am a beautiful string";
@@ -367,8 +367,6 @@ MyStringRetVal comparingMyStringTest() {
     return MYSTRING_SUCCESS;
 }
 
-
-
 bool filterRemoveB(const char * ch)
 {
     if (ch != NULL && *ch == 'b')
@@ -392,18 +390,6 @@ int comparatorReverse(const char c1, const char c2)
     }
     return 1;
 }
-
-//FILE * generateStream()
-//{
-//    FILE * pFile;
-//    pFile = fopen("myfile.txt","w+");
-//    if (pFile != NULL)
-//    {
-//        myStringWrite(a, pFile);
-//        fclose (pFile);
-//    }
-//}
-
 
 int testQuickSort()
 {
@@ -444,12 +430,9 @@ int testQuickSort()
     return 0;
 }
 
-
 MyStringRetVal notifyHelper(MyStringRetVal returnValue, char * msg, MyString ** arrToFree, int arrSize)
 {
     freeArrayOfMyStringByLen(arrToFree, arrSize);
     printf("%s\n", msg);
     return returnValue;
 }
-
-

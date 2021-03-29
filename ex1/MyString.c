@@ -197,7 +197,7 @@ MyStringRetVal myStringCat(MyString *dest, const MyString *src)
             return MYSTRING_SUCCESS;
         }
 
-        char * output = (char *) malloc(sizeof(char)*new_len);
+        char * output = (char *) malloc(sizeof(char)*(new_len+1));
         IF_NULL_RETURN_MYSTRING_ERROR(output);
 
         memcpy(output, dest->value, sizeof(char)*dest->len);
@@ -207,6 +207,7 @@ MyStringRetVal myStringCat(MyString *dest, const MyString *src)
         free(dest->value);
         dest->value = output;
         dest->len = new_len;
+        output[new_len] = '\0';
         return MYSTRING_SUCCESS;
     }
     return MYSTRING_ERROR;
