@@ -1,5 +1,6 @@
-#ifndef MYSTRINGUTILS_H
-#define MYSTRINGUTILS_H
+#pragma once
+
+// CR: Why is this here?
 
 /* Note: Do not start the guard symbol with an underscore! Leading underscore
  * names are reserved for internal use by the C implementation – the
@@ -19,8 +20,10 @@
 #define MINUS_SYMBOL '-'
 
 // ------------------------------ macros -----------------------------
-
+// CR: like MyString.h, same goes here, val=>(val)
+// CR: change this to CHECK_NULL_RETURN_NULL
 #define IF_NULL_RETURN_NULL(val) if (val == NULL) return NULL
+// CR: this name is a bit confusing, change it to CHECK_NULL_RETURN
 #define IF_NULL_RETURN_NOTHING(val) if (val == NULL) return
 
 // ------------------------------ functions -----------------------------
@@ -63,4 +66,3 @@ char * intToChar(int n);
 void quicksortCharArraysUsingComp(MyString **arr, int (*comparator)(const void *, const void *),
                                   int first, int last);
 
-#endif // MYSTRINGUTILS_H

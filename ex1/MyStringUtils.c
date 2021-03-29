@@ -74,7 +74,7 @@ static char * intToCharHelper(char * output, int n)
     output++;
     return output;
 }
-
+// CR: dont use recursion
 static int getTotalDigitsOfNumHelper(int n)
 {
     if (n <= -10)
@@ -102,11 +102,12 @@ static int getTotalDigitsOfNum(int n)
 
 int charArrayLen(const char * str)
 {
-    if (str != NULL)
+    if (str != NULL) // CR: macros?
     {
         int n = 0;
         const char * current = str;
-        while (*current != '\0')
+        // CR: do you really need n? try to do it without :D
+        while (*current != '\0') 
         {
             n++;
             current++;
@@ -154,7 +155,7 @@ char * intToChar(int n)
 {
     int totalDigits = getTotalDigitsOfNum(n);
     char * output = (char *) malloc(sizeof (char)*totalDigits);
-    char * op = output;
+    char * op = output; // CR: dont cheap out on the variable names.
     if (n < 0)
     {
         *output = '-';
@@ -169,6 +170,7 @@ char * intToChar(int n)
     return output;
 }
 
+// CR: do it without recursion.
 void quicksortCharArraysUsingComp(MyString **arr, int (*comparator)(const void *, const void *),
                                   int first, int last)
 {

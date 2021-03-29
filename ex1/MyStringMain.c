@@ -90,14 +90,15 @@ MyStringRetVal validateInput(int argc, char *argv[])
         printf("Didn't know argv can be NULL.\n");
         return MYSTRING_ERROR;
     }
-
+    // CR: lol, use enum for these :D
     if (argc != EXACT_AMOUNT_OF_INPUT_PARAMS)
     {
         printf("Bebi, you know you need to enter exactly two strings :)\nUsage: bebi <str1> <str2>\n");
         return MYSTRING_ERROR;
     }
 
-    char * str1 = argv[1];
+    // CR: in the same enum as the above.
+    char * str1 = argv[1]; 
     char * str2 = argv[2];
 
     if (str1 == NULL || str2 == NULL)

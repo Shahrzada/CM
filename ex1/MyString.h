@@ -55,7 +55,10 @@ typedef enum {
 } MyStringRetVal;
 
 // ------------------------------ macros -----------------------------
-
+// CR: While these are good this is not really the place for them since both are private for your library
+// CR: the usual names for these are, CHECK, CHECK_NULL, CHECK_NULL_RETURN_..., 
+//     not really a convention but since they are more recognized you should use them.
+// CR: when creating macros you should warp the marco's argument with parenthesis
 #define IF_NULL_RETURN_MYSTRING_ERROR(val) if (val == NULL) return MYSTRING_ERROR
 #define IF_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(val) if (val == MYSTRING_ERROR) return MYSTRING_ERROR
 
