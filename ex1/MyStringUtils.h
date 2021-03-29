@@ -63,5 +63,4 @@ char * intToChar(int n);
 void quicksortCharArraysUsingComp(MyString **arr, int (*comparator)(const void *, const void *),
                                   int first, int last);
 
-
 #endif // MYSTRINGUTILS_H

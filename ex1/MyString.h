@@ -58,7 +58,6 @@ typedef enum {
 
 #define IF_NULL_RETURN_MYSTRING_ERROR(val) if (val == NULL) return MYSTRING_ERROR
 #define IF_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(val) if (val == MYSTRING_ERROR) return MYSTRING_ERROR
-#define IF_NOT_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(val) if (val != MYSTRING_ERROR) return MYSTRING_ERROR
 
 // ------------------------------ functions -----------------------------
 
@@ -275,7 +274,22 @@ void myStringCustomSort(MyString **arr, unsigned int size,
  */
 void myStringSort(MyString **arr, unsigned int len);
 
+/**
+ * @brief creates an array of the desired length of MyString objects with no value
+ * (= empty string)
+ * @param n
+ *
+ * RETURN VALUE: a pointer to the array
+ */
 MyString ** getArrayOfMyStringByLen(int n);
+
+/**
+ * @brief given a pointer to an array of MyString objects, it frees all of them and itself
+ * @param arr
+ * @param n
+ *
+ * RETURN VALUE: none
+ */
 void freeArrayOfMyStringByLen(MyString ** arr, int n);
 
 #endif // _MYSTRING_H

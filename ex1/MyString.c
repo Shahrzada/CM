@@ -13,14 +13,14 @@ struct _MyString {
 
 // -------------------------- private functions -------------------------
 
-MyStringRetVal myStringCheckNull(const MyString *str)
+static MyStringRetVal myStringCheckNull(const MyString *str)
 {
     IF_NULL_RETURN_MYSTRING_ERROR(str);
     IF_NULL_RETURN_MYSTRING_ERROR(str->value);
     return MYSTRING_SUCCESS;
 }
 
-MyStringRetVal myStringArrayCheckNull(MyString **arr, unsigned int size)
+static MyStringRetVal myStringArrayCheckNull(MyString **arr, unsigned int size)
 {
     IF_NULL_RETURN_MYSTRING_ERROR(arr);
     for (int i = 0; i < size; i++)
@@ -312,7 +312,6 @@ int myStringCustomEqual(const MyString *str1, const MyString *str2,
     return MYSTR_ERROR_CODE;
 }
 
-
 unsigned long myStringMemUsage(const MyString *str1)
 {
     if (myStringCheckNull(str1) == MYSTRING_SUCCESS)
@@ -322,7 +321,6 @@ unsigned long myStringMemUsage(const MyString *str1)
     return 0;
 }
 
-
 unsigned long myStringLen(const MyString *str1)
 {
     if (myStringCheckNull(str1) == MYSTRING_SUCCESS)
@@ -331,7 +329,6 @@ unsigned long myStringLen(const MyString *str1)
     }
     return 0;
 }
-
 
 MyStringRetVal myStringWrite(const MyString *str, FILE *stream)
 {

@@ -5,7 +5,7 @@
 
 // -------------------------- private functions -------------------------
 
-int quicksortMoveRight(MyString **arr, int (*comparator)(const void *, const void *),
+static int quicksortMoveRight(MyString **arr, int (*comparator)(const void *, const void *),
                        int i, int pivot, unsigned int last)
 {
     if (arr == NULL || comparator == NULL)
@@ -33,7 +33,7 @@ int quicksortMoveRight(MyString **arr, int (*comparator)(const void *, const voi
     }
 }
 
-int quicksortMoveLeft(MyString **arr, int (*comparator)(const void *, const void *),
+static int quicksortMoveLeft(MyString **arr, int (*comparator)(const void *, const void *),
                       int j, int pivot)
 {
     if (arr == NULL || comparator == NULL)
@@ -61,6 +61,42 @@ int quicksortMoveLeft(MyString **arr, int (*comparator)(const void *, const void
     }
 }
 
+static char * intToCharHelper(char * output, int n)
+{
+    IF_NULL_RETURN_NULL(output);
+    if (n <= -10)
+    {
+        output = intToCharHelper(output, n/10);
+        IF_NULL_RETURN_NULL(output);
+    }
+    int digit = - n%10;
+    *output = ASCII_ZERO_DEC + digit;
+    output++;
+    return output;
+}
+
+static int getTotalDigitsOfNumHelper(int n)
+{
+    if (n <= -10)
+    {
+        return getTotalDigitsOfNumHelper(n/10) + 1;
+    }
+    return 1;
+}
+
+static int getTotalDigitsOfNum(int n)
+{
+    int result = 0;
+    if (n < 0)
+    {
+        result++;
+    }
+    else
+    {
+        n = -n;
+    }
+    return result + getTotalDigitsOfNumHelper(n);
+}
 
 // -------------------------- functions -------------------------
 
@@ -112,45 +148,6 @@ int charToInt(char * ch, unsigned int size)
         return output * sign;
     }
     return MYSTR_ERROR_CODE;
-}
-
-char * intToCharHelper(char * output, int n)
-{
-    IF_NULL_RETURN_NULL(output);
-    if (n <= -10)
-    {
-        output = intToCharHelper(output, n/10);
-        IF_NULL_RETURN_NULL(output);
-    }
-    int digit = - n%10;
-    *output = ASCII_ZERO_DEC + digit;
-    output++;
-    return output;
-}
-
-int getTotalDigitsOfNumHelper(int n)
-{
-    if (n <= -10)
-    {
-        return getTotalDigitsOfNumHelper(n/10) + 1;
-    }
-    return 1;
-}
-
-int getTotalDigitsOfNum(int n)
-{
-    int result = 0;
-    if (n < 0)
-    {
-        result++;
-    }
-    else
-    {
-        n = -n;
-    }
-    return result + getTotalDigitsOfNumHelper(n);
-
-
 }
 
 char * intToChar(int n)

@@ -4,7 +4,7 @@
 #define TOTAL_MYSTRING_OBJECTS 4
 #define IS_SMALLER " is smaller than "
 
-int validateInput(int argc, char *argv[]);
+MyStringRetVal validateInput(int argc, char *argv[]);
 MyStringRetVal initMyStrings(MyString **arr, int len, char *argv[]);
 MyStringRetVal compareMyStringsAndCreateOutput(MyString **arr);
 MyStringRetVal createMyStringOutput(MyString * output, MyString * left, MyString * middle, MyString * right);
@@ -17,10 +17,15 @@ int main (int argc, char *argv[])
         return MYSTRING_ERROR;
     }
 
-    // create MyString objects
     MyStringRetVal result;
 
+    // create MyString objects
     MyString **arr = getArrayOfMyStringByLen(TOTAL_MYSTRING_OBJECTS);
+    if (arr == NULL)
+    {
+        printf("Couldn't init the strings.\n");
+    }
+
     result = initMyStrings(arr, TOTAL_MYSTRING_OBJECTS, argv);
     if (result == MYSTRING_ERROR)
     {
@@ -40,12 +45,12 @@ int main (int argc, char *argv[])
 
     // open and write to file
     result = openAndWriteToFile(arr, TOTAL_MYSTRING_OBJECTS);
+    freeArrayOfMyStringByLen(arr, TOTAL_MYSTRING_OBJECTS);
+
     if (result == MYSTRING_ERROR)
     {
-        freeArrayOfMyStringByLen(arr, TOTAL_MYSTRING_OBJECTS);
         return MYSTRING_ERROR;
     }
-
     return MYSTRING_SUCCESS;
 }
 
@@ -78,7 +83,7 @@ MyStringRetVal compareMyStringsAndCreateOutput(MyString **arr) {
     }
 }
 
-int validateInput(int argc, char *argv[])
+MyStringRetVal validateInput(int argc, char *argv[])
 {
     if (argv == NULL)
     {
@@ -88,7 +93,7 @@ int validateInput(int argc, char *argv[])
 
     if (argc != EXACT_AMOUNT_OF_INPUT_PARAMS)
     {
-        printf("Bebi, you know you need to enter two strings :)\nUsage: bebi <str1> <str2>\n");
+        printf("Bebi, you know you need to enter exactly two strings :)\nUsage: bebi <str1> <str2>\n");
         return MYSTRING_ERROR;
     }
 
@@ -106,12 +111,12 @@ int validateInput(int argc, char *argv[])
 
 MyStringRetVal initMyStrings(MyString **arr, int len, char *argv[])
 {
-    // verify non-null pointers
     if (arr == NULL)
     {
         printf("Couldn't allocate memory for MyStrings.\n");
         return MYSTRING_ERROR;
     }
+
     for (int i = 0; i < len; i++)
     {
         if (*(arr + i) == NULL)
@@ -150,22 +155,13 @@ MyStringRetVal createMyStringOutput(MyString * output, MyString * left, MyString
 
     MyStringRetVal result;
     result = myStringSetFromMyString(output, left);
-    if (result == MYSTRING_ERROR)
-    {
-        return MYSTRING_ERROR;
-    }
+    IF_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(result);
 
     result = myStringCat(output, middle);
-    if (result == MYSTRING_ERROR)
-    {
-        return MYSTRING_ERROR;
-    }
+    IF_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(result);
 
     result = myStringCat(output, right);
-    if (result == MYSTRING_ERROR)
-    {
-        return MYSTRING_ERROR;
-    }
+    IF_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(result);
 
     return MYSTRING_SUCCESS;
 }
@@ -194,11 +190,11 @@ MyStringRetVal openAndWriteToFile(MyString **arr, int len)
     if (result == MYSTRING_ERROR)
     {
         printf("Couldn't write to file.\n");
-        fclose (pFile);
+        fclose(pFile);
         freeArrayOfMyStringByLen(arr, len);
         return MYSTRING_ERROR;
     }
 
-    fclose (pFile);
+    fclose(pFile);
     return MYSTRING_SUCCESS;
 }
