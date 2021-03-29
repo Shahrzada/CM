@@ -49,11 +49,11 @@ int charToInt(char * ch, unsigned int size);
  * @param n
  *
  */
-void intToChar(char * ch, int n);
+char * intToChar(int n);
 
 /**
  * @brief Applies the quicksort algorithm to sort an array of char arrays using
- * a comparator
+ * a comparatorReverse
  * @param arr
  * @param comparator
  * @param first

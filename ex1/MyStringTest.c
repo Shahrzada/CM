@@ -3,8 +3,14 @@
 
 
 MyStringRetVal basicMyStringTest();
-
 MyStringRetVal nullMyStringTest();
+MyStringRetVal comparingMyStringTest();
+
+MyStringRetVal notifyHelper(MyStringRetVal returnValue, char * msg, MyString ** arrToFree, int arrSize);
+
+bool filterRemoveB(const char * ch);
+int comparatorReverse(const char c1, const char c2);
+
 
 int main()
 {
@@ -13,132 +19,355 @@ int main()
     result = basicMyStringTest();
     if (result == MYSTRING_ERROR)
     {
-        printf("Failed the basic MyString tests");
+        printf("Failed a basic MyString test.\n");
+        return -1;
     }
+    printf("Passed all basic MyString tests.\n");
 
     result = nullMyStringTest();
     if (result == MYSTRING_ERROR)
     {
-        printf("Failed the basic MyString tests");
+        printf("Failed a NULL MyString test.\n");
+        return -1;
     }
+    printf("Passed all NULL MyString tests.\n");
+
+    result = comparingMyStringTest();
+    if (result == MYSTRING_ERROR)
+    {
+        printf("Failed a comparing MyString test.\n");
+        return -1;
+    }
+    printf("Passed all comparing MyString tests.\n");
 
     return 0;
 }
 
 MyStringRetVal basicMyStringTest() {
     const char * cString = "I am a beautiful string";
-    srand(time(NULL));
-    int n = rand();
+    int n = -35467;
+    int arrSize = 10;
 
     int result;
 
     // initializing
-    MyString * a = myStringAlloc();
-    IF_NULL_RETURN_MYSTRING_ERROR(a);
-    MyString * b = myStringAlloc();
-    IF_NULL_RETURN_MYSTRING_ERROR(b);
+    MyString ** arr = getArrayOfMyStringByLen(arrSize);
+    if (arr == NULL)
+    {
+        return notifyHelper(MYSTRING_ERROR, "getArrayOfMyStringByLen failed", arr, arrSize);
+    }
 
+    MyString * a = *arr;
+    MyString * b = *(arr + 1);
+    MyString * c = *(arr + 2);
+
+
+    // assigning string values
     result = myStringSetFromInt(a, n);
-    IF_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(result);
+    if (result == MYSTRING_ERROR)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringSetFromInt failed", arr, arrSize);
+    }
+
     result = myStringSetFromCString(b, cString);
-    IF_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(result);
+    if (result == MYSTRING_ERROR)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringSetFromCString failed", arr, arrSize);
+    }
 
     // cloning and comparing
-    MyString * c = myStringClone(a);
-    IF_NULL_RETURN_MYSTRING_ERROR(c);
-    MyString * d = myStringAlloc();
-    IF_NULL_RETURN_MYSTRING_ERROR(d);
-    result = myStringSetFromMyString(d, b);
-    IF_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(result);
-    result = myStringEqual(a, c);
-    if (result <= 0)
+    MyString * d = myStringClone(a);
+    if (d == NULL)
     {
-        return MYSTRING_ERROR;
+        return notifyHelper(MYSTRING_ERROR, "myStringClone failed", arr, arrSize);
     }
-    result = myStringEqual(b, d);
-    if (result <= 0)
+    myStringFree(*(arr + 3));
+    *(arr + 3) = d;
+
+    result = myStringSetFromMyString(c, b);
+    if (result == MYSTRING_ERROR)
     {
-        return MYSTRING_ERROR;
+        return notifyHelper(MYSTRING_ERROR, "myStringSetFromMyString failed", arr, arrSize);
     }
 
-    myStringFree(a);
-    myStringFree(b);
-    myStringFree(c);
-    myStringFree(d);
+    result = myStringEqual(a, d);
+    if (result <= 0)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringEqual failed", arr, arrSize);
+    }
 
+    result = myStringEqual(b, c);
+    if (result <= 0)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringEqual failed", arr, arrSize);
+    }
+
+
+    freeArrayOfMyStringByLen(arr, arrSize);
     return MYSTRING_SUCCESS;
 }
 
-MyStringRetVal checkSingleMyStringInputFunction(const MyString *str,
-                                                MyStringRetVal (*func)(const MyString *))
-{
-    return func(str);
-}
-
 MyStringRetVal nullMyStringTest() {
-    const char * cString = "I am another beautiful string";
-    srand(time(NULL));
-    int n = rand();
+    const char * cString = "I am a beautiful string";
+    int n = -35467;
+    int arrSize = 10;
 
     int result;
 
     // initializing
-    MyString * a = NULL;
-    MyString * b = myStringAlloc();
-    IF_NULL_RETURN_MYSTRING_ERROR(b);
-
-    result = myStringSetFromInt(a, n);
-    if (result != MYSTRING_ERROR)
+    MyString ** arr = getArrayOfMyStringByLen(arrSize);
+    if (arr == NULL)
     {
-        return MYSTRING_ERROR;
+        return notifyHelper(MYSTRING_ERROR, "getArrayOfMyStringByLen failed", arr, arrSize);
     }
-    result = myStringSetFromCString(b, cString);
-    IF_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(result);
 
-    // cloning and comparing
+    MyString * a = NULL;
+    MyString * b = *(arr + 1);
+
+    result = myStringSetFromCString(b, cString);
+    if (result == MYSTRING_ERROR)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringSetFromCString failed", arr, arrSize);
+    }
+
+    // checking null
     MyString * c = myStringClone(a);
     if (c != NULL)
     {
-        return MYSTRING_ERROR;
+        return notifyHelper(MYSTRING_ERROR, "myStringClone failed", arr, arrSize);
     }
 
     result = myStringSetFromMyString(a, c);
     if (result != MYSTRING_ERROR)
     {
-        return MYSTRING_ERROR;
+        return notifyHelper(MYSTRING_ERROR, "myStringSetFromMyString failed", arr, arrSize);
     }
 
-    result = myStringEqual(a, c);
-    if (result != MYSTR_ERROR_CODE)
+    result = myStringFilter(a, NULL);
+    if (result != MYSTRING_ERROR)
     {
-        return MYSTRING_ERROR;
+        return notifyHelper(MYSTRING_ERROR, "myStringFilter failed", arr, arrSize);
+    }
+
+    result = myStringFilter(a, filterRemoveB);
+    if (result != MYSTRING_ERROR)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringFilter failed", arr, arrSize);
+    }
+
+    result = myStringSetFromCString(a, NULL);
+    if (result != MYSTRING_ERROR)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringSetFromCString failed", arr, arrSize);
     }
 
     result = myStringSetFromCString(b, NULL);
     if (result != MYSTRING_ERROR)
     {
-        return MYSTRING_ERROR;
+        return notifyHelper(MYSTRING_ERROR, "myStringSetFromCString failed", arr, arrSize);
     }
 
     result = myStringSetFromCString(a, "abcde");
     if (result != MYSTRING_ERROR)
     {
-        return MYSTRING_ERROR;
+        return notifyHelper(MYSTRING_ERROR, "myStringSetFromCString failed", arr, arrSize);
+    }
+
+    result = myStringSetFromInt(a, n);
+    if (result != MYSTRING_ERROR)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringSetFromInt failed", arr, arrSize);
     }
 
     result = myStringToInt(a);
-    if (result != MYSTRING_ERROR)
+    if (result != MYSTR_ERROR_CODE)
     {
-        return MYSTRING_ERROR;
+        return notifyHelper(MYSTRING_ERROR, "myStringToInt failed", arr, arrSize);
     }
 
+    char * ch = myStringToCString(a);
+    if (ch != NULL)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringToCString failed", arr, arrSize);
+    }
 
-    myStringFree(a);
-    myStringFree(b);
-    myStringFree(c);
+    result = myStringCat(a, b);
+    if (result != MYSTRING_ERROR)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringCat failed", arr, arrSize);
+    }
 
+    result = myStringCatTo(a, b, a);
+    if (result != MYSTRING_ERROR)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringCatTo failed", arr, arrSize);
+    }
+
+    result = myStringCompare(a, b);
+    if (result != MYSTR_ERROR_CODE)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringCompare failed", arr, arrSize);
+    }
+
+    result = myStringCustomCompare(a, b, comparatorReverse);
+    if (result != MYSTR_ERROR_CODE)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringCustomCompare failed", arr, arrSize);
+    }
+
+    result = myStringEqual(a, c);
+    if (result != MYSTR_ERROR_CODE)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringEqual failed", arr, arrSize);
+    }
+
+    result = myStringCustomEqual(a, c, comparatorReverse);
+    if (result != MYSTR_ERROR_CODE)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringCustomEqual failed", arr, arrSize);
+    }
+
+    unsigned long size = myStringMemUsage(a);
+    if (size != 0)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringMemUsage failed", arr, arrSize);
+    }
+
+    unsigned long len = myStringLen(a);
+    if (len != 0)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringLen failed", arr, arrSize);
+    }
+
+    result = myStringWrite(a, NULL);
+    if (result != MYSTRING_ERROR)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringWrite failed", arr, arrSize);
+    }
+
+    freeArrayOfMyStringByLen(arr, arrSize);
     return MYSTRING_SUCCESS;
 }
+
+MyStringRetVal comparingMyStringTest() {
+    const char * cString1 = "I am a beautiful string";
+    const char * cString2 = "I am another beautiful string";
+    int arrSize = 10;
+    int result;
+
+    // initializing
+    MyString ** arr = getArrayOfMyStringByLen(arrSize);
+    if (arr == NULL)
+    {
+        return notifyHelper(MYSTRING_ERROR, "getArrayOfMyStringByLen failed", arr, arrSize);
+    }
+    MyString * a = *arr;
+    MyString * b = *(arr + 1);
+    MyString * c = *(arr + 2);
+
+    // assigning string values
+    result = myStringSetFromCString(a, cString1);
+    if (result == MYSTRING_ERROR)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringSetFromCString failed", arr, arrSize);
+    }
+    result = myStringSetFromCString(b, cString2);
+    if (result == MYSTRING_ERROR)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringSetFromCString failed", arr, arrSize);
+    }
+    MyString * d = myStringClone(a);
+    if (d == NULL)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringClone failed", arr, arrSize);
+    }
+    myStringFree(*(arr + 3));
+    *(arr + 3) = d;
+
+    result = myStringSetFromMyString(c, b);
+    if (result == MYSTRING_ERROR)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringSetFromMyString failed", arr, arrSize);
+    }
+
+    // compare string values - notice that: a == d ; b == c ; a < b
+    int compareResult = myStringCompare(b, a);
+    if (compareResult <= 0)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringCompare failed, a < b", arr, arrSize);
+    }
+
+    compareResult = myStringCompare(b, b);
+    if (compareResult != 0)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringCompare failed, b = b", arr, arrSize);
+    }
+
+    compareResult = myStringCompare(c, a);
+    if (compareResult <= 0)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringCompare failed, a < c", arr, arrSize);
+    }
+
+    compareResult = myStringCustomCompare(b, a, comparatorReverse);
+    if (compareResult >= 0)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringCompare failed, a > b", arr, arrSize);
+    }
+
+    compareResult = myStringCustomCompare(b, b, comparatorReverse);
+    if (compareResult != 0)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringCompare failed, b = b", arr, arrSize);
+    }
+
+    compareResult = myStringCustomCompare(c, a, comparatorReverse);
+    if (compareResult >= 0)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringCompare failed, a > c", arr, arrSize);
+    }
+
+    compareResult = myStringEqual(b, a);
+    if (compareResult != 0)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringEqual failed, a < b", arr, arrSize);
+    }
+
+    compareResult = myStringEqual(b, c);
+    if (compareResult <= 0)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringEqual failed, b = c", arr, arrSize);
+    }
+
+    compareResult = myStringEqual(c, a);
+    if (compareResult != 0)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringEqual failed, a < c", arr, arrSize);
+    }
+
+    compareResult = myStringCustomEqual(b, a, comparatorReverse);
+    if (compareResult != 0)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringCustomEqual failed, a > b", arr, arrSize);
+    }
+
+    compareResult = myStringCustomEqual(b, c, comparatorReverse);
+    if (compareResult <= 0)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringCustomEqual failed, b = b", arr, arrSize);
+    }
+
+    compareResult = myStringCustomEqual(c, a, comparatorReverse);
+    if (compareResult != 0)
+    {
+        return notifyHelper(MYSTRING_ERROR, "myStringCustomEqual failed, a > c", arr, arrSize);
+    }
+
+    freeArrayOfMyStringByLen(arr, arrSize);
+    return MYSTRING_SUCCESS;
+}
+
+
 
 bool filterRemoveB(const char * ch)
 {
@@ -149,9 +378,19 @@ bool filterRemoveB(const char * ch)
     return false;
 }
 
-int comp(const char c1, const char c2)
+int comparatorReverse(const char c1, const char c2)
 {
-    return 0;
+    int x = (unsigned char)c1;
+    int y = (unsigned char)c2;
+    if (x == y)
+    {
+        return 0;
+    }
+    else if (x < y)
+    {
+        return -1;
+    }
+    return 1;
 }
 
 //FILE * generateStream()
@@ -164,7 +403,7 @@ int comp(const char c1, const char c2)
 //        fclose (pFile);
 //    }
 //}
-//
+
 
 int testQuickSort()
 {
@@ -206,6 +445,11 @@ int testQuickSort()
 }
 
 
-
+MyStringRetVal notifyHelper(MyStringRetVal returnValue, char * msg, MyString ** arrToFree, int arrSize)
+{
+    freeArrayOfMyStringByLen(arrToFree, arrSize);
+    printf("%s\n", msg);
+    return returnValue;
+}
 
 

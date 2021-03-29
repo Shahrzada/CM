@@ -114,7 +114,7 @@ int charToInt(char * ch, unsigned int size)
     return MYSTR_ERROR_CODE;
 }
 
-char *intToCharHelper(char * output, int n)
+char * intToCharHelper(char * output, int n)
 {
     IF_NULL_RETURN_NULL(output);
     if (n <= -10)
@@ -128,10 +128,36 @@ char *intToCharHelper(char * output, int n)
     return output;
 }
 
-void intToChar(char * ch, int n)
+int getTotalDigitsOfNumHelper(int n)
 {
-    IF_NULL_RETURN_NOTHING(ch);
-    char * output = ch;
+    if (n <= -10)
+    {
+        return getTotalDigitsOfNumHelper(n/10) + 1;
+    }
+    return 1;
+}
+
+int getTotalDigitsOfNum(int n)
+{
+    int result = 0;
+    if (n < 0)
+    {
+        result++;
+    }
+    else
+    {
+        n = -n;
+    }
+    return result + getTotalDigitsOfNumHelper(n);
+
+
+}
+
+char * intToChar(int n)
+{
+    int totalDigits = getTotalDigitsOfNum(n);
+    char * output = (char *) malloc(sizeof (char)*totalDigits);
+    char * op = output;
     if (n < 0)
     {
         *output = '-';
@@ -141,9 +167,9 @@ void intToChar(char * ch, int n)
     {
         n = -n;
     }
-    output = intToCharHelper(output, n);
-    IF_NULL_RETURN_NOTHING(output);
-    *output = '\0';
+    op = intToCharHelper(op, n);
+    *op = '\0';
+    return output;
 }
 
 void quicksortCharArraysUsingComp(MyString **arr, int (*comparator)(const void *, const void *),

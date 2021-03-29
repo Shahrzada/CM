@@ -69,9 +69,7 @@ MyStringRetVal myStringSetFromMyString(MyString *str, const MyString *other)
     if (myStringCheckNull(str) == MYSTRING_SUCCESS &&
         myStringCheckNull(other) == MYSTRING_SUCCESS)
     {
-        memcpy(str->value, other->value, sizeof(char)*other->len);
-        str->len = other->len;
-        return MYSTRING_SUCCESS;
+        return myStringSetFromCString(str, other->value);
     }
     return MYSTRING_ERROR;
 }
@@ -130,7 +128,7 @@ MyStringRetVal myStringSetFromCString(MyString *str, const char *cString)
             return MYSTRING_ERROR;
         }
         free(str->value);
-        str->value = (char *) malloc(sizeof(char)*n);
+        str->value = (char *) malloc(sizeof(char)*(n+1));
         IF_NULL_RETURN_MYSTRING_ERROR(str->value);
         str->len = n;
         memcpy(str->value, cString, sizeof(char)*str->len);
@@ -144,10 +142,7 @@ MyStringRetVal myStringSetFromInt(MyString *str, int n)
 {
     if (myStringCheckNull(str) == MYSTRING_SUCCESS)
     {
-        char * output = (char *) malloc(sizeof(char));
-        IF_NULL_RETURN_MYSTRING_ERROR(output);
-
-        intToChar(output, n);
+        char * output = intToChar(n);
         int len = charArrayLen(output);
         if (len == MYSTRING_ERROR)
         {
@@ -367,5 +362,40 @@ void myStringSort(MyString **arr, unsigned int len)
     if (myStringArrayCheckNull(arr, len) == MYSTRING_SUCCESS && len > 1)
     {
         quicksortCharArraysUsingComp(arr, (int (*)(const void *, const void *)) myStringCompare, 0, (int) len - 1);
+    }
+}
+
+MyString ** getArrayOfMyStringByLen(int n)
+{
+    if (n > 0)
+    {
+        MyString **arr = (MyString **) malloc(sizeof(MyString)*n);
+        for (int i = 0; i < n; i++)
+        {
+            MyString * a = myStringAlloc();
+            if (a != NULL)
+            {
+                *(arr+ i) = a;
+            }
+            else
+            {
+                freeArrayOfMyStringByLen(arr, i);
+                return NULL;
+            }
+        }
+        return arr;
+    }
+    return NULL;
+}
+
+void freeArrayOfMyStringByLen(MyString ** arr, int n)
+{
+    if (arr != NULL)
+    {
+        for (int i = 0; i < n; i++)
+        {
+            myStringFree(*(arr+ i));
+        }
+        free(arr);
     }
 }

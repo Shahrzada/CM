@@ -58,6 +58,7 @@ typedef enum {
 
 #define IF_NULL_RETURN_MYSTRING_ERROR(val) if (val == NULL) return MYSTRING_ERROR
 #define IF_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(val) if (val == MYSTRING_ERROR) return MYSTRING_ERROR
+#define IF_NOT_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(val) if (val != MYSTRING_ERROR) return MYSTRING_ERROR
 
 // ------------------------------ functions -----------------------------
 
@@ -195,8 +196,8 @@ int myStringCompare(const MyString *str1, const MyString *str2);
  * RETURN VALUE:
  * @return an integral value indicating the relationship between the strings:
  * 	A zero value indicates that the strings are equal according to the
- * custom comparator (3rd parameter). A value greater than zero indicates that
- * the first MyString is bigger according to the comparator. And a value less
+ * custom comparatorReverse (3rd parameter). A value greater than zero indicates that
+ * the first MyString is bigger according to the comparatorReverse. And a value less
  * than zero indicates the opposite. If strings cannot be compared, the return
  * value should be MYSTR_ERROR_CODE
  */
@@ -226,7 +227,7 @@ int myStringEqual(const MyString *str1, const MyString *str2);
  *
  * RETURN VALUE:
  * @return an integral value indicating the equality of the strings using a
- * custom comparator (3rd parameter): A zero value indicates that the strings
+ * custom comparatorReverse (3rd parameter): A zero value indicates that the strings
  * are not equal. A greater than zero value indicates that the strings are
  * equal. If string cannot be compared, the return value should be
  * MYSTR_ERROR_CODE
@@ -257,7 +258,7 @@ MyStringRetVal myStringWrite(const MyString *str, FILE *stream);
  * @brief sort an array of MyString pointers
  * @param arr
  * @param len
- * @param comparator custom comparator
+ * @param comparator custom comparatorReverse
  *
  * RETURN VALUE:none
  */
@@ -273,5 +274,8 @@ void myStringCustomSort(MyString **arr, unsigned int size,
  * RETURN VALUE: none
  */
 void myStringSort(MyString **arr, unsigned int len);
+
+MyString ** getArrayOfMyStringByLen(int n);
+void freeArrayOfMyStringByLen(MyString ** arr, int n);
 
 #endif // _MYSTRING_H
