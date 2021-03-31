@@ -15,11 +15,16 @@ struct _MyString {
     char * value;
 };
 
+
+typedef bool (FilterFunction)(const char *);
+typedef int (MyStringComparator)(const char, const char);
+typedef int (MyStringSortComparator)(const void *, const void *);
+
 // -------------------------- private functions -------------------------
 
 static MyStringRetVal myStringArrayCheckNull(MyString **arr, unsigned int size)
 {
-    IF_NULL_RETURN_MYSTRING_ERROR(arr);
+    CHECK_NULL_RETURN_MYSTRING_ERROR(arr);
     for (int i = 0; i < size; i++)
     {
         CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(arr[i]);
@@ -36,16 +41,16 @@ MyString *myStringAlloc()
 
     str->value = (char *) malloc(sizeof(char));
     if (str->value == NULL)
-    {
-        // CR: In c, you should use goto for cleanup.
-        free(str);
-        return NULL;
-    }
-    
+        goto cleanup;
+
     str->length = 0;
     // CR: Do you really need this?
     *(str->value) = NULL_CHAR;
     return str;
+
+cleanup:
+    free(str);
+    return NULL;
 }
 
 void myStringFree(MyString *str)
@@ -77,22 +82,21 @@ MyString *myStringClone(const MyString *str)
     }
     return new_str;
 }
-// CR: filt is not really a good name a variable, dont cheap out on the name(filterFunc)
-// CR: use a typedef for the filt, it would be more readable. filter_func_t 
-MyStringRetVal myStringFilter(MyString *str, bool (*filt)(const char *))
+
+MyStringRetVal myStringFilter(MyString *str, FilterFunction *filterFunction)
 {
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str);
     // CR: this is dangurous, since you have a lot of malloc calls in youre code
     //     and not a single place to unifity it, this can happen.
     char * output = (char *) malloc(sizeof(char));
-    IF_NULL_RETURN_MYSTRING_ERROR(output);
+    CHECK_NULL_RETURN_MYSTRING_ERROR(output);
 
     char * current = str->value;
     int n = 0;
 
     while (*current != '\0') // CR: magic
     {
-        if (filt(current) == false)
+        if (filterFunction(current) == false)
         {
             output[n] = *current;
             n++;
@@ -117,7 +121,7 @@ MyStringRetVal myStringSetFromCString(MyString *str, const char *cString)
     CHECK_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(charLength);
 
     char * newCString = (char *) malloc(sizeof(char)*(charLength));
-    IF_NULL_RETURN_MYSTRING_ERROR(newCString);
+    CHECK_NULL_RETURN_MYSTRING_ERROR(newCString);
 
     memcpy(newCString, cString, sizeof(char)*charLength);
     free(str->value);
@@ -164,7 +168,7 @@ MyStringRetVal myStringConcatToFirst(MyString *str1, const MyString *str2)
     CHECK_ZERO_RETURN_MYSTRING_SUCCESS(outputLength);
 
     char * output = charConcat(str1->value, str1->length, str2->value, str2->length);
-    IF_NULL_RETURN_MYSTRING_ERROR(output);
+    CHECK_NULL_RETURN_MYSTRING_ERROR(output);
 
     return myStringSetFromCString(str1, output);
 }
@@ -187,9 +191,7 @@ int myStringCompare(const MyString *str1, const MyString *str2)
     return memcmp(str1->value, str2->value, str1->length);
 }
 
-// CR: typedef comparator like filt(lol)
-int myStringCustomCompare(const MyString *str1, const MyString *str2,
-                          int (*comparator)(const char, const char))
+int myStringCustomCompare(const MyString *str1, const MyString *str2, MyStringComparator *comparator)
 {
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str1);
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str2);
@@ -229,8 +231,7 @@ int myStringEqual(const MyString *str1, const MyString *str2)
 }
 
 // CR: seems like a bit duplication from the code above.
-int myStringCustomEqual(const MyString *str1, const MyString *str2,
-                        int (*comparator)(const char, const char))
+int myStringCustomEqual(const MyString *str1, const MyString *str2, MyStringComparator *comparator)
 {
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str1);
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str2);
@@ -277,8 +278,7 @@ MyStringRetVal myStringWrite(const MyString *str, FILE *stream)
     return MYSTRING_SUCCESS;
 }
 
-void myStringCustomSort(MyString **arr, unsigned int size,
-                        int (*comparator)(const void *, const void *))
+void myStringCustomSort(MyString **arr, unsigned int size, MyStringSortComparator *comparator)
 {
     if (myStringArrayCheckNull(arr, size) == MYSTRING_SUCCESS &&
         comparator != NULL && size > 1)
