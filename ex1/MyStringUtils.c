@@ -113,7 +113,7 @@ int charArrayLen(const char * str)
             n++;
             current++;
         }
-        return n;
+        return n + 1;
     }
     return MYSTRING_ERROR;
 }
@@ -170,6 +170,24 @@ char * intToChar(int n)
     *op = '\0';
     return output;
 }
+
+char * charConcat(const char * cStr1, int cStr1Length, const char * cStr2, int cStr2Length)
+{
+    CHECK_NULL_RETURN_NULL(cStr1);
+    CHECK_NULL_RETURN_NULL(cStr2);
+
+    int outputLength = cStr1Length + cStr2Length;
+
+    char * output = (char *) malloc(sizeof(char)*(outputLength + LAST_NULL_CHAR_SIZE));
+    CHECK_NULL_RETURN_NULL(output);
+
+    memcpy(output, cStr1, sizeof(char)*cStr1Length);
+    char * outputPointer = output + cStr1Length;
+    memcpy(outputPointer, cStr2, sizeof(char)*(cStr2Length + LAST_NULL_CHAR_SIZE));
+
+    return output;
+}
+
 
 // CR: do it without recursion.
 void quicksortCharArraysUsingComp(MyString **arr, int (*comparator)(const void *, const void *),

@@ -44,19 +44,17 @@ MyString *myStringAlloc()
     
     str->length = 0;
     // CR: Do you really need this?
-    *(str->value) = EMPTY_STR; 
+    *(str->value) = NULL_CHAR;
     return str;
 }
 
 void myStringFree(MyString *str)
 {
     CHECK_NULL_RETURN(str);
-
     if (str->value != NULL)
     {
         free(str->value);
     }
-
     free(str);
 }
 
@@ -72,13 +70,12 @@ MyString *myStringClone(const MyString *str)
     CHECK_MYSTRING_NULL_RETURN_NULL(str);
     MyString * new_str = myStringAlloc();
     CHECK_NULL_RETURN_NULL(new_str);
-    if (myStringSetFromMyString(new_str, str) == MYSTRING_SUCCESS)
+    if (myStringSetFromMyString(new_str, str) == MYSTRING_ERROR)
     {
-        return new_str;
+        myStringFree(new_str);
+        return NULL;
     }
-    // CR: this is a bit code dup
-    free(new_str);
-    return NULL;
+    return new_str;
 }
 // CR: filt is not really a good name a variable, dont cheap out on the name(filterFunc)
 // CR: use a typedef for the filt, it would be more readable. filter_func_t 
@@ -116,94 +113,60 @@ MyStringRetVal myStringSetFromCString(MyString *str, const char *cString)
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str);
     CHECK_NULL_RETURN_MYSTRING_ERROR(cString);
 
-    int n = charArrayLen(cString); // CR: Bad name bebi.
-    if (n == MYSTRING_ERROR) // CR: macro?
-    {
-        return MYSTRING_ERROR;
-    }
+    int charLength = charArrayLen(cString);
+    CHECK_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(charLength);
+
+    char * newCString = (char *) malloc(sizeof(char)*(charLength));
+    IF_NULL_RETURN_MYSTRING_ERROR(newCString);
+
+    memcpy(newCString, cString, sizeof(char)*charLength);
     free(str->value);
-    // CR: +1? magic :)
-    str->value = (char *) malloc(sizeof(char)*(n+1)); // CR: while this is a good practice, according to C ABI, sizeof(char)==?
-    IF_NULL_RETURN_MYSTRING_ERROR(str->value);
-    str->length = n;
-    // CR: Why not copy +1?
-    memcpy(str->value, cString, sizeof(char)*str->length);
-    str->value[n] = '\0'; // CR: magic :)
+    str->value = newCString;
+    str->length = charLength - LAST_NULL_CHAR_SIZE;
     return MYSTRING_SUCCESS;
 }
 
 MyStringRetVal myStringSetFromInt(MyString *str, int n)
 {
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str);
-
     char * output = intToChar(n);
-    int len = charArrayLen(output);
-    if (len == MYSTRING_ERROR)
-    {
-        // CR: use goto
-        free(output);
-        return MYSTRING_ERROR;
-    }
-    free(str->value);
-    str->value = output;
-    str->length = len;
-    return MYSTRING_SUCCESS;
-
+    CHECK_NULL_RETURN_MYSTRING_ERROR(output);
+    return myStringSetFromCString(str, output);
 }
 
 int myStringToInt(const MyString *str)
 {
-    // CR: this is a good example of why you should change the condintions,
-    //     where is the good flow and where is the bad flow?
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str);
     if (str->length == 0)
     {
         return MYSTRING_ERROR;
     }
-
     return charToInt(str->value, str->length);
-
 }
 
 char *myStringToCString(const MyString *str)
 {
     CHECK_MYSTRING_NULL_RETURN_NULL(str);
-    // CR: off by one?
-    char * output = (char *) malloc(sizeof(char)*str->length);
+    int cStringLength = str->length + LAST_NULL_CHAR_SIZE;
+    char * output = (char *) malloc(sizeof(char)*cStringLength);
     CHECK_NULL_RETURN_NULL(output);
-    memcpy(output, str->value, sizeof(char)*str->length);
-    output[str->length] = '\0';
+    memcpy(output, str->value, sizeof(char)*cStringLength);
+    output[str->length] = NULL_CHAR;
     return output;
 }
 
-MyStringRetVal myStringCat(MyString *dest, const MyString *src)
+MyStringRetVal myStringConcatToFirst(MyString *str1, const MyString *str2)
 {
-    CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(dest);
-    CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(src);
+    CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str1);
+    CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str2);
 
-    int new_len = dest->length + src->length;
+    int outputLength = str1->length + str2->length;
+    CHECK_ZERO_RETURN_MYSTRING_SUCCESS(outputLength);
 
-    // if both are empty, there's nothing to do
-    // CR: why not add private function for isNullOrEmpty?
-    if (new_len == 0)
-    {
-        return MYSTRING_SUCCESS;
-    }
-
-    char * output = (char *) malloc(sizeof(char)*(new_len+1));
+    char * output = charConcat(str1->value, str1->length, str2->value, str2->length);
     IF_NULL_RETURN_MYSTRING_ERROR(output);
 
-    memcpy(output, dest->value, sizeof(char)*dest->length);
-    // CR: output_cat?
-    char * output_cat = output + dest->length;
-    memcpy(output_cat, src->value, sizeof(char)*src->length);
-
-    free(dest->value);
-    dest->value = output;
-    dest->length = new_len;
-    output[new_len] = '\0';
-    return MYSTRING_SUCCESS;
-
+    return myStringSetFromCString(str1, output);
 }
 
 MyStringRetVal myStringCatTo(const MyString *str1, const MyString *str2,  MyString *result)
@@ -217,7 +180,7 @@ MyStringRetVal myStringCatTo(const MyString *str1, const MyString *str2,  MyStri
     {
         return MYSTRING_ERROR;
     }
-    return myStringCat(result, str2);
+    return myStringConcatToFirst(result, str2);
 
 }
 

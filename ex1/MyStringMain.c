@@ -15,7 +15,7 @@ int main (int argc, char *argv[])
 {
     MyString * a = myStringAlloc();
     CHECK_NULL_RETURN_MYSTRING_ERROR(a);
-    MyString * b = myStringClone(a);
+    myStringSetFromInt(a, 123);
 
 
 
@@ -167,10 +167,10 @@ MyStringRetVal createMyStringOutput(MyString * output, MyString * left, MyString
     result = myStringSetFromMyString(output, left);
     IF_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(result);
 
-    result = myStringCat(output, middle);
+    result = myStringConcatToFirst(output, middle);
     IF_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(result);
 
-    result = myStringCat(output, right);
+    result = myStringConcatToFirst(output, right);
     IF_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(result);
 
     return MYSTRING_SUCCESS;

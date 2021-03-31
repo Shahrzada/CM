@@ -191,10 +191,10 @@ MyStringRetVal nullMyStringTest() {
         return notifyHelper(MYSTRING_ERROR, "myStringToCString failed", arr, arrSize);
     }
 
-    result = myStringCat(a, b);
+    result = myStringConcatToFirst(a, b);
     if (result != MYSTRING_ERROR)
     {
-        return notifyHelper(MYSTRING_ERROR, "myStringCat failed", arr, arrSize);
+        return notifyHelper(MYSTRING_ERROR, "myStringConcatToFirst failed", arr, arrSize);
     }
 
     result = myStringCatTo(a, b, a);

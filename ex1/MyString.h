@@ -148,14 +148,14 @@ int myStringToInt(const MyString *str);
 char *myStringToCString(const MyString *str);
 
 /**
- * @brief Appends a copy of the source MyString src to the destination MyString
+ * @brief Appends a copy of str2 to str1
  * dst.
- * @param dest the destination
- * @param src the MyString to append
+ * @param str1 to alter
+ * @param str2 to append
  * RETURN VALUE:
  *  @return MYSTRING_SUCCESS on success, MYSTRING_ERROR on failure.
  */
-MyStringRetVal myStringCat(MyString *dest, const MyString *src);
+MyStringRetVal myStringConcatToFirst(MyString *str1, const MyString *str2);
 
 /**
  * @brief Sets result to be the concatenation of str1 and str2.

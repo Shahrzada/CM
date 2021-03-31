@@ -14,9 +14,7 @@
 // -------------------------- const definitions -------------------------
 
 #define ASCII_ZERO_DEC 48
-#define EMPTY_STR '\0'
 #define MINUS_SYMBOL '-'
-
 
 // ------------------------------ functions -----------------------------
 
@@ -45,6 +43,9 @@ int charToInt(char * ch, unsigned int size);
  *
  */
 char * intToChar(int n);
+
+
+char * charConcat(const char * cStr1, int cStr1Length, const char * cStr2, int cStr2Length);
 
 /**
  * @brief Applies the quicksort algorithm to sort an array of char arrays using
