@@ -27,4 +27,4 @@
 
 
 #define NULL_CHAR '\0'
-#define LAST_NULL_CHAR_SIZE 1
+#define NULL_CHAR_SIZE 1

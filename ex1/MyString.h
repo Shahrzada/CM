@@ -48,6 +48,10 @@ typedef enum {
   MYSTRING_SUCCESS = 0,
 } MyStringRetVal;
 
+typedef bool (FilterFunction)(const char *);
+typedef int (MyStringComparator)(const char, const char);
+typedef int (MyStringSortComparator)(const void *, const void *);
+
 // ------------------------------ functions -----------------------------
 
 /**

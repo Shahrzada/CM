@@ -91,7 +91,7 @@ int charArrayLen(const char * cStr)
     {
         current++;
     }
-    return (current - cStr) + LAST_NULL_CHAR_SIZE;
+    return (current - cStr) + NULL_CHAR_SIZE;
 }
 
 int charToInt(char * cStr, unsigned int size)
@@ -138,7 +138,7 @@ char * intToChar(int n)
     if (n < 0)
     {
         *output = '-';
-        output++;
+        op++;
     }
     else
     {
@@ -156,12 +156,12 @@ char * charConcat(const char * cStr1, unsigned int cStr1Length, const char * cSt
 
     unsigned outputLength = cStr1Length + cStr2Length;
 
-    char * output = (char *) malloc(sizeof(char)*(outputLength + LAST_NULL_CHAR_SIZE));
+    char * output = (char *) malloc(sizeof(char)*(outputLength + NULL_CHAR_SIZE));
     CHECK_NULL_RETURN_NULL(output);
 
     memcpy(output, cStr1, sizeof(char)*cStr1Length);
     char * outputPointer = output + cStr1Length;
-    memcpy(outputPointer, cStr2, sizeof(char)*(cStr2Length + LAST_NULL_CHAR_SIZE));
+    memcpy(outputPointer, cStr2, sizeof(char)*(cStr2Length + NULL_CHAR_SIZE));
 
     return output;
 }
@@ -234,4 +234,15 @@ unsigned int myCStringFilter(char *cStr, unsigned int strLength, char *output, F
         }
     }
     return newStrLength;
+}
+
+int charCompare(const char ch1, const char ch2)
+{
+    return memcmp(&ch1, &ch2, 1);
+}
+
+char * getCStringBySize(unsigned int arraySize)
+{
+    char * output = (char *) malloc(sizeof(char)*(arraySize));
+    CHECK_NULL_RETURN_NULL(output);
 }

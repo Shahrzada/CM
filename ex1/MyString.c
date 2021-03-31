@@ -5,6 +5,9 @@
 #include "MyStringUtils.h"
 #include "MyStringMacros.h"
 
+#define STRINGS_ARE_EQUAL 1
+#define STRINGS_NOT_EQUAL 0
+
 // -------------------------- const definitions -------------------------
 // CR: Why did you choose to put this here and not in the header file?
 // CR_S: The declaration the structure is in the header, the variables are
@@ -45,13 +48,9 @@ MyString *myStringAlloc()
 {
     MyString * str = (MyString *) malloc(sizeof(MyString));
     CHECK_NULL_RETURN_NULL(str);
-
-    str->value = (char *) malloc(sizeof(char));
+    str->value = getCStringBySize(NULL_CHAR_SIZE);
     CHECK_NULL_GOTO_CLEANUP(str->value);
-
     str->length = 0;
-    // CR: Do you really need this?
-    *(str->value) = NULL_CHAR;
     return str;
 
 cleanup:
@@ -73,31 +72,28 @@ MyStringRetVal myStringSetFromMyString(MyString *str, const MyString *other)
 {
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str);
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(other);
-    return myStringSetFromCString(str, other->value);
+    return setMyString(str, myStringToCString(other), other->length);
 }
 
 MyString *myStringClone(const MyString *str)
 {
     CHECK_MYSTRING_NULL_RETURN_NULL(str);
-    MyString * new_str = myStringAlloc();
-    CHECK_NULL_RETURN_NULL(new_str);
-    if (myStringSetFromMyString(new_str, str) == MYSTRING_ERROR)
-    {
-        myStringFree(new_str);
-        return NULL;
-    }
-    return new_str;
+    MyString * newStr = myStringAlloc();
+    CHECK_NULL_RETURN_NULL(newStr);
+    int result = myStringSetFromMyString(newStr, str);
+    CHECK_MYSTRING_ERROR_GOTO_CLEANUP(result);
+    return newStr;
+
+cleanup:
+    free(newStr);
+    return NULL;
 }
 
 MyStringRetVal myStringFilter(MyString *str, FilterFunction *filterFunction)
 {
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str);
     CHECK_NULL_RETURN_MYSTRING_ERROR(filterFunction);
-
-    // CR: this is dangurous, since you have a lot of malloc calls in youre code
-    //     and not a single place to unifity it, this can happen.
-
-    char * output = (char *) malloc(sizeof(char)*str->length);
+    char * output = getCStringBySize(str->length);
     CHECK_NULL_RETURN_MYSTRING_ERROR(output);
     unsigned int newStrLength = myCStringFilter(str->value, str->length, output, filterFunction);
     CHECK_MYSTRING_ERROR_GOTO_CLEANUP(newStrLength);
@@ -122,12 +118,11 @@ MyStringRetVal myStringSetFromCString(MyString *str, const char *cString)
     CHECK_NULL_RETURN_MYSTRING_ERROR(cString);
 
     int charLength = charArrayLen(cString);
-    int strLength = charLength - LAST_NULL_CHAR_SIZE;
+    int strLength = charLength - NULL_CHAR_SIZE;
     CHECK_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(charLength);
 
-    char * output = (char *) malloc(sizeof(char)*(charLength));
+    char * output = getCStringBySize(charLength);
     CHECK_NULL_RETURN_MYSTRING_ERROR(output);
-
     memcpy(output, cString, sizeof(char)*strLength);
 
     CHECK_MYSTRING_ERROR_GOTO_CLEANUP(setMyString(str, output, strLength));
@@ -156,9 +151,9 @@ int myStringToInt(const MyString *str)
 char *myStringToCString(const MyString *str)
 {
     CHECK_MYSTRING_NULL_RETURN_NULL(str);
-    unsigned int cStringLength = str->length + LAST_NULL_CHAR_SIZE;
+    unsigned int cStringLength = str->length + NULL_CHAR_SIZE;
 
-    char * output = (char *) malloc(sizeof(char)*cStringLength);
+    char * output = getCStringBySize(cStringLength);
     CHECK_NULL_RETURN_NULL(output);
 
     memcpy(output, str->value, sizeof(char)*cStringLength);
@@ -207,7 +202,7 @@ int myStringCustomCompare(const MyString *str1, const MyString *str2, MyStringCo
     int result = 0;
     for (int i = 0; i < str1->length; i++)
     {
-        result = comparator(*(str1->value + i), *(str2->value + i));
+        result = comparator(str1->value[i], str2->value[i]);
         if (result != 0)
         {
             return result;
@@ -218,46 +213,25 @@ int myStringCustomCompare(const MyString *str1, const MyString *str2, MyStringCo
 
 int myStringEqual(const MyString *str1, const MyString *str2)
 {
-    CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str1);
-    CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str2);
-
-    if (str1->length != str2->length)
-    {
-        return 0; // CR: 0 is good or bad?
-    }
-    int result = myStringCompare(str1, str2);
-    if (result == 0)
-    {
-        return 1; // CR: 1 is good or bad?
-    }
-    else if (result == MYSTRING_ERROR)
-    {
-        return result;
-    }
-    return 0;
+    return myStringCustomEqual(str1, str2, charCompare);
 }
 
-// CR: seems like a bit duplication from the code above.
 int myStringCustomEqual(const MyString *str1, const MyString *str2, MyStringComparator *comparator)
 {
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str1);
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str2);
     CHECK_NULL_RETURN_MYSTRING_ERROR(comparator);
-
     if (str1->length != str2->length)
     {
-        return 0;
+        return STRINGS_NOT_EQUAL;
     }
     int result = myStringCustomCompare(str1, str2, comparator);
+    CHECK_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(result);
     if (result == 0)
     {
-        return 1;
+        return STRINGS_ARE_EQUAL;
     }
-    else if (result == MYSTRING_ERROR)
-    {
-        return result;
-    }
-    return 0;
+    return STRINGS_NOT_EQUAL;
 }
 
 unsigned long getMyStringMemoryUsage(const MyString *str1)
@@ -276,7 +250,6 @@ MyStringRetVal myStringWrite(const MyString *str, FILE *stream)
 {
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str);
     CHECK_NULL_RETURN_MYSTRING_ERROR(stream);
-
     int result = fputs(str->value, stream);
     if (result < 0 || result == EOF)
     {

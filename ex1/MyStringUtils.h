@@ -16,10 +16,6 @@
 #define ASCII_ZERO_DEC 48
 #define MINUS_SYMBOL '-'
 
-typedef bool (FilterFunction)(const char *);
-typedef int (MyStringComparator)(const char, const char);
-typedef int (MyStringSortComparator)(const void *, const void *);
-
 // ------------------------------ functions -----------------------------
 
 /**
@@ -64,3 +60,7 @@ void quicksortCharArraysUsingComp(MyString **arr, int (*comparator)(const void *
                                   int first, int last);
 
 unsigned int myCStringFilter(char *cStr, unsigned int strLength, char *output, FilterFunction *filterFunction);
+
+int charCompare(const char ch1, const char ch2);
+
+char * getCStringBySize(unsigned int arraySize);
