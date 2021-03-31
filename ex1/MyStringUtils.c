@@ -149,12 +149,12 @@ char * intToChar(int n)
     return output;
 }
 
-char * charConcat(const char * cStr1, int cStr1Length, const char * cStr2, int cStr2Length)
+char * charConcat(const char * cStr1, unsigned int cStr1Length, const char * cStr2, unsigned int cStr2Length)
 {
     CHECK_NULL_RETURN_NULL(cStr1);
     CHECK_NULL_RETURN_NULL(cStr2);
 
-    int outputLength = cStr1Length + cStr2Length;
+    unsigned outputLength = cStr1Length + cStr2Length;
 
     char * output = (char *) malloc(sizeof(char)*(outputLength + LAST_NULL_CHAR_SIZE));
     CHECK_NULL_RETURN_NULL(output);
@@ -218,4 +218,20 @@ void quicksortCharArraysUsingComp(MyString **arr, int (*comparator)(const void *
         quicksortCharArraysUsingComp(arr, comparator, first, j - 1);
         quicksortCharArraysUsingComp(arr, comparator, j + 1, last);
     }
+}
+
+unsigned int myCStringFilter(char *cStr, unsigned int strLength, char *output, FilterFunction *filterFunction)
+{
+    CHECK_NULL_RETURN_MYSTRING_ERROR(cStr);
+    CHECK_NULL_RETURN_MYSTRING_ERROR(output);
+    unsigned int newStrLength = 0;
+    for (int i = 0; i < strLength; i++)
+    {
+        if (filterFunction(&cStr[i]) == false) // By returning false it means "keep this char"
+        {
+            output[newStrLength] = cStr[i];
+            newStrLength++;
+        }
+    }
+    return newStrLength;
 }

@@ -16,6 +16,10 @@
 #define ASCII_ZERO_DEC 48
 #define MINUS_SYMBOL '-'
 
+typedef bool (FilterFunction)(const char *);
+typedef int (MyStringComparator)(const char, const char);
+typedef int (MyStringSortComparator)(const void *, const void *);
+
 // ------------------------------ functions -----------------------------
 
 /**
@@ -45,7 +49,7 @@ int charToInt(char * cString, unsigned int size);
 char * intToChar(int n);
 
 
-char * charConcat(const char * cStr1, int cStr1Length, const char * cStr2, int cStr2Length);
+char * charConcat(const char * cStr1, unsigned int cStr1Length, const char * cStr2, unsigned int cStr2Length);
 
 /**
  * @brief Applies the quicksort algorithm to sort an array of char arrays using
@@ -59,3 +63,4 @@ char * charConcat(const char * cStr1, int cStr1Length, const char * cStr2, int c
 void quicksortCharArraysUsingComp(MyString **arr, int (*comparator)(const void *, const void *),
                                   int first, int last);
 
+unsigned int myCStringFilter(char *cStr, unsigned int strLength, char *output, FilterFunction *filterFunction);

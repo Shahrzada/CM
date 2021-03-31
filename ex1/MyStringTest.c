@@ -5,6 +5,7 @@
 MyStringRetVal basicMyStringTest();
 MyStringRetVal nullMyStringTest();
 MyStringRetVal comparingMyStringTest();
+MyStringRetVal filteringMyStringTest();
 
 MyStringRetVal notifyHelper(MyStringRetVal returnValue, char * msg, MyString ** arrToFree, int arrSize);
 
@@ -32,13 +33,24 @@ int main()
     }
     printf("Passed all NULL MyString tests.\n");
 
-    result = comparingMyStringTest();
+//    result = comparingMyStringTest();
+//    if (result == MYSTRING_ERROR)
+//    {
+//        printf("Failed a comparing MyString test.\n");
+//        return -1;
+//    }
+    printf("Passed all comparing MyString tests.\n");
+
+
+    result = filteringMyStringTest();
     if (result == MYSTRING_ERROR)
     {
-        printf("Failed a comparing MyString test.\n");
+        printf("Failed a filtering MyString test.\n");
         return -1;
     }
-    printf("Passed all comparing MyString tests.\n");
+    printf("Passed all filtering MyString tests.\n");
+
+
 
     return 0;
 }
@@ -366,6 +378,62 @@ MyStringRetVal comparingMyStringTest() {
     freeArrayOfMyStringBySize(arr, arrSize);
     return MYSTRING_SUCCESS;
 }
+
+MyStringRetVal filteringMyStringTest() {
+    const char *cString1 = "I am a beautiful string";
+    const char *cString2 = "I am another beautiful string";
+    int arrSize = 10;
+    int result;
+
+    // initializing
+    MyString **arr = getArrayOfMyStringBySize(arrSize);
+    if (arr == NULL) {
+        return notifyHelper(MYSTRING_ERROR, "getArrayOfMyStringBySize failed", arr, arrSize);
+    }
+    MyString *a = *arr;
+    MyString *b = *(arr + 1);
+    MyString *c = *(arr + 2);
+
+    // assigning string values
+    result = myStringSetFromCString(a, cString1);
+    if (result == MYSTRING_ERROR) {
+        return notifyHelper(MYSTRING_ERROR, "myStringSetFromCString failed", arr, arrSize);
+    }
+    result = myStringSetFromCString(b, cString2);
+    if (result == MYSTRING_ERROR) {
+        return notifyHelper(MYSTRING_ERROR, "myStringSetFromCString failed", arr, arrSize);
+    }
+    MyString *d = myStringClone(a);
+    if (d == NULL) {
+        return notifyHelper(MYSTRING_ERROR, "myStringClone failed", arr, arrSize);
+    }
+    myStringFree(*(arr + 3));
+    *(arr + 3) = d;
+
+    result = myStringSetFromMyString(c, b);
+    if (result == MYSTRING_ERROR) {
+        return notifyHelper(MYSTRING_ERROR, "myStringSetFromMyString failed", arr, arrSize);
+    }
+
+    // testing filtering
+    result = myStringFilter(a, filterRemoveB);
+    if (result == MYSTRING_ERROR) {
+        return notifyHelper(MYSTRING_ERROR, "myStringFilter failed", arr, arrSize);
+    }
+    char *filteredCString = myStringToCString(a);
+    if (filteredCString == NULL) {
+        return notifyHelper(MYSTRING_ERROR, "myStringToCString failed", arr, arrSize);
+    }
+    char *validResult = strchr(filteredCString, 'b');
+    if (validResult != NULL) {
+        return notifyHelper(MYSTRING_ERROR, "myStringToCString failed logically", arr, arrSize);
+    }
+
+
+    freeArrayOfMyStringBySize(arr, arrSize);
+    return MYSTRING_SUCCESS;
+}
+
 
 bool filterRemoveB(const char * ch)
 {

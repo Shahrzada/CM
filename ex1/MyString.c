@@ -11,14 +11,9 @@
 //       in this a source file for avoiding access from outside directly;
 //       There are getters and setters for both.
 struct _MyString {
-    int length;
+    unsigned int length;
     char * value;
 };
-
-
-typedef bool (FilterFunction)(const char *);
-typedef int (MyStringComparator)(const char, const char);
-typedef int (MyStringSortComparator)(const void *, const void *);
 
 // -------------------------- private functions -------------------------
 
@@ -32,6 +27,18 @@ static MyStringRetVal myStringArrayCheckNull(MyString **arr, unsigned int size)
     return MYSTRING_SUCCESS;
 }
 
+// CR_S: why is this a private function and not a macro function? I guess because this is
+//       more like a getter/setter for an 'object' rather than a checker of some sort.
+static MyStringRetVal setMyString(MyString* str, char * cStr, unsigned int length)
+{
+    CHECK_NULL_RETURN_MYSTRING_ERROR(str);
+    CHECK_NULL_RETURN_MYSTRING_ERROR(cStr);
+    free(str->value);
+    str->value = cStr;
+    str->length = length;
+    return MYSTRING_SUCCESS;
+}
+
 // -------------------------- functions -------------------------
 
 MyString *myStringAlloc()
@@ -40,8 +47,7 @@ MyString *myStringAlloc()
     CHECK_NULL_RETURN_NULL(str);
 
     str->value = (char *) malloc(sizeof(char));
-    if (str->value == NULL)
-        goto cleanup;
+    CHECK_NULL_GOTO_CLEANUP(str->value);
 
     str->length = 0;
     // CR: Do you really need this?
@@ -86,30 +92,28 @@ MyString *myStringClone(const MyString *str)
 MyStringRetVal myStringFilter(MyString *str, FilterFunction *filterFunction)
 {
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str);
+    CHECK_NULL_RETURN_MYSTRING_ERROR(filterFunction);
+
     // CR: this is dangurous, since you have a lot of malloc calls in youre code
     //     and not a single place to unifity it, this can happen.
-    char * output = (char *) malloc(sizeof(char));
+
+    char * output = (char *) malloc(sizeof(char)*str->length);
     CHECK_NULL_RETURN_MYSTRING_ERROR(output);
+    unsigned int newStrLength = myCStringFilter(str->value, str->length, output, filterFunction);
+    CHECK_MYSTRING_ERROR_GOTO_CLEANUP(newStrLength);
 
-    char * current = str->value;
-    int n = 0;
-
-    while (*current != '\0') // CR: magic
+    if (newStrLength < str->length)
     {
-        if (filterFunction(current) == false)
-        {
-            output[n] = *current;
-            n++;
-        }
-        current++;
+        output = (char *) realloc(output, sizeof(char)*newStrLength);
+        CHECK_NULL_GOTO_CLEANUP(output);
     }
-    output[n] = '\0'; // CR: magic
-    str->length = n;
-    // CR: this should be preformed from a "private" function
-    free(str->value);
-    str->value = output;
+
+    CHECK_MYSTRING_ERROR_GOTO_CLEANUP(setMyString(str, output, newStrLength));
     return MYSTRING_SUCCESS;
 
+cleanup:
+    free(output);
+    return MYSTRING_ERROR;
 }
 
 MyStringRetVal myStringSetFromCString(MyString *str, const char *cString)
@@ -151,7 +155,7 @@ int myStringToInt(const MyString *str)
 char *myStringToCString(const MyString *str)
 {
     CHECK_MYSTRING_NULL_RETURN_NULL(str);
-    int cStringLength = str->length + LAST_NULL_CHAR_SIZE;
+    unsigned int cStringLength = str->length + LAST_NULL_CHAR_SIZE;
     char * output = (char *) malloc(sizeof(char)*cStringLength);
     CHECK_NULL_RETURN_NULL(output);
     memcpy(output, str->value, sizeof(char)*cStringLength);
@@ -164,7 +168,7 @@ MyStringRetVal myStringConcatToFirst(MyString *str1, const MyString *str2)
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str1);
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str2);
 
-    int outputLength = str1->length + str2->length;
+    unsigned int outputLength = str1->length + str2->length;
     CHECK_ZERO_RETURN_MYSTRING_SUCCESS(outputLength);
 
     char * output = charConcat(str1->value, str1->length, str2->value, str2->length);
@@ -197,7 +201,7 @@ int myStringCustomCompare(const MyString *str1, const MyString *str2, MyStringCo
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str2);
     CHECK_NULL_RETURN_MYSTRING_ERROR(comparator);
 
-    int result = -1;
+    int result = 0;
     for (int i = 0; i < str1->length; i++)
     {
         result = comparator(*(str1->value + i), *(str2->value + i));
@@ -206,7 +210,7 @@ int myStringCustomCompare(const MyString *str1, const MyString *str2, MyStringCo
             return result;
         }
     }
-    return 0;
+    return result;
 }
 
 int myStringEqual(const MyString *str1, const MyString *str2)

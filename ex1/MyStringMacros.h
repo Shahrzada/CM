@@ -4,8 +4,10 @@
 #define CHECK_NULL_RETURN(pointer) do {if ((pointer) == NULL) return;} while(0)
 #define CHECK_NULL_RETURN_MYSTRING_ERROR(pointer) do {if ((pointer) == NULL) return MYSTRING_ERROR;} while(0)
 #define CHECK_NULL_RETURN_0(pointer) do {if ((pointer) == NULL) return 0;} while(0)
+#define CHECK_NULL_GOTO_CLEANUP(pointer) do {if ((pointer) == NULL) goto cleanup;;} while(0)
 
 #define CHECK_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(number) do {if ((number) == MYSTRING_ERROR) return MYSTRING_ERROR;} while(0)
+#define CHECK_MYSTRING_ERROR_GOTO_CLEANUP(number) do {if ((number) == MYSTRING_ERROR) goto cleanup;;} while(0)
 
 #define CHECK_ZERO_RETURN_MYSTRING_SUCCESS(length) do {if ((length) == 0) return MYSTRING_SUCCESS;} while(0)
 

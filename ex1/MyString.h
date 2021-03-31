@@ -48,13 +48,6 @@ typedef enum {
   MYSTRING_SUCCESS = 0,
 } MyStringRetVal;
 
-// ------------------------------ macros -----------------------------
-// CR: While these are good this is not really the place for them since both are private for your library
-// CR: the usual names for these are, CHECK, CHECK_NULL, CHECK_NULL_RETURN_..., 
-//     not really a convention but since they are more recognized you should use them.
-// CR: when creating macros you should warp the marco's argument with parenthesis
-
-
 // ------------------------------ functions -----------------------------
 
 /**
