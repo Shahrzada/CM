@@ -29,7 +29,7 @@ int main (int argc, char *argv[])
     MyStringRetVal result;
 
     // create MyString objects
-    MyString **arr = getArrayOfMyStringByLen(TOTAL_MYSTRING_OBJECTS);
+    MyString **arr = getArrayOfMyStringBySize(TOTAL_MYSTRING_OBJECTS);
     if (arr == NULL)
     {
         printf("Couldn't init the strings.\n");
@@ -39,7 +39,7 @@ int main (int argc, char *argv[])
     if (result == MYSTRING_ERROR)
     {
         printf("Couldn't init the strings.\n");
-        freeArrayOfMyStringByLen(arr, TOTAL_MYSTRING_OBJECTS);
+        freeArrayOfMyStringBySize(arr, TOTAL_MYSTRING_OBJECTS);
         return MYSTRING_ERROR;
     }
 
@@ -48,13 +48,13 @@ int main (int argc, char *argv[])
     if (result == MYSTRING_ERROR)
     {
         printf("Couldn't compare the strings.\n");
-        freeArrayOfMyStringByLen(arr, TOTAL_MYSTRING_OBJECTS);
+        freeArrayOfMyStringBySize(arr, TOTAL_MYSTRING_OBJECTS);
         return MYSTRING_ERROR;
     }
 
     // open and write to file
     result = openAndWriteToFile(arr, TOTAL_MYSTRING_OBJECTS);
-    freeArrayOfMyStringByLen(arr, TOTAL_MYSTRING_OBJECTS);
+    freeArrayOfMyStringBySize(arr, TOTAL_MYSTRING_OBJECTS);
 
     if (result == MYSTRING_ERROR)
     {
@@ -132,7 +132,7 @@ MyStringRetVal initMyStrings(MyString **arr, int len, char *argv[])
         if (*(arr + i) == NULL)
         {
             printf("Couldn't allocate memory for MyStrings.\n");
-            freeArrayOfMyStringByLen(arr, len);
+            freeArrayOfMyStringBySize(arr, len);
             return MYSTRING_ERROR;
         }
     }
@@ -149,7 +149,7 @@ MyStringRetVal initMyStrings(MyString **arr, int len, char *argv[])
     if (result1 == MYSTRING_ERROR || result2 == MYSTRING_ERROR || resultOutput == MYSTRING_ERROR)
     {
         printf("myStringSetFromCString failed.\n");
-        freeArrayOfMyStringByLen(arr, len);
+        freeArrayOfMyStringBySize(arr, len);
         return MYSTRING_ERROR;
     }
 
@@ -192,7 +192,7 @@ MyStringRetVal openAndWriteToFile(MyString **arr, int len)
     if (pFile == NULL)
     {
         printf("Couldn't create the file.\n");
-        freeArrayOfMyStringByLen(arr, len);
+        freeArrayOfMyStringBySize(arr, len);
         return MYSTRING_ERROR;
     }
 
@@ -201,7 +201,7 @@ MyStringRetVal openAndWriteToFile(MyString **arr, int len)
     {
         printf("Couldn't write to file.\n");
         fclose(pFile);
-        freeArrayOfMyStringByLen(arr, len);
+        freeArrayOfMyStringBySize(arr, len);
         return MYSTRING_ERROR;
     }
 

@@ -28,12 +28,12 @@ int charArrayLen(const char * str);
 
 /**
  * @brief Returns the value of the char array as an integer.
- * @param ch
+ * @param cString
  * @param size
  *
  * @return an integer
  */
-int charToInt(char * ch, unsigned int size);
+int charToInt(char * cString, unsigned int size);
 
 /**
  * @brief Returns the value of an int as a char array, terminated with the

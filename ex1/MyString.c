@@ -169,30 +169,22 @@ MyStringRetVal myStringConcatToFirst(MyString *str1, const MyString *str2)
     return myStringSetFromCString(str1, output);
 }
 
-MyStringRetVal myStringCatTo(const MyString *str1, const MyString *str2,  MyString *result)
+MyStringRetVal myStringConcatToFirstResult(const MyString *str1, const MyString *str2, MyString *result)
 {
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str1);
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str2);
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(result);
 
-    MyStringRetVal retVal = myStringSetFromMyString(result, str1);
-    if (retVal == MYSTRING_ERROR)
-    {
-        return MYSTRING_ERROR;
-    }
+    MyStringRetVal firstConcatReturnValue = myStringSetFromMyString(result, str1);
+    CHECK_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(firstConcatReturnValue);
     return myStringConcatToFirst(result, str2);
-
 }
 
 int myStringCompare(const MyString *str1, const MyString *str2)
 {
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str1);
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str2);
-    if (str1->length > 0 && str2->length > 0) // CR: if both are empty why is it an ERROR?
-    {
-        return memcmp(str1->value, str2->value, str1->length);
-    }
-    return MYSTRING_ERROR;
+    return memcmp(str1->value, str2->value, str1->length);
 }
 
 // CR: typedef comparator like filt(lol)
@@ -203,20 +195,16 @@ int myStringCustomCompare(const MyString *str1, const MyString *str2,
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str2);
     CHECK_NULL_RETURN_MYSTRING_ERROR(comparator);
 
-    if (str1->length == str2->length) // CR: same as the above.
+    int result = -1;
+    for (int i = 0; i < str1->length; i++)
     {
-        int result; // CR: its a good practice to alway initalize your variables
-        for (int i = 0; i < str1->length; i++)
+        result = comparator(*(str1->value + i), *(str2->value + i));
+        if (result != 0)
         {
-            result = comparator(*(str1->value + i), *(str2->value + i));
-            if (result != 0)
-            {
-                return result;
-            }
+            return result;
         }
-        return 0;
     }
-    return MYSTRING_ERROR;
+    return 0;
 }
 
 int myStringEqual(const MyString *str1, const MyString *str2)
@@ -268,7 +256,6 @@ unsigned long myStringMemUsage(const MyString *str1)
 {
     CHECK_MYSTRING_NULL_RETURN_0(str1);
     return sizeof(MyString) + sizeof(char)*str1->length;
-
 }
 
 unsigned long myStringLen(const MyString *str1)
@@ -288,7 +275,6 @@ MyStringRetVal myStringWrite(const MyString *str, FILE *stream)
         return MYSTRING_ERROR;
     }
     return MYSTRING_SUCCESS;
-
 }
 
 void myStringCustomSort(MyString **arr, unsigned int size,
@@ -303,48 +289,40 @@ void myStringCustomSort(MyString **arr, unsigned int size,
 
 void myStringSort(MyString **arr, unsigned int len)
 {
-    if (myStringArrayCheckNull(arr, len) == MYSTRING_SUCCESS && len > 1)
-    {
-        // CR: nice, but this shouldve been your clue to use typedef :D
-        quicksortCharArraysUsingComp(arr, (int (*)(const void *, const void *)) myStringCompare, 0, (int) len - 1);
-    }
+    // CR: nice, but this shouldve been your clue to use typedef :D
+    myStringCustomSort(arr, len, (int (*)(const void *, const void *)) myStringCompare);
 }
 
-MyString ** getArrayOfMyStringByLen(int n)
+MyString ** getArrayOfMyStringBySize(int arraySize)
 {
-    if (n > 0)
+    if (arraySize <= 0)
     {
-        MyString **arr = (MyString **) malloc(sizeof(MyString)*n);
-        for (int i = 0; i < n; i++)
-        {
-            MyString * a = myStringAlloc();
-
-            if (a != NULL)
-            {
-                // CR: this is kind of worrying, Im not really sure about struct assignment.
-                //     I mean its not a problem here. but can you think of a problem?
-                *(arr+ i) = a; // CR: there is a better way to write this
-            }
-            else
-            {
-                // CR: nice catch.
-                freeArrayOfMyStringByLen(arr, i);
-                return NULL;
-            }
-        }
-        return arr;
+        return NULL;
     }
-    return NULL;
+
+    MyString **array = (MyString **) malloc(sizeof(MyString) * arraySize);
+    for (int i = 0; i < arraySize; i++)
+    {
+        MyString * a = myStringAlloc();
+        if (a != NULL)
+        {
+            array[i] = a;
+        }
+        else
+        {
+            freeArrayOfMyStringBySize(array, i);
+            return NULL;
+        }
+    }
+    return array;
 }
 
-void freeArrayOfMyStringByLen(MyString ** arr, int n)
+void freeArrayOfMyStringBySize(MyString ** array, int arraySize)
 {
-    if (arr != NULL)
+    CHECK_NULL_RETURN(array);
+    for (int i = 0; i < arraySize; i++)
     {
-        for (int i = 0; i < n; i++)
-        {
-            myStringFree(*(arr+ i));// CR: there is a better way to write this
-        }
-        free(arr);
+        myStringFree(array[i]);
     }
+    free(array);
 }

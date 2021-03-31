@@ -1,5 +1,4 @@
-#ifndef _MYSTRING_H
-#define _MYSTRING_H
+#pragma once
 
 /********************************************************************************
  * @file MyString.h
@@ -167,8 +166,8 @@ MyStringRetVal myStringConcatToFirst(MyString *str1, const MyString *str2);
  * RETURN VALUE:
  *  @return MYSTRING_SUCCESS on success, MYSTRING_ERROR on failure.
  */
-MyStringRetVal myStringCatTo(const MyString *str1, const MyString *str2,
-                             MyString *result);
+MyStringRetVal myStringConcatToFirstResult(const MyString *str1, const MyString *str2,
+                                           MyString *result);
 
 /**
  * @brief Compare str1 and str2.
@@ -273,21 +272,19 @@ void myStringCustomSort(MyString **arr, unsigned int size,
 void myStringSort(MyString **arr, unsigned int len);
 
 /**
- * @brief creates an array of the desired length of MyString objects with no value
+ * @brief creates an array of the desired arraySize of MyString objects with no value
  * (= empty string)
- * @param n
+ * @param arraySize
  *
  * RETURN VALUE: a pointer to the array
  */
-MyString ** getArrayOfMyStringByLen(int n);
+MyString ** getArrayOfMyStringBySize(int arraySize);
 
 /**
  * @brief given a pointer to an array of MyString objects, it frees all of them and itself
- * @param arr
- * @param n
+ * @param array
+ * @param arraySize
  *
  * RETURN VALUE: none
  */
-void freeArrayOfMyStringByLen(MyString ** arr, int n);
-
-#endif // _MYSTRING_H
+void freeArrayOfMyStringBySize(MyString ** array, int arraySize);

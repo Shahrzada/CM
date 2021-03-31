@@ -51,10 +51,10 @@ MyStringRetVal basicMyStringTest() {
     int result;
 
     // initializing
-    MyString ** arr = getArrayOfMyStringByLen(arrSize);
+    MyString ** arr = getArrayOfMyStringBySize(arrSize);
     if (arr == NULL)
     {
-        return notifyHelper(MYSTRING_ERROR, "getArrayOfMyStringByLen failed", arr, arrSize);
+        return notifyHelper(MYSTRING_ERROR, "getArrayOfMyStringBySize failed", arr, arrSize);
     }
 
     MyString * a = *arr;
@@ -103,7 +103,7 @@ MyStringRetVal basicMyStringTest() {
     }
 
 
-    freeArrayOfMyStringByLen(arr, arrSize);
+    freeArrayOfMyStringBySize(arr, arrSize);
     return MYSTRING_SUCCESS;
 }
 
@@ -115,10 +115,10 @@ MyStringRetVal nullMyStringTest() {
     int result;
 
     // initializing
-    MyString ** arr = getArrayOfMyStringByLen(arrSize);
+    MyString ** arr = getArrayOfMyStringBySize(arrSize);
     if (arr == NULL)
     {
-        return notifyHelper(MYSTRING_ERROR, "getArrayOfMyStringByLen failed", arr, arrSize);
+        return notifyHelper(MYSTRING_ERROR, "getArrayOfMyStringBySize failed", arr, arrSize);
     }
 
     MyString * a = NULL;
@@ -197,10 +197,10 @@ MyStringRetVal nullMyStringTest() {
         return notifyHelper(MYSTRING_ERROR, "myStringConcatToFirst failed", arr, arrSize);
     }
 
-    result = myStringCatTo(a, b, a);
+    result = myStringConcatToFirstResult(a, b, a);
     if (result != MYSTRING_ERROR)
     {
-        return notifyHelper(MYSTRING_ERROR, "myStringCatTo failed", arr, arrSize);
+        return notifyHelper(MYSTRING_ERROR, "myStringConcatToFirstResult failed", arr, arrSize);
     }
 
     result = myStringCompare(a, b);
@@ -245,7 +245,7 @@ MyStringRetVal nullMyStringTest() {
         return notifyHelper(MYSTRING_ERROR, "myStringWrite failed", arr, arrSize);
     }
 
-    freeArrayOfMyStringByLen(arr, arrSize);
+    freeArrayOfMyStringBySize(arr, arrSize);
     return MYSTRING_SUCCESS;
 }
 
@@ -256,10 +256,10 @@ MyStringRetVal comparingMyStringTest() {
     int result;
 
     // initializing
-    MyString ** arr = getArrayOfMyStringByLen(arrSize);
+    MyString ** arr = getArrayOfMyStringBySize(arrSize);
     if (arr == NULL)
     {
-        return notifyHelper(MYSTRING_ERROR, "getArrayOfMyStringByLen failed", arr, arrSize);
+        return notifyHelper(MYSTRING_ERROR, "getArrayOfMyStringBySize failed", arr, arrSize);
     }
     MyString * a = *arr;
     MyString * b = *(arr + 1);
@@ -363,7 +363,7 @@ MyStringRetVal comparingMyStringTest() {
         return notifyHelper(MYSTRING_ERROR, "myStringCustomEqual failed, a > c", arr, arrSize);
     }
 
-    freeArrayOfMyStringByLen(arr, arrSize);
+    freeArrayOfMyStringBySize(arr, arrSize);
     return MYSTRING_SUCCESS;
 }
 
@@ -432,7 +432,7 @@ int testQuickSort()
 
 MyStringRetVal notifyHelper(MyStringRetVal returnValue, char * msg, MyString ** arrToFree, int arrSize)
 {
-    freeArrayOfMyStringByLen(arrToFree, arrSize);
+    freeArrayOfMyStringBySize(arrToFree, arrSize);
     printf("%s\n", msg);
     return returnValue;
 }

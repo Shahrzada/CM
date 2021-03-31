@@ -6,27 +6,18 @@
 
 // -------------------------- private functions -------------------------
 
-static int quicksortMoveRight(MyString **arr, int (*comparator)(const void *, const void *),
+static int quicksortMoveRight(MyString **array, int (*comparator)(const void *, const void *),
                        int i, int pivot, unsigned int last)
 {
-    if (arr == NULL || comparator == NULL)
+    CHECK_NULL_RETURN_MYSTRING_ERROR(array);
+    CHECK_NULL_RETURN_MYSTRING_ERROR(comparator);
+    int resultIPivot;
+    while(1)  // while (arr[i] <= arr[pivot] and i < last)
     {
-        return MYSTRING_ERROR;
-    }
-
-    int result_i_pivot;
-    while(true)  // while (arr[i] <= arr[pivot] and i < last)
-    {
-        if (arr[i] == NULL)
-        {
-            return MYSTRING_ERROR;
-        }
-        result_i_pivot = comparator(arr[i], arr[pivot]);
-        if (result_i_pivot == MYSTRING_ERROR)
-        {
-            return MYSTRING_ERROR;
-        }
-        if (result_i_pivot > 0 || i >= last)
+        CHECK_NULL_RETURN_MYSTRING_ERROR(array[i]);
+        resultIPivot = comparator(array[i], array[pivot]);
+        CHECK_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(resultIPivot);
+        if (resultIPivot > 0 || i >= last)
         {
             return i;
         }
@@ -34,27 +25,18 @@ static int quicksortMoveRight(MyString **arr, int (*comparator)(const void *, co
     }
 }
 
-static int quicksortMoveLeft(MyString **arr, int (*comparator)(const void *, const void *),
+static int quicksortMoveLeft(MyString **array, int (*comparator)(const void *, const void *),
                       int j, int pivot)
 {
-    if (arr == NULL || comparator == NULL)
+    CHECK_NULL_RETURN_MYSTRING_ERROR(array);
+    CHECK_NULL_RETURN_MYSTRING_ERROR(comparator);
+    int resultJPivot;
+    while(1)
     {
-        return MYSTRING_ERROR;
-    }
-
-    int result_j_pivot;
-    while (true)
-    {
-        if (arr[j] == NULL)
-        {
-            return MYSTRING_ERROR;
-        }
-        result_j_pivot = comparator(arr[j], arr[pivot]);
-        if (result_j_pivot == MYSTRING_ERROR)
-        {
-            return MYSTRING_ERROR;
-        }
-        if (result_j_pivot <= 0)
+        CHECK_NULL_RETURN_MYSTRING_ERROR(array[j]);
+        resultJPivot = comparator(array[j], array[pivot]);
+        CHECK_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(resultJPivot);
+        if (resultJPivot <= 0)
         {
             return j;
         }
@@ -101,55 +83,51 @@ static int getTotalDigitsOfNum(int n)
 
 // -------------------------- functions -------------------------
 
-int charArrayLen(const char * str)
+int charArrayLen(const char * cStr)
 {
-    if (str != NULL) // CR: macros?
+    CHECK_NULL_RETURN_MYSTRING_ERROR(cStr);
+    const char * current = cStr;
+    while (*current != '\0')
     {
-        int n = 0;
-        const char * current = str;
-        // CR: do you really need n? try to do it without :D
-        while (*current != '\0') 
-        {
-            n++;
-            current++;
-        }
-        return n + 1;
+        current++;
     }
-    return MYSTRING_ERROR;
+    return (current - cStr) + LAST_NULL_CHAR_SIZE;
 }
 
-int charToInt(char * ch, unsigned int size)
+int charToInt(char * cStr, unsigned int size)
 {
-    if (ch != NULL && size > 0)
+    CHECK_NULL_RETURN_MYSTRING_ERROR(cStr);
+    if (size <= 0)
     {
-        char * current = ch;
-        unsigned int decile = size - 1;
-        int output = 0;
-        int sign = 1;
-        int i = 0;
-
-        if (*current == MINUS_SYMBOL)
-        {
-            sign = -1;
-            i++;
-            decile--;
-        }
-
-        while (i < size)
-        {
-            int digit = current[i] - ASCII_ZERO_DEC;
-            if (digit < 0 || 9 < digit)
-            {
-                return MYSTRING_ERROR;
-            }
-            double position = pow(10, decile);
-            output += ((int)position) * digit;
-            decile--;
-            i++;
-        }
-        return output * sign;
+        return MYSTRING_ERROR;
     }
-    return MYSTRING_ERROR;
+
+    char * current = cStr;
+    unsigned int decile = size - 1;
+    int output = 0;
+    int sign = 1;
+    int i = 0;
+
+    if (*current == MINUS_SYMBOL)
+    {
+        sign = -1;
+        i++;
+        decile--;
+    }
+
+    while (i < size)
+    {
+        int digit = current[i] - ASCII_ZERO_DEC;
+        if (digit < 0 || 9 < digit)
+        {
+            return MYSTRING_ERROR;
+        }
+        double position = pow(10, decile);
+        output += ((int)position) * digit;
+        decile--;
+        i++;
+    }
+    return output * sign;
 }
 
 char * intToChar(int n)
