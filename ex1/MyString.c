@@ -102,7 +102,7 @@ MyStringRetVal myStringFilter(MyString *str, FilterFunction *filterFunction)
     unsigned int newStrLength = myCStringFilter(str->value, str->length, output, filterFunction);
     CHECK_MYSTRING_ERROR_GOTO_CLEANUP(newStrLength);
 
-    if (newStrLength < str->length)
+    if (newStrLength < str->length) //we save up memory usage
     {
         output = (char *) realloc(output, sizeof(char)*newStrLength);
         CHECK_NULL_GOTO_CLEANUP(output);
@@ -122,16 +122,20 @@ MyStringRetVal myStringSetFromCString(MyString *str, const char *cString)
     CHECK_NULL_RETURN_MYSTRING_ERROR(cString);
 
     int charLength = charArrayLen(cString);
+    int strLength = charLength - LAST_NULL_CHAR_SIZE;
     CHECK_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(charLength);
 
-    char * newCString = (char *) malloc(sizeof(char)*(charLength));
-    CHECK_NULL_RETURN_MYSTRING_ERROR(newCString);
+    char * output = (char *) malloc(sizeof(char)*(charLength));
+    CHECK_NULL_RETURN_MYSTRING_ERROR(output);
 
-    memcpy(newCString, cString, sizeof(char)*charLength);
-    free(str->value);
-    str->value = newCString;
-    str->length = charLength - LAST_NULL_CHAR_SIZE;
+    memcpy(output, cString, sizeof(char)*strLength);
+
+    CHECK_MYSTRING_ERROR_GOTO_CLEANUP(setMyString(str, output, strLength));
     return MYSTRING_SUCCESS;
+
+cleanup:
+    free(output);
+    return MYSTRING_ERROR;
 }
 
 MyStringRetVal myStringSetFromInt(MyString *str, int n)
@@ -145,10 +149,7 @@ MyStringRetVal myStringSetFromInt(MyString *str, int n)
 int myStringToInt(const MyString *str)
 {
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str);
-    if (str->length == 0)
-    {
-        return MYSTRING_ERROR;
-    }
+    CHECK_ZERO_RETURN_MYSTRING_ERROR(str->length);
     return charToInt(str->value, str->length);
 }
 
@@ -156,8 +157,10 @@ char *myStringToCString(const MyString *str)
 {
     CHECK_MYSTRING_NULL_RETURN_NULL(str);
     unsigned int cStringLength = str->length + LAST_NULL_CHAR_SIZE;
+
     char * output = (char *) malloc(sizeof(char)*cStringLength);
     CHECK_NULL_RETURN_NULL(output);
+
     memcpy(output, str->value, sizeof(char)*cStringLength);
     output[str->length] = NULL_CHAR;
     return output;
@@ -257,13 +260,13 @@ int myStringCustomEqual(const MyString *str1, const MyString *str2, MyStringComp
     return 0;
 }
 
-unsigned long myStringMemUsage(const MyString *str1)
+unsigned long getMyStringMemoryUsage(const MyString *str1)
 {
     CHECK_MYSTRING_NULL_RETURN_0(str1);
     return sizeof(MyString) + sizeof(char)*str1->length;
 }
 
-unsigned long myStringLen(const MyString *str1)
+unsigned long getMyStringLength(const MyString *str1)
 {
     CHECK_MYSTRING_NULL_RETURN_0(str1);
     return str1->length;
@@ -293,8 +296,7 @@ void myStringCustomSort(MyString **arr, unsigned int size, MyStringSortComparato
 
 void myStringSort(MyString **arr, unsigned int len)
 {
-    // CR: nice, but this shouldve been your clue to use typedef :D
-    myStringCustomSort(arr, len, (int (*)(const void *, const void *)) myStringCompare);
+    myStringCustomSort(arr, len, (MyStringSortComparator*) myStringCompare);
 }
 
 MyString ** getArrayOfMyStringBySize(int arraySize)
@@ -305,18 +307,16 @@ MyString ** getArrayOfMyStringBySize(int arraySize)
     }
 
     MyString **array = (MyString **) malloc(sizeof(MyString) * arraySize);
+    CHECK_NULL_RETURN_NULL(array);
     for (int i = 0; i < arraySize; i++)
     {
         MyString * a = myStringAlloc();
-        if (a != NULL)
-        {
-            array[i] = a;
-        }
-        else
+        if (a == NULL)
         {
             freeArrayOfMyStringBySize(array, i);
             return NULL;
         }
+        array[i] = a;
     }
     return array;
 }

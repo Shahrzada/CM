@@ -9,7 +9,8 @@
 #define CHECK_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(number) do {if ((number) == MYSTRING_ERROR) return MYSTRING_ERROR;} while(0)
 #define CHECK_MYSTRING_ERROR_GOTO_CLEANUP(number) do {if ((number) == MYSTRING_ERROR) goto cleanup;;} while(0)
 
-#define CHECK_ZERO_RETURN_MYSTRING_SUCCESS(length) do {if ((length) == 0) return MYSTRING_SUCCESS;} while(0)
+#define CHECK_ZERO_RETURN_MYSTRING_SUCCESS(number) do {if ((number) == 0) return MYSTRING_SUCCESS;} while(0)
+#define CHECK_ZERO_RETURN_MYSTRING_ERROR(number) do {if ((number) == 0) return MYSTRING_ERROR;} while(0)
 
 #define CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str) do { \
            CHECK_NULL_RETURN_MYSTRING_ERROR(str);\

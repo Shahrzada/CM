@@ -227,12 +227,12 @@ int myStringCustomEqual(const MyString *str1, const MyString *str2,
  * @return the amount of memory (all the memory that used by the MyString object
  * itself and its allocations), in bytes, allocated to str1.
  */
-unsigned long myStringMemUsage(const MyString *str1);
+unsigned long getMyStringMemoryUsage(const MyString *str1);
 
 /**
  * @return the length of the string in str1.
  */
-unsigned long myStringLen(const MyString *str1);
+unsigned long getMyStringLength(const MyString *str1);
 
 /**
  * Writes the content of str to stream. (like fputs())

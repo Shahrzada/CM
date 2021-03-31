@@ -239,16 +239,16 @@ MyStringRetVal nullMyStringTest() {
         return notifyHelper(MYSTRING_ERROR, "myStringCustomEqual failed", arr, arrSize);
     }
 
-    unsigned long size = myStringMemUsage(a);
+    unsigned long size = getMyStringMemoryUsage(a);
     if (size != 0)
     {
-        return notifyHelper(MYSTRING_ERROR, "myStringMemUsage failed", arr, arrSize);
+        return notifyHelper(MYSTRING_ERROR, "getMyStringMemoryUsage failed", arr, arrSize);
     }
 
-    unsigned long len = myStringLen(a);
+    unsigned long len = getMyStringLength(a);
     if (len != 0)
     {
-        return notifyHelper(MYSTRING_ERROR, "myStringLen failed", arr, arrSize);
+        return notifyHelper(MYSTRING_ERROR, "getMyStringLength failed", arr, arrSize);
     }
 
     result = myStringWrite(a, NULL);
