@@ -1,4 +1,5 @@
 #include "MyString.h"
+#include "MyStringMacros.h"
 
 #define EXACT_AMOUNT_OF_INPUT_PARAMS 3
 #define TOTAL_MYSTRING_OBJECTS 4
@@ -12,6 +13,14 @@ MyStringRetVal openAndWriteToFile(MyString **arr, int len);
 
 int main (int argc, char *argv[])
 {
+    MyString * a = myStringAlloc();
+    CHECK_NULL_RETURN_MYSTRING_ERROR(a);
+    MyString * b = myStringClone(a);
+
+
+
+
+
     if (validateInput(argc, argv) == MYSTRING_ERROR)
     {
         return MYSTRING_ERROR;
@@ -68,7 +77,7 @@ MyStringRetVal compareMyStringsAndCreateOutput(MyString **arr) {
     MyString * output = *(arr + 3);
 
     result = myStringCompare(str1, str2);
-    if (result == MYSTR_ERROR_CODE)
+    if (result == MYSTRING_ERROR)
     {
         printf("Couldn't compare the strings.\n");
         return MYSTRING_ERROR;

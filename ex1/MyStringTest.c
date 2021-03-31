@@ -180,7 +180,7 @@ MyStringRetVal nullMyStringTest() {
     }
 
     result = myStringToInt(a);
-    if (result != MYSTR_ERROR_CODE)
+    if (result != MYSTRING_ERROR)
     {
         return notifyHelper(MYSTRING_ERROR, "myStringToInt failed", arr, arrSize);
     }
@@ -204,25 +204,25 @@ MyStringRetVal nullMyStringTest() {
     }
 
     result = myStringCompare(a, b);
-    if (result != MYSTR_ERROR_CODE)
+    if (result != MYSTRING_ERROR)
     {
         return notifyHelper(MYSTRING_ERROR, "myStringCompare failed", arr, arrSize);
     }
 
     result = myStringCustomCompare(a, b, comparatorReverse);
-    if (result != MYSTR_ERROR_CODE)
+    if (result != MYSTRING_ERROR)
     {
         return notifyHelper(MYSTRING_ERROR, "myStringCustomCompare failed", arr, arrSize);
     }
 
     result = myStringEqual(a, c);
-    if (result != MYSTR_ERROR_CODE)
+    if (result != MYSTRING_ERROR)
     {
         return notifyHelper(MYSTRING_ERROR, "myStringEqual failed", arr, arrSize);
     }
 
     result = myStringCustomEqual(a, c, comparatorReverse);
-    if (result != MYSTR_ERROR_CODE)
+    if (result != MYSTRING_ERROR)
     {
         return notifyHelper(MYSTRING_ERROR, "myStringCustomEqual failed", arr, arrSize);
     }

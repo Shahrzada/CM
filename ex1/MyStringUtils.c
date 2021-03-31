@@ -2,6 +2,7 @@
 // ------------------------------ includes ------------------------------
 
 #include "MyStringUtils.h"
+#include "MyStringMacros.h"
 
 // -------------------------- private functions -------------------------
 
@@ -10,7 +11,7 @@ static int quicksortMoveRight(MyString **arr, int (*comparator)(const void *, co
 {
     if (arr == NULL || comparator == NULL)
     {
-        return MYSTR_ERROR_CODE;
+        return MYSTRING_ERROR;
     }
 
     int result_i_pivot;
@@ -18,12 +19,12 @@ static int quicksortMoveRight(MyString **arr, int (*comparator)(const void *, co
     {
         if (arr[i] == NULL)
         {
-            return MYSTR_ERROR_CODE;
+            return MYSTRING_ERROR;
         }
         result_i_pivot = comparator(arr[i], arr[pivot]);
-        if (result_i_pivot == MYSTR_ERROR_CODE)
+        if (result_i_pivot == MYSTRING_ERROR)
         {
-            return MYSTR_ERROR_CODE;
+            return MYSTRING_ERROR;
         }
         if (result_i_pivot > 0 || i >= last)
         {
@@ -38,7 +39,7 @@ static int quicksortMoveLeft(MyString **arr, int (*comparator)(const void *, con
 {
     if (arr == NULL || comparator == NULL)
     {
-        return MYSTR_ERROR_CODE;
+        return MYSTRING_ERROR;
     }
 
     int result_j_pivot;
@@ -46,12 +47,12 @@ static int quicksortMoveLeft(MyString **arr, int (*comparator)(const void *, con
     {
         if (arr[j] == NULL)
         {
-            return MYSTR_ERROR_CODE;
+            return MYSTRING_ERROR;
         }
         result_j_pivot = comparator(arr[j], arr[pivot]);
-        if (result_j_pivot == MYSTR_ERROR_CODE)
+        if (result_j_pivot == MYSTRING_ERROR)
         {
-            return MYSTR_ERROR_CODE;
+            return MYSTRING_ERROR;
         }
         if (result_j_pivot <= 0)
         {
@@ -63,11 +64,11 @@ static int quicksortMoveLeft(MyString **arr, int (*comparator)(const void *, con
 
 static char * intToCharHelper(char * output, int n)
 {
-    IF_NULL_RETURN_NULL(output);
+    CHECK_NULL_RETURN_NULL(output);
     if (n <= -10)
     {
         output = intToCharHelper(output, n/10);
-        IF_NULL_RETURN_NULL(output);
+        CHECK_NULL_RETURN_NULL(output);
     }
     int digit = - n%10;
     *output = ASCII_ZERO_DEC + digit;
@@ -139,7 +140,7 @@ int charToInt(char * ch, unsigned int size)
             int digit = current[i] - ASCII_ZERO_DEC;
             if (digit < 0 || 9 < digit)
             {
-                return MYSTR_ERROR_CODE;
+                return MYSTRING_ERROR;
             }
             double position = pow(10, decile);
             output += ((int)position) * digit;
@@ -148,7 +149,7 @@ int charToInt(char * ch, unsigned int size)
         }
         return output * sign;
     }
-    return MYSTR_ERROR_CODE;
+    return MYSTRING_ERROR;
 }
 
 char * intToChar(int n)
@@ -195,13 +196,13 @@ void quicksortCharArraysUsingComp(MyString **arr, int (*comparator)(const void *
             }
 
             i = quicksortMoveRight(arr, comparator, i, pivot, last);
-            if (i == MYSTR_ERROR_CODE)
+            if (i == MYSTRING_ERROR)
             {
                 return;
             }
 
             j = quicksortMoveLeft(arr, comparator, j, pivot);
-            if (j == MYSTR_ERROR_CODE)
+            if (j == MYSTRING_ERROR)
             {
                 return;
             }

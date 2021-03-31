@@ -38,11 +38,6 @@
 // -------------------------- const definitions -------------------------
 
 /*
- * mystr error code
- */
-#define MYSTR_ERROR_CODE -999
-
-/*
  * MyString represents a manipulable string.
  */
 struct _MyString;
@@ -50,7 +45,7 @@ typedef struct _MyString MyString;
 
 /* Return values */
 typedef enum {
-  MYSTRING_ERROR = -1,
+  MYSTRING_ERROR = -999,
   MYSTRING_SUCCESS = 0,
 } MyStringRetVal;
 

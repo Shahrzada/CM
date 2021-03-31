@@ -1,12 +1,10 @@
 #pragma once
 
-// CR: Why is this here?
-
-/* Note: Do not start the guard symbol with an underscore! Leading underscore
- * names are reserved for internal use by the C implementation – the
- * preprocessor, compiler, and Standard Library – breaking this rule can
- * cause unnecessary and very puzzling errors.
- * From http://www.umich.edu/~eecs381/handouts/CHeaderFileGuidelines.pdf? */
+// CR_S: not only pragma once is slightly faster then good 'ol ifndef, it
+//       also overcomes ifndef's bad guard names problems.
+//       Although, pragma once can become an issue when the same file is
+//       in different locations which make the compiler think these are
+//       different files. That's not an issue in this ex.
 
 // ------------------------------ includes ------------------------------
 
@@ -19,12 +17,6 @@
 #define EMPTY_STR '\0'
 #define MINUS_SYMBOL '-'
 
-// ------------------------------ macros -----------------------------
-// CR: like MyString.h, same goes here, val=>(val)
-// CR: change this to CHECK_NULL_RETURN_NULL
-#define IF_NULL_RETURN_NULL(val) if (val == NULL) return NULL
-// CR: this name is a bit confusing, change it to CHECK_NULL_RETURN
-#define IF_NULL_RETURN_NOTHING(val) if (val == NULL) return
 
 // ------------------------------ functions -----------------------------
 
