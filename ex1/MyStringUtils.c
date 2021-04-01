@@ -6,29 +6,6 @@
 
 // -------------------------- private functions -------------------------
 
-static char * intToCharHelper(char * output, int n)
-{
-    CHECK_NULL_RETURN_NULL(output);
-    if (n <= -10)
-    {
-        output = intToCharHelper(output, n/10);
-        CHECK_NULL_RETURN_NULL(output);
-    }
-    int digit = - n%10;
-    *output = ASCII_ZERO_DEC + digit;
-    output++;
-    return output;
-}
-// CR: dont use recursion
-static int getTotalDigitsOfNumHelper(int n)
-{
-    if (n <= -10)
-    {
-        return getTotalDigitsOfNumHelper(n/10) + 1;
-    }
-    return 1;
-}
-
 static int getTotalDigitsOfNum(int n)
 {
     int result = 0;
@@ -36,11 +13,14 @@ static int getTotalDigitsOfNum(int n)
     {
         result++;
     }
-    else
+    do
     {
-        n = -n;
+        result++;
+        n /= 10;
     }
-    return result + getTotalDigitsOfNumHelper(n);
+    while(n != 0);
+
+    return result;
 }
 
 // -------------------------- functions -------------------------
@@ -49,7 +29,7 @@ int charArrayLen(const char * cStr)
 {
     CHECK_NULL_RETURN_MYSTRING_ERROR(cStr);
     const char * current = cStr;
-    while (*current != '\0')
+    while (*current != NULL_CHAR)
     {
         current++;
     }
@@ -59,10 +39,7 @@ int charArrayLen(const char * cStr)
 int charToInt(char * cStr, unsigned int size)
 {
     CHECK_NULL_RETURN_MYSTRING_ERROR(cStr);
-    if (size <= 0)
-    {
-        return MYSTRING_ERROR;
-    }
+    CHECK_ZERO_RETURN_MYSTRING_ERROR(size);
 
     char * current = cStr;
     unsigned int decile = size - 1;
@@ -80,10 +57,7 @@ int charToInt(char * cStr, unsigned int size)
     while (i < size)
     {
         int digit = current[i] - ASCII_ZERO_DEC;
-        if (digit < 0 || 9 < digit)
-        {
-            return MYSTRING_ERROR;
-        }
+        CHECK_NOT_DIGIT_RETURN_MYSTRING_ERROR(digit);
         double position = pow(10, decile);
         output += ((int)position) * digit;
         decile--;
@@ -92,22 +66,26 @@ int charToInt(char * cStr, unsigned int size)
     return output * sign;
 }
 
-char * intToChar(int n)
+char * intToChar(int number)
 {
-    int totalDigits = getTotalDigitsOfNum(n);
-    char * output = (char *) malloc(sizeof (char)*totalDigits);
-    char * op = output; // CR: dont cheap out on the variable names.
-    if (n < 0)
+    int totalDigits = getTotalDigitsOfNum(number);
+    char * output = (char *) malloc(sizeof(char)*totalDigits);
+    CHECK_NULL_RETURN_NULL(output);
+    int signPosition = -1;
+    if (number < 0)
     {
-        *output = '-';
-        op++;
+        *output = MINUS_SYMBOL;
+        signPosition++;
     }
     else
     {
-        n = -n;
+        number = -number;
     }
-    op = intToCharHelper(op, n);
-    *op = '\0';
+    for (int i = totalDigits - 1; i > signPosition; i--, number /= 10)
+    {
+        int digit = - number % 10;
+        output[i] = ASCII_ZERO_DEC + digit;
+    }
     return output;
 }
 
@@ -127,7 +105,6 @@ char * charConcat(const char * cStr1, unsigned int cStr1Length, const char * cSt
 
     return output;
 }
-
 
 unsigned int myCStringFilter(char *cStr, unsigned int strLength, char *output, FilterFunction *filterFunction)
 {

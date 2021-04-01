@@ -48,5 +48,8 @@
            myStringSetFromMyString((right), (temp)); \
            } while(0)
 
+#define CHECK_NOT_DIGIT_RETURN_MYSTRING_ERROR(number) do {if ((number) < 0 || 9 < (number)) return MYSTRING_ERROR;} while(0)
+
+
 #define NULL_CHAR '\0'
 #define NULL_CHAR_SIZE 1
