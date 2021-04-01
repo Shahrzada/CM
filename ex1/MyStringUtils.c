@@ -6,19 +6,19 @@
 
 // -------------------------- private functions -------------------------
 
-static int getTotalDigitsOfNum(int n)
+static int getTotalDigitsOfNumber(int number)
 {
     int result = 0;
-    if (n < 0)
+    if (number < 0)
     {
         result++;
     }
     do
     {
         result++;
-        n /= 10;
+        number /= 10;
     }
-    while(n != 0);
+    while(number != 0);
 
     return result;
 }
@@ -68,7 +68,7 @@ int charToInt(char * cStr, unsigned int size)
 
 char * intToChar(int number)
 {
-    int totalDigits = getTotalDigitsOfNum(number);
+    int totalDigits = getTotalDigitsOfNumber(number);
     char * output = (char *) malloc(sizeof(char)*totalDigits);
     CHECK_NULL_RETURN_NULL(output);
     int signPosition = -1;
@@ -127,9 +127,9 @@ int myCStringFilter(char *cStr, unsigned int strLength, char *output, FilterFunc
     return newStrLength;
 }
 
-int charCompare(const char ch1, const char ch2)
+int charCompare(const char char1, const char char2)
 {
-    return memcmp(&ch1, &ch2, 1);
+    return memcmp(&char1, &char2, 1);
 }
 
 char * allocateCStringByLength(unsigned int length)

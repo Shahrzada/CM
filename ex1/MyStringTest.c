@@ -14,52 +14,52 @@ bool filterRemoveB(const char * ch);
 int comparatorReverse(const char c1, const char c2);
 
 
-int main()
-{
-    MyStringRetVal result;
-
-    result = basicMyStringTest();
-    if (result == MYSTRING_ERROR)
-    {
-        printf("Failed a basic MyString test.\n");
-        return -1;
-    }
-    printf("Passed all basic MyString tests.\n");
-
-    result = nullMyStringTest();
-    if (result == MYSTRING_ERROR)
-    {
-        printf("Failed a NULL MyString test.\n");
-        return -1;
-    }
-    printf("Passed all NULL MyString tests.\n");
-
-    result = comparingMyStringTest();
-    if (result == MYSTRING_ERROR)
-    {
-        printf("Failed a comparing MyString test.\n");
-        return -1;
-    }
-    printf("Passed all comparing MyString tests.\n");
-
-    result = filteringMyStringTest();
-    if (result == MYSTRING_ERROR)
-    {
-        printf("Failed a filtering MyString test.\n");
-        return -1;
-    }
-    printf("Passed all filtering MyString tests.\n");
-
-    result = sortingMyStringTest();
-    if (result == MYSTRING_ERROR)
-    {
-        printf("Failed a sorting MyString test.\n");
-        return -1;
-    }
-    printf("Passed all sorting MyString tests.\n");
-
-    return 0;
-}
+//int main()
+//{
+//    MyStringRetVal result;
+//
+//    result = basicMyStringTest();
+//    if (result == MYSTRING_ERROR)
+//    {
+//        printf("Failed a basic MyString test.\n");
+//        return -1;
+//    }
+//    printf("Passed all basic MyString tests.\n");
+//
+//    result = nullMyStringTest();
+//    if (result == MYSTRING_ERROR)
+//    {
+//        printf("Failed a NULL MyString test.\n");
+//        return -1;
+//    }
+//    printf("Passed all NULL MyString tests.\n");
+//
+//    result = comparingMyStringTest();
+//    if (result == MYSTRING_ERROR)
+//    {
+//        printf("Failed a comparing MyString test.\n");
+//        return -1;
+//    }
+//    printf("Passed all comparing MyString tests.\n");
+//
+//    result = filteringMyStringTest();
+//    if (result == MYSTRING_ERROR)
+//    {
+//        printf("Failed a filtering MyString test.\n");
+//        return -1;
+//    }
+//    printf("Passed all filtering MyString tests.\n");
+//
+//    result = sortingMyStringTest();
+//    if (result == MYSTRING_ERROR)
+//    {
+//        printf("Failed a sorting MyString test.\n");
+//        return -1;
+//    }
+//    printf("Passed all sorting MyString tests.\n");
+//
+//    return 0;
+//}
 
 MyStringRetVal basicMyStringTest() {
     const char * cString = "I am a beautiful string";

@@ -14,6 +14,7 @@
 #define CHECK_ZERO_RETURN_MYSTRING_ERROR(number) do {if ((number) == 0) return MYSTRING_ERROR;} while(0)
 #define CHECK_ZERO_RETURN_ZERO(number) do {if ((number) == 0) return 0;} while(0)
 #define CHECK_ZERO_RETURN(number) do {if ((number) == 0) return;} while(0)
+#define CHECK_ZERO_RETURN_NULL(number) do {if ((number) == 0) return NULL;} while(0)
 
 #define CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str) do { \
            CHECK_NULL_RETURN_MYSTRING_ERROR(str);\

@@ -111,16 +111,16 @@ MyStringRetVal myStringFilter(MyString *str, bool (*filt)(const char *));
 MyStringRetVal myStringSetFromCString(MyString *str, const char *cString);
 
 /**
- * @brief Sets the value of str to the value of the integer n.
- *	(i.e. if n=7 than str should contain ‘7’)
+ * @brief Sets the value of str to the value of the integer number.
+ *	(i.e. if number=7 than str should contain ‘7’)
  * 	You are not allowed to use itoa (or a similar functions) here but must
  *code your own conversion function.
  * @param str the MyString to set.
- * @param n the int to set from.
+ * @param number the int to set from.
  * RETURN VALUE:
  *  @return MYSTRING_SUCCESS on success, MYSTRING_ERROR on failure.
  */
-MyStringRetVal myStringSetFromInt(MyString *str, int n);
+MyStringRetVal myStringSetFromInt(MyString *str, int number);
 
 /**
  * @brief Returns the value of str as an integer.
@@ -231,12 +231,12 @@ int myStringCustomEqual(const MyString *str1, const MyString *str2,
  * @return the amount of memory (all the memory that used by the MyString object
  * itself and its allocations), in bytes, allocated to str1.
  */
-unsigned long getMyStringMemoryUsage(const MyString *str1);
+unsigned long getMyStringMemoryUsage(const MyString *str);
 
 /**
  * @return the length of the string in str1.
  */
-unsigned long getMyStringLength(const MyString *str1);
+unsigned long getMyStringLength(const MyString *str);
 
 /**
  * Writes the content of str to stream. (like fputs())
@@ -274,7 +274,7 @@ void myStringSort(MyString **arr, unsigned int len);
  *
  * RETURN VALUE: a pointer to the array
  */
-MyString ** getArrayOfMyStringBySize(int arraySize);
+MyString ** getArrayOfMyStringBySize(unsigned int arraySize);
 
 /**
  * @brief given a pointer to an array of MyString objects, it frees all of them and itself
@@ -283,4 +283,6 @@ MyString ** getArrayOfMyStringBySize(int arraySize);
  *
  * RETURN VALUE: none
  */
-void freeArrayOfMyStringBySize(MyString ** array, int arraySize);
+void freeArrayOfMyStringBySize(MyString ** array, unsigned int arraySize);
+
+MyStringRetVal myStringArrayCheckNull(MyString **array, unsigned int arraySize);

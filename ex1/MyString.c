@@ -5,16 +5,13 @@
 #include "MyStringUtils.h"
 #include "MyStringMacros.h"
 
-#define STRINGS_ARE_EQUAL 1
-#define STRINGS_NOT_EQUAL 0
+#define MYSTRING_STRINGS_ARE_EQUAL 1
+#define MYSTRING_STRINGS_NOT_EQUAL 0
+#define MEMCMP_STRINGS_ARE_EQUAL 0
 #define LEFT_STRING_IS_GREATER 1
 #define RIGHT_STRING_IS_GREATER -1
 
 // -------------------------- const definitions -------------------------
-// CR: Why did you choose to put this here and not in the header file?
-// CR_S: The declaration the structure is in the header, the variables are
-//       in this a source file for avoiding access from outside directly;
-//       There are getters and setters for both.
 struct _MyString {
     unsigned int length;
     char * value;
@@ -22,18 +19,6 @@ struct _MyString {
 
 // -------------------------- private functions -------------------------
 
-static MyStringRetVal myStringArrayCheckNull(MyString **arr, unsigned int size)
-{
-    CHECK_NULL_RETURN_MYSTRING_ERROR(arr);
-    for (int i = 0; i < size; i++)
-    {
-        CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(arr[i]);
-    }
-    return MYSTRING_SUCCESS;
-}
-
-// CR_S: why is this a private function and not a macro function? I guess because this is
-//       more like a getter/setter for an 'object' rather than a checker of some sort.
 static MyStringRetVal setMyString(MyString* str, char * cStr, unsigned int length)
 {
     CHECK_NULL_RETURN_MYSTRING_ERROR(str);
@@ -44,29 +29,8 @@ static MyStringRetVal setMyString(MyString* str, char * cStr, unsigned int lengt
     return MYSTRING_SUCCESS;
 }
 
-static unsigned int myStringArrayGetMaxLength(MyString ** array, unsigned int arraySize)
-{
-    CHECK_NULL_RETURN_0(array);
-    unsigned int result = 0;
-    for (int i = 0; i < arraySize; i++)
-    {
-        MAX(result, array[i]->length, result);
-    }
-    return result;
-}
-
-static MyStringRetVal myStringSetStringByLengthOnly(MyString * str, unsigned int length)
-{
-    CHECK_NULL_RETURN_MYSTRING_ERROR(str);
-    char * newCString = allocateCStringByLength(length);
-    CHECK_NULL_RETURN_MYSTRING_ERROR(newCString);
-    free(str->value);
-    str->value = newCString;
-    str->length = length;
-    return MYSTRING_SUCCESS;
-}
-
-static void myStringBubbleSortWithComparator(MyString ** array, unsigned int arraySize, MyStringSortComparator * comparator)
+static void myStringBubbleSortWithComparator(MyString ** array, unsigned int arraySize,
+                                             MyStringSortComparator * comparator)
 {
     CHECK_NULL_RETURN(array);
     MyString * temp = myStringAlloc();
@@ -176,10 +140,10 @@ cleanup:
     return MYSTRING_ERROR;
 }
 
-MyStringRetVal myStringSetFromInt(MyString *str, int n)
+MyStringRetVal myStringSetFromInt(MyString *str, int number)
 {
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str);
-    char * output = intToChar(n);
+    char * output = intToChar(number);
     CHECK_NULL_RETURN_MYSTRING_ERROR(output);
     return myStringSetFromCString(str, output);
 }
@@ -214,8 +178,7 @@ MyStringRetVal myStringConcatToFirst(MyString *str1, const MyString *str2)
 
     char * output = charConcat(str1->value, str1->length, str2->value, str2->length);
     CHECK_NULL_RETURN_MYSTRING_ERROR(output);
-
-    return myStringSetFromCString(str1, output);
+    return setMyString(str1, output, outputLength);
 }
 
 MyStringRetVal myStringConcatToFirstResult(const MyString *str1, const MyString *str2, MyString *result)
@@ -240,11 +203,10 @@ int myStringCompare(const MyString *str1, const MyString *str2)
 
     unsigned int minimalLength = 0;
     MIN(str1->length, str2->length, minimalLength);
-
     int result = memcmp(str1->value, str2->value, minimalLength);
-    if (result == 0)
+    if (result == MEMCMP_STRINGS_ARE_EQUAL)
     {
-        if (minimalLength == str1->length)
+        if (minimalLength == str1->length)  // if str1 is the shorter of the two
         {
             return RIGHT_STRING_IS_GREATER;
         }
@@ -283,34 +245,37 @@ int myStringCustomEqual(const MyString *str1, const MyString *str2, MyStringComp
     CHECK_NULL_RETURN_MYSTRING_ERROR(comparator);
     if (str1->length != str2->length)
     {
-        return STRINGS_NOT_EQUAL;
+        return MYSTRING_STRINGS_NOT_EQUAL;
     }
     int result = myStringCustomCompare(str1, str2, comparator);
     CHECK_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(result);
-    if (result == 0)
+    if (result == MEMCMP_STRINGS_ARE_EQUAL)
     {
-        return STRINGS_ARE_EQUAL;
+        return MYSTRING_STRINGS_ARE_EQUAL;
     }
-    return STRINGS_NOT_EQUAL;
+    return MYSTRING_STRINGS_NOT_EQUAL;
 }
 
-unsigned long getMyStringMemoryUsage(const MyString *str1)
+unsigned long getMyStringMemoryUsage(const MyString *str)
 {
-    CHECK_MYSTRING_NULL_RETURN_0(str1);
-    return sizeof(MyString) + sizeof(char)*str1->length;
+    CHECK_MYSTRING_NULL_RETURN_0(str);
+    return sizeof(MyString) + sizeof(char)*str->length;
 }
 
-unsigned long getMyStringLength(const MyString *str1)
+unsigned long getMyStringLength(const MyString *str)
 {
-    CHECK_MYSTRING_NULL_RETURN_0(str1);
-    return str1->length;
+    CHECK_MYSTRING_NULL_RETURN_0(str);
+    return str->length;
 }
 
 MyStringRetVal myStringWrite(const MyString *str, FILE *stream)
 {
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str);
     CHECK_NULL_RETURN_MYSTRING_ERROR(stream);
-    int result = fputs(str->value, stream);
+    char * cStr = myStringToCString(str);
+    CHECK_NULL_RETURN_MYSTRING_ERROR(cStr);
+    int result = fputs(cStr, stream);
+    free(cStr);
     if (result < 0 || result == EOF)
     {
         return MYSTRING_ERROR;
@@ -321,7 +286,8 @@ MyStringRetVal myStringWrite(const MyString *str, FILE *stream)
 void myStringCustomSort(MyString **array, unsigned int arraySize, MyStringSortComparator *comparator)
 {
     if (myStringArrayCheckNull(array, arraySize) == MYSTRING_SUCCESS &&
-        comparator != NULL && arraySize > 1)
+        comparator != NULL &&
+        arraySize > 1)
     {
         myStringBubbleSortWithComparator(array, arraySize, comparator);
     }
@@ -332,29 +298,24 @@ void myStringSort(MyString **array, unsigned int arraySize)
     myStringCustomSort(array, arraySize, (MyStringSortComparator*) myStringCompare);
 }
 
-MyString ** getArrayOfMyStringBySize(int arraySize)
+MyString ** getArrayOfMyStringBySize(unsigned int arraySize)
 {
-    if (arraySize <= 0)
-    {
-        return NULL;
-    }
-
+    CHECK_ZERO_RETURN_NULL(arraySize);
     MyString **array = (MyString **) malloc(sizeof(MyString) * arraySize);
     CHECK_NULL_RETURN_NULL(array);
     for (int i = 0; i < arraySize; i++)
     {
-        MyString * a = myStringAlloc();
-        if (a == NULL)
+        array[i] = myStringAlloc();
+        if (array[i] == NULL)
         {
             freeArrayOfMyStringBySize(array, i);
             return NULL;
         }
-        array[i] = a;
     }
     return array;
 }
 
-void freeArrayOfMyStringBySize(MyString ** array, int arraySize)
+void freeArrayOfMyStringBySize(MyString ** array, unsigned int arraySize)
 {
     CHECK_NULL_RETURN(array);
     for (int i = 0; i < arraySize; i++)
@@ -362,4 +323,14 @@ void freeArrayOfMyStringBySize(MyString ** array, int arraySize)
         myStringFree(array[i]);
     }
     free(array);
+}
+
+MyStringRetVal myStringArrayCheckNull(MyString **array, unsigned int arraySize)
+{
+    CHECK_NULL_RETURN_MYSTRING_ERROR(array);
+    for (int i = 0; i < arraySize; i++)
+    {
+        CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(array[i]);
+    }
+    return MYSTRING_SUCCESS;
 }
