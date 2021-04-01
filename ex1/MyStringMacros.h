@@ -7,13 +7,10 @@
 #define CHECK_NULL_GOTO_CLEANUP(pointer) do {if ((pointer) == NULL) goto cleanup;;} while(0)
 
 #define CHECK_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(number) do {if ((number) == MYSTRING_ERROR) return MYSTRING_ERROR;} while(0)
-#define CHECK_MYSTRING_ERROR_RETURN(number) do {if ((number) == MYSTRING_ERROR) return;} while(0)
 #define CHECK_MYSTRING_ERROR_GOTO_CLEANUP(number) do {if ((number) == MYSTRING_ERROR) goto cleanup;;} while(0)
 
 #define CHECK_ZERO_RETURN_MYSTRING_SUCCESS(number) do {if ((number) == 0) return MYSTRING_SUCCESS;} while(0)
 #define CHECK_ZERO_RETURN_MYSTRING_ERROR(number) do {if ((number) == 0) return MYSTRING_ERROR;} while(0)
-#define CHECK_ZERO_RETURN_ZERO(number) do {if ((number) == 0) return 0;} while(0)
-#define CHECK_ZERO_RETURN(number) do {if ((number) == 0) return;} while(0)
 #define CHECK_ZERO_RETURN_NULL(number) do {if ((number) == 0) return NULL;} while(0)
 
 #define CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str) do { \
@@ -50,7 +47,6 @@
            } while(0)
 
 #define CHECK_NOT_DIGIT_RETURN_MYSTRING_ERROR(number) do {if ((number) < 0 || 9 < (number)) return MYSTRING_ERROR;} while(0)
-
 
 #define NULL_CHAR '\0'
 #define NULL_CHAR_SIZE 1

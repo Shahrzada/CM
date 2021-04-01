@@ -252,7 +252,7 @@ MyStringRetVal myStringWrite(const MyString *str, FILE *stream);
  * @param len
  * @param comparator custom comparatorReverse
  *
- * RETURN VALUE:none
+ * RETURN VALUE: MYSTRING_SUCCESS on success, MYSTRING_ERROR on failure.
  */
 void myStringCustomSort(MyString **arr, unsigned int size,
                         int (*comparator)(const void *, const void *));
@@ -285,4 +285,11 @@ MyString ** getArrayOfMyStringBySize(unsigned int arraySize);
  */
 void freeArrayOfMyStringBySize(MyString ** array, unsigned int arraySize);
 
+/**
+ * @brief given a pointer to an array of MyString objects, it verifies all MyStrings are not null
+ * @param array
+ * @param arraySize
+ *
+ * RETURN VALUE: MYSTRING_SUCCESS on success, MYSTRING_ERROR on failure.
+ */
 MyStringRetVal myStringArrayCheckNull(MyString **array, unsigned int arraySize);

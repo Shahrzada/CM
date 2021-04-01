@@ -5,17 +5,18 @@
 #include "MyStringUtils.h"
 #include "MyStringMacros.h"
 
+// -------------------------- const definitions -------------------------
+
+struct _MyString {
+    unsigned int length;
+    char * value;
+};
+
 #define MYSTRING_STRINGS_ARE_EQUAL 1
 #define MYSTRING_STRINGS_NOT_EQUAL 0
 #define MEMCMP_STRINGS_ARE_EQUAL 0
 #define LEFT_STRING_IS_GREATER 1
 #define RIGHT_STRING_IS_GREATER -1
-
-// -------------------------- const definitions -------------------------
-struct _MyString {
-    unsigned int length;
-    char * value;
-};
 
 // -------------------------- private functions -------------------------
 
@@ -204,15 +205,16 @@ int myStringCompare(const MyString *str1, const MyString *str2)
     unsigned int minimalLength = 0;
     MIN(str1->length, str2->length, minimalLength);
     int result = memcmp(str1->value, str2->value, minimalLength);
-    if (result == MEMCMP_STRINGS_ARE_EQUAL)
+    if (result != MEMCMP_STRINGS_ARE_EQUAL)
     {
-        if (minimalLength == str1->length)  // if str1 is the shorter of the two
-        {
-            return RIGHT_STRING_IS_GREATER;
-        }
-        return LEFT_STRING_IS_GREATER;
+        return result;
     }
-    return result;
+    // the two strings are equal but only by the shortest comparable string (E. abc and ab)
+    if (minimalLength == str1->length)
+    {
+        return RIGHT_STRING_IS_GREATER;
+    }
+    return LEFT_STRING_IS_GREATER;
 }
 
 int myStringCustomCompare(const MyString *str1, const MyString *str2, MyStringComparator *comparator)

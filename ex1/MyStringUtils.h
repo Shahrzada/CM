@@ -76,5 +76,5 @@ int charCompare(const char ch1, const char ch2);
  * @brief allocates a cStr by desired length
  * @param length
  * RETURN VALUE:
- *  @return same return as malloc for the gicen length. */
+ *  @return same return as malloc for the given length. */
 char * allocateCStringByLength(unsigned int arraySize);
