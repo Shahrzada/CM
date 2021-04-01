@@ -6,6 +6,7 @@ MyStringRetVal basicMyStringTest();
 MyStringRetVal nullMyStringTest();
 MyStringRetVal comparingMyStringTest();
 MyStringRetVal filteringMyStringTest();
+MyStringRetVal sortingMyStringTest();
 
 MyStringRetVal notifyHelper(MyStringRetVal returnValue, char * msg, MyString ** arrToFree, int arrSize);
 
@@ -41,7 +42,6 @@ int main()
     }
     printf("Passed all comparing MyString tests.\n");
 
-
     result = filteringMyStringTest();
     if (result == MYSTRING_ERROR)
     {
@@ -50,7 +50,13 @@ int main()
     }
     printf("Passed all filtering MyString tests.\n");
 
-
+    result = sortingMyStringTest();
+    if (result == MYSTRING_ERROR)
+    {
+        printf("Failed a sorting MyString test.\n");
+        return -1;
+    }
+    printf("Passed all sorting MyString tests.\n");
 
     return 0;
 }
@@ -429,11 +435,50 @@ MyStringRetVal filteringMyStringTest() {
         return notifyHelper(MYSTRING_ERROR, "myStringToCString failed logically", arr, arrSize);
     }
 
-
     freeArrayOfMyStringBySize(arr, arrSize);
     return MYSTRING_SUCCESS;
 }
 
+MyStringRetVal sortingMyStringTest() {
+    const char *cString1 = "I am another beautiful string2";
+    const char *cString2 = "I am a beautiful string";
+    const char *cString3 = "I am another beautiful string";
+    int arrSize = 3;
+    int result;
+
+    // initializing
+    MyString **arr = getArrayOfMyStringBySize(arrSize);
+    if (arr == NULL) {
+        return notifyHelper(MYSTRING_ERROR, "getArrayOfMyStringBySize failed", arr, arrSize);
+    }
+
+    // assigning string values
+    result = myStringSetFromCString(arr[0], cString1);
+    if (result == MYSTRING_ERROR) {
+        return notifyHelper(MYSTRING_ERROR, "myStringSetFromCString failed", arr, arrSize);
+    }
+    result = myStringSetFromCString(arr[1], cString2);
+    if (result == MYSTRING_ERROR) {
+        return notifyHelper(MYSTRING_ERROR, "myStringSetFromCString failed", arr, arrSize);
+    }
+    result = myStringSetFromCString(arr[2], cString3);
+    if (result == MYSTRING_ERROR) {
+        return notifyHelper(MYSTRING_ERROR, "myStringSetFromCString failed", arr, arrSize);
+    }
+
+    // testing sort
+    myStringSort(arr, arrSize);
+    for (int i = 0; i < arrSize; i ++)
+    {
+        if (strcmp(myStringToCString(arr[0]), cString2) != 0)
+        {
+            return notifyHelper(MYSTRING_ERROR, "myStringSort failed", arr, arrSize);
+        }
+    }
+
+    freeArrayOfMyStringBySize(arr, arrSize);
+    return MYSTRING_SUCCESS;
+}
 
 bool filterRemoveB(const char * ch)
 {

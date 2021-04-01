@@ -6,44 +6,6 @@
 
 // -------------------------- private functions -------------------------
 
-static int quicksortMoveRight(MyString **array, int (*comparator)(const void *, const void *),
-                       int i, int pivot, unsigned int last)
-{
-    CHECK_NULL_RETURN_MYSTRING_ERROR(array);
-    CHECK_NULL_RETURN_MYSTRING_ERROR(comparator);
-    int resultIPivot;
-    while(1)  // while (arr[i] <= arr[pivot] and i < last)
-    {
-        CHECK_NULL_RETURN_MYSTRING_ERROR(array[i]);
-        resultIPivot = comparator(array[i], array[pivot]);
-        CHECK_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(resultIPivot);
-        if (resultIPivot > 0 || i >= last)
-        {
-            return i;
-        }
-        i++;
-    }
-}
-
-static int quicksortMoveLeft(MyString **array, int (*comparator)(const void *, const void *),
-                      int j, int pivot)
-{
-    CHECK_NULL_RETURN_MYSTRING_ERROR(array);
-    CHECK_NULL_RETURN_MYSTRING_ERROR(comparator);
-    int resultJPivot;
-    while(1)
-    {
-        CHECK_NULL_RETURN_MYSTRING_ERROR(array[j]);
-        resultJPivot = comparator(array[j], array[pivot]);
-        CHECK_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(resultJPivot);
-        if (resultJPivot <= 0)
-        {
-            return j;
-        }
-        j--;
-    }
-}
-
 static char * intToCharHelper(char * output, int n)
 {
     CHECK_NULL_RETURN_NULL(output);
@@ -167,59 +129,6 @@ char * charConcat(const char * cStr1, unsigned int cStr1Length, const char * cSt
 }
 
 
-// CR: do it without recursion.
-void quicksortCharArraysUsingComp(MyString **arr, int (*comparator)(const void *, const void *),
-                                  int first, int last)
-{
-    if (arr == NULL || comparator == NULL)
-    {
-        return;
-    }
-
-    int i, j, pivot;
-    MyString * temp;
-
-    if (first < last){
-        pivot = first;
-        i = first;
-        j = last;
-
-        while(i < j)
-        {
-            if (arr[i] == NULL || arr[j] == NULL || arr[pivot] == NULL)
-            {
-                return;
-            }
-
-            i = quicksortMoveRight(arr, comparator, i, pivot, last);
-            if (i == MYSTRING_ERROR)
-            {
-                return;
-            }
-
-            j = quicksortMoveLeft(arr, comparator, j, pivot);
-            if (j == MYSTRING_ERROR)
-            {
-                return;
-            }
-
-            if (i < j)
-            {
-                temp = arr[i];
-                arr[i] = arr[j];
-                arr[j] = temp;
-            }
-        }
-
-        temp = arr[pivot];
-        arr[pivot] = arr[j];
-        arr[j] = temp;
-
-        quicksortCharArraysUsingComp(arr, comparator, first, j - 1);
-        quicksortCharArraysUsingComp(arr, comparator, j + 1, last);
-    }
-}
-
 unsigned int myCStringFilter(char *cStr, unsigned int strLength, char *output, FilterFunction *filterFunction)
 {
     CHECK_NULL_RETURN_MYSTRING_ERROR(cStr);
@@ -241,8 +150,9 @@ int charCompare(const char ch1, const char ch2)
     return memcmp(&ch1, &ch2, 1);
 }
 
-char * getCStringBySize(unsigned int arraySize)
+char * allocateCStringByLength(unsigned int length)
 {
-    char * output = (char *) malloc(sizeof(char)*(arraySize));
+    char * output = (char *) malloc(sizeof(char)*(length));
     CHECK_NULL_RETURN_NULL(output);
+    return output;
 }

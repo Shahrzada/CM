@@ -44,23 +44,10 @@ int charToInt(char * cString, unsigned int size);
  */
 char * intToChar(int n);
 
-
 char * charConcat(const char * cStr1, unsigned int cStr1Length, const char * cStr2, unsigned int cStr2Length);
-
-/**
- * @brief Applies the quicksort algorithm to sort an array of char arrays using
- * a comparatorReverse
- * @param arr
- * @param comparator
- * @param first
- * @param last
- *
- */
-void quicksortCharArraysUsingComp(MyString **arr, int (*comparator)(const void *, const void *),
-                                  int first, int last);
 
 unsigned int myCStringFilter(char *cStr, unsigned int strLength, char *output, FilterFunction *filterFunction);
 
 int charCompare(const char ch1, const char ch2);
 
-char * getCStringBySize(unsigned int arraySize);
+char * allocateCStringByLength(unsigned int arraySize);
