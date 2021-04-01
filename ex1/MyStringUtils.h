@@ -44,10 +44,37 @@ int charToInt(char * cString, unsigned int size);
  */
 char * intToChar(int n);
 
+/**
+ * @brief Create a new cStr by appending a copy of cStr2 to cStr1
+ * dst.
+ * @param cStr1 to alter
+ * @param cStr2 to append
+ * RETURN VALUE:
+ *  @return the new cStr on success, NULL on failure.
+ */
 char * charConcat(const char * cStr1, unsigned int cStr1Length, const char * cStr2, unsigned int cStr2Length);
 
-unsigned int myCStringFilter(char *cStr, unsigned int strLength, char *output, FilterFunction *filterFunction);
+/**
+ * @brief filter the value of cStr according to a filter function.
+ * @param cStr to filter
+ * @param strLength
+ * @param output - the cStr to contain the new filtered string
+ * @param filterFunction
+ * RETURN VALUE:
+ *  @return new string size on success, MYSTRING_ERROR on failure. */
+int myCStringFilter(char *cStr, unsigned int strLength, char *output, FilterFunction *filterFunction);
 
+/**
+ * @brief a wrapper for memcmp to compare two single chars, used as a simple comparator
+ * @param ch1
+ * @param ch2
+ * RETURN VALUE:
+ *  @return same return as memcmp(&ch1, &ch2, 1). */
 int charCompare(const char ch1, const char ch2);
 
+/**
+ * @brief allocates a cStr by desired length
+ * @param length
+ * RETURN VALUE:
+ *  @return same return as malloc for the gicen length. */
 char * allocateCStringByLength(unsigned int arraySize);

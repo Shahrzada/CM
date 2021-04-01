@@ -145,15 +145,8 @@ MyStringRetVal myStringFilter(MyString *str, FilterFunction *filterFunction)
     CHECK_NULL_RETURN_MYSTRING_ERROR(filterFunction);
     char * output = allocateCStringByLength(str->length);
     CHECK_NULL_RETURN_MYSTRING_ERROR(output);
-    unsigned int newStrLength = myCStringFilter(str->value, str->length, output, filterFunction);
+    int newStrLength = myCStringFilter(str->value, str->length, output, filterFunction);
     CHECK_MYSTRING_ERROR_GOTO_CLEANUP(newStrLength);
-
-    if (newStrLength < str->length) //we save up memory usage
-    {
-        output = (char *) realloc(output, sizeof(char)*newStrLength);
-        CHECK_NULL_GOTO_CLEANUP(output);
-    }
-
     CHECK_MYSTRING_ERROR_GOTO_CLEANUP(setMyString(str, output, newStrLength));
     return MYSTRING_SUCCESS;
 

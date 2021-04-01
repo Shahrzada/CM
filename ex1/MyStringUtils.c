@@ -106,11 +106,11 @@ char * charConcat(const char * cStr1, unsigned int cStr1Length, const char * cSt
     return output;
 }
 
-unsigned int myCStringFilter(char *cStr, unsigned int strLength, char *output, FilterFunction *filterFunction)
+int myCStringFilter(char *cStr, unsigned int strLength, char *output, FilterFunction *filterFunction)
 {
     CHECK_NULL_RETURN_MYSTRING_ERROR(cStr);
     CHECK_NULL_RETURN_MYSTRING_ERROR(output);
-    unsigned int newStrLength = 0;
+    int newStrLength = 0;
     for (int i = 0; i < strLength; i++)
     {
         if (filterFunction(&cStr[i]) == false) // By returning false it means "keep this char"
@@ -118,6 +118,11 @@ unsigned int myCStringFilter(char *cStr, unsigned int strLength, char *output, F
             output[newStrLength] = cStr[i];
             newStrLength++;
         }
+    }
+    if (newStrLength < strLength) // we want to save up memory usage
+    {
+        output = (char *) realloc(output, sizeof(char)*newStrLength);
+        CHECK_NULL_RETURN_MYSTRING_ERROR(output);
     }
     return newStrLength;
 }
@@ -130,6 +135,5 @@ int charCompare(const char ch1, const char ch2)
 char * allocateCStringByLength(unsigned int length)
 {
     char * output = (char *) malloc(sizeof(char)*(length));
-    CHECK_NULL_RETURN_NULL(output);
     return output;
 }
