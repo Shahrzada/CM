@@ -3,7 +3,7 @@
 #define CHECK_NULL_RETURN_NULL(pointer) do {if ((pointer) == NULL) return NULL;} while(0)
 #define CHECK_NULL_RETURN(pointer) do {if ((pointer) == NULL) return;} while(0)
 #define CHECK_NULL_RETURN_MYSTRING_ERROR(pointer) do {if ((pointer) == NULL) return MYSTRING_ERROR;} while(0)
-#define CHECK_NULL_RETURN_0(pointer) do {if ((pointer) == NULL) return 0;} while(0)
+#define CHECK_NULL_RETURN_VALUE(pointer, returnValue) do {if ((pointer) == NULL) return (returnValue);} while(0)
 #define CHECK_NULL_GOTO_CLEANUP(pointer) do {if ((pointer) == NULL) goto cleanup;;} while(0)
 
 #define CHECK_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(number) do {if ((number) == MYSTRING_ERROR) return MYSTRING_ERROR;} while(0)
@@ -21,9 +21,9 @@
            CHECK_NULL_RETURN_NULL(str);\
            CHECK_NULL_RETURN_NULL(str->value);\
            } while(0)
-#define CHECK_MYSTRING_NULL_RETURN_0(str) do { \
-           CHECK_NULL_RETURN_0(str);\
-           CHECK_NULL_RETURN_0(str->value);\
+#define CHECK_MYSTRING_NULL_RETURN_VALUE(str, returnValue) do { \
+           CHECK_NULL_RETURN_VALUE(str, returnValue);\
+           CHECK_NULL_RETURN_VALUE(str->value, returnValue);\
            } while(0)
 
 #define MIN(x,y,result) do { \
@@ -32,19 +32,6 @@
             else { \
                 (result) = (y); } \
             } while(0)
-
-#define MAX(x,y,result) do { \
-            if ((x) < (y)) { \
-                (result) = (y); } \
-            else { \
-                (result) = (x); } \
-            } while(0)
-
-#define SWAP_MYSTRINGS(left, right, temp) do { \
-           myStringSetFromMyString((temp), (left)); \
-           myStringSetFromMyString((left), (right)); \
-           myStringSetFromMyString((right), (temp)); \
-           } while(0)
 
 #define CHECK_NOT_DIGIT_RETURN_MYSTRING_ERROR(number) do {if ((number) < 0 || 9 < (number)) return MYSTRING_ERROR;} while(0)
 

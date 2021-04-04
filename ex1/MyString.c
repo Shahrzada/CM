@@ -14,7 +14,7 @@ struct _MyString {
 
 #define MYSTRING_STRINGS_ARE_EQUAL 1
 #define MYSTRING_STRINGS_NOT_EQUAL 0
-#define MEMCMP_STRINGS_ARE_EQUAL 0
+#define CMP_STRINGS_ARE_EQUAL 0
 #define LEFT_STRING_IS_GREATER 1
 #define RIGHT_STRING_IS_GREATER -1
 
@@ -30,8 +30,27 @@ static MyStringRetVal setMyString(MyString* str, char * cStr, unsigned int lengt
     return MYSTRING_SUCCESS;
 }
 
+static MyStringRetVal swapMyStringContents(MyString *left, MyString *right, MyString *temp)
+{
+    CHECK_NULL_RETURN_MYSTRING_ERROR(left);
+    CHECK_NULL_RETURN_MYSTRING_ERROR(right);
+    CHECK_NULL_RETURN_MYSTRING_ERROR(temp);
+    int result = 0;
+
+    result = myStringSetFromMyString((temp), (left));
+    CHECK_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(result);
+
+    result = myStringSetFromMyString((left), (right));
+    CHECK_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(result);
+
+    result = myStringSetFromMyString((right), (temp));
+    CHECK_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(result);
+
+    return MYSTRING_SUCCESS;
+}
+
 static void myStringBubbleSortWithComparator(MyString ** array, unsigned int arraySize,
-                                             MyStringSortComparator * comparator)
+                                             my_string_sort_comparator_t * comparator)
 {
     CHECK_NULL_RETURN(array);
     MyString * temp = myStringAlloc();
@@ -49,7 +68,8 @@ static void myStringBubbleSortWithComparator(MyString ** array, unsigned int arr
             CHECK_MYSTRING_ERROR_GOTO_CLEANUP(result);
 
             if (result == LEFT_STRING_IS_GREATER) {
-                SWAP_MYSTRINGS(leftStr, rightStr, temp);
+                result = swapMyStringContents(leftStr, rightStr, temp);
+                CHECK_MYSTRING_ERROR_GOTO_CLEANUP(result);
             }
         }
 
@@ -69,7 +89,7 @@ MyString *myStringAlloc()
     return str;
 
 cleanup:
-    free(str);
+    myStringFree(str);
     return NULL;
 }
 
@@ -100,19 +120,22 @@ MyString *myStringClone(const MyString *str)
     return newStr;
 
 cleanup:
-    free(newStr);
+    myStringFree(newStr);
     return NULL;
 }
 
-MyStringRetVal myStringFilter(MyString *str, FilterFunction *filterFunction)
+MyStringRetVal myStringFilter(MyString *str, filter_function_t *filterFunction)
 {
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str);
     CHECK_NULL_RETURN_MYSTRING_ERROR(filterFunction);
+
     char * output = allocateCStringByLength(str->length);
     CHECK_NULL_RETURN_MYSTRING_ERROR(output);
+
     int newStrLength = myCStringFilter(str->value, str->length, output, filterFunction);
     CHECK_MYSTRING_ERROR_GOTO_CLEANUP(newStrLength);
     CHECK_MYSTRING_ERROR_GOTO_CLEANUP(setMyString(str, output, newStrLength));
+
     return MYSTRING_SUCCESS;
 
 cleanup:
@@ -125,7 +148,7 @@ MyStringRetVal myStringSetFromCString(MyString *str, const char *cString)
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str);
     CHECK_NULL_RETURN_MYSTRING_ERROR(cString);
 
-    int charLength = charArrayLen(cString);
+    int charLength = cStringLength(cString);
     int strLength = charLength - NULL_CHAR_SIZE;
     CHECK_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(charLength);
 
@@ -144,7 +167,7 @@ cleanup:
 MyStringRetVal myStringSetFromInt(MyString *str, int number)
 {
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str);
-    char * output = intToChar(number);
+    char * output = intToCString(number);
     CHECK_NULL_RETURN_MYSTRING_ERROR(output);
     return myStringSetFromCString(str, output);
 }
@@ -153,7 +176,7 @@ int myStringToInt(const MyString *str)
 {
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str);
     CHECK_ZERO_RETURN_MYSTRING_ERROR(str->length);
-    return charToInt(str->value, str->length);
+    return cStringToInt(str->value, str->length);
 }
 
 char *myStringToCString(const MyString *str)
@@ -169,20 +192,20 @@ char *myStringToCString(const MyString *str)
     return output;
 }
 
-MyStringRetVal myStringConcatToFirst(MyString *str1, const MyString *str2)
+MyStringRetVal myStringConcat(MyString *dest, const MyString *source)
 {
-    CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str1);
-    CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str2);
+    CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(dest);
+    CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(source);
 
-    unsigned int outputLength = str1->length + str2->length;
+    unsigned int outputLength = dest->length + source->length;
     CHECK_ZERO_RETURN_MYSTRING_SUCCESS(outputLength);
 
-    char * output = charConcat(str1->value, str1->length, str2->value, str2->length);
+    char * output = charConcat(dest->value, dest->length, source->value, source->length);
     CHECK_NULL_RETURN_MYSTRING_ERROR(output);
-    return setMyString(str1, output, outputLength);
+    return setMyString(dest, output, outputLength);
 }
 
-MyStringRetVal myStringConcatToFirstResult(const MyString *str1, const MyString *str2, MyString *result)
+MyStringRetVal myStringConcatToResult(const MyString *str1, const MyString *str2, MyString *result)
 {
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str1);
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str2);
@@ -190,7 +213,7 @@ MyStringRetVal myStringConcatToFirstResult(const MyString *str1, const MyString 
 
     MyStringRetVal firstConcatReturnValue = myStringSetFromMyString(result, str1);
     CHECK_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(firstConcatReturnValue);
-    return myStringConcatToFirst(result, str2);
+    return myStringConcat(result, str2);
 }
 
 int myStringCompare(const MyString *str1, const MyString *str2)
@@ -205,19 +228,19 @@ int myStringCompare(const MyString *str1, const MyString *str2)
     unsigned int minimalLength = 0;
     MIN(str1->length, str2->length, minimalLength);
     int result = memcmp(str1->value, str2->value, minimalLength);
-    if (result != MEMCMP_STRINGS_ARE_EQUAL)
+    if (result != CMP_STRINGS_ARE_EQUAL)
     {
         return result;
     }
     // the two strings are equal but only by the shortest comparable string (E. abc and ab)
-    if (minimalLength == str1->length)
+    if (minimalLength != str2->length)
     {
         return RIGHT_STRING_IS_GREATER;
     }
     return LEFT_STRING_IS_GREATER;
 }
 
-int myStringCustomCompare(const MyString *str1, const MyString *str2, MyStringComparator *comparator)
+int myStringCustomCompare(const MyString *str1, const MyString *str2, my_string_comparator_t *comparator)
 {
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str1);
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str2);
@@ -227,7 +250,7 @@ int myStringCustomCompare(const MyString *str1, const MyString *str2, MyStringCo
     for (int i = 0; i < str1->length; i++)
     {
         result = comparator(str1->value[i], str2->value[i]);
-        if (result != 0)
+        if (result != CMP_STRINGS_ARE_EQUAL)
         {
             return result;
         }
@@ -240,7 +263,7 @@ int myStringEqual(const MyString *str1, const MyString *str2)
     return myStringCustomEqual(str1, str2, charCompare);
 }
 
-int myStringCustomEqual(const MyString *str1, const MyString *str2, MyStringComparator *comparator)
+int myStringCustomEqual(const MyString *str1, const MyString *str2, my_string_comparator_t *comparator)
 {
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str1);
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str2);
@@ -251,26 +274,22 @@ int myStringCustomEqual(const MyString *str1, const MyString *str2, MyStringComp
     }
     int result = myStringCustomCompare(str1, str2, comparator);
     CHECK_MYSTRING_ERROR_RETURN_MYSTRING_ERROR(result);
-    if (result == MEMCMP_STRINGS_ARE_EQUAL)
-    {
-        return MYSTRING_STRINGS_ARE_EQUAL;
-    }
-    return MYSTRING_STRINGS_NOT_EQUAL;
+    return result == CMP_STRINGS_ARE_EQUAL ? MYSTRING_STRINGS_ARE_EQUAL : MYSTRING_STRINGS_NOT_EQUAL;
 }
 
 unsigned long getMyStringMemoryUsage(const MyString *str)
 {
-    CHECK_MYSTRING_NULL_RETURN_0(str);
+    CHECK_MYSTRING_NULL_RETURN_VALUE(str, 0);
     return sizeof(MyString) + sizeof(char)*str->length;
 }
 
 unsigned long getMyStringLength(const MyString *str)
 {
-    CHECK_MYSTRING_NULL_RETURN_0(str);
+    CHECK_MYSTRING_NULL_RETURN_VALUE(str, 0);
     return str->length;
 }
 
-MyStringRetVal myStringWrite(const MyString *str, FILE *stream)
+MyStringRetVal myStringWriteStrValueToStream(const MyString *str, FILE *stream)
 {
     CHECK_MYSTRING_NULL_RETURN_MYSTRING_ERROR(str);
     CHECK_NULL_RETURN_MYSTRING_ERROR(stream);
@@ -285,7 +304,7 @@ MyStringRetVal myStringWrite(const MyString *str, FILE *stream)
     return MYSTRING_SUCCESS;
 }
 
-void myStringCustomSort(MyString **array, unsigned int arraySize, MyStringSortComparator *comparator)
+void myStringCustomSort(MyString **array, unsigned int arraySize, my_string_sort_comparator_t *comparator)
 {
     if (myStringArrayCheckNull(array, arraySize) == MYSTRING_SUCCESS &&
         comparator != NULL &&
@@ -297,10 +316,10 @@ void myStringCustomSort(MyString **array, unsigned int arraySize, MyStringSortCo
 
 void myStringSort(MyString **array, unsigned int arraySize)
 {
-    myStringCustomSort(array, arraySize, (MyStringSortComparator*) myStringCompare);
+    myStringCustomSort(array, arraySize, (my_string_sort_comparator_t*) myStringCompare);
 }
 
-MyString ** getArrayOfMyStringBySize(unsigned int arraySize)
+MyString ** allocateMyStringArrayBySize(unsigned int arraySize)
 {
     CHECK_ZERO_RETURN_NULL(arraySize);
     MyString **array = (MyString **) malloc(sizeof(MyString) * arraySize);

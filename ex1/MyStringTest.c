@@ -14,52 +14,52 @@ bool filterRemoveB(const char * ch);
 int comparatorReverse(const char c1, const char c2);
 
 
-//int main()
-//{
-//    MyStringRetVal result;
-//
-//    result = basicMyStringTest();
-//    if (result == MYSTRING_ERROR)
-//    {
-//        printf("Failed a basic MyString test.\n");
-//        return -1;
-//    }
-//    printf("Passed all basic MyString tests.\n");
-//
-//    result = nullMyStringTest();
-//    if (result == MYSTRING_ERROR)
-//    {
-//        printf("Failed a NULL MyString test.\n");
-//        return -1;
-//    }
-//    printf("Passed all NULL MyString tests.\n");
-//
-//    result = comparingMyStringTest();
-//    if (result == MYSTRING_ERROR)
-//    {
-//        printf("Failed a comparing MyString test.\n");
-//        return -1;
-//    }
-//    printf("Passed all comparing MyString tests.\n");
-//
-//    result = filteringMyStringTest();
-//    if (result == MYSTRING_ERROR)
-//    {
-//        printf("Failed a filtering MyString test.\n");
-//        return -1;
-//    }
-//    printf("Passed all filtering MyString tests.\n");
-//
-//    result = sortingMyStringTest();
-//    if (result == MYSTRING_ERROR)
-//    {
-//        printf("Failed a sorting MyString test.\n");
-//        return -1;
-//    }
-//    printf("Passed all sorting MyString tests.\n");
-//
-//    return 0;
-//}
+int main()
+{
+    MyStringRetVal result;
+
+    result = basicMyStringTest();
+    if (result == MYSTRING_ERROR)
+    {
+        printf("Failed a basic MyString test.\n");
+        return -1;
+    }
+    printf("Passed all basic MyString tests.\n");
+
+    result = nullMyStringTest();
+    if (result == MYSTRING_ERROR)
+    {
+        printf("Failed a NULL MyString test.\n");
+        return -1;
+    }
+    printf("Passed all NULL MyString tests.\n");
+
+    result = comparingMyStringTest();
+    if (result == MYSTRING_ERROR)
+    {
+        printf("Failed a comparing MyString test.\n");
+        return -1;
+    }
+    printf("Passed all comparing MyString tests.\n");
+
+    result = filteringMyStringTest();
+    if (result == MYSTRING_ERROR)
+    {
+        printf("Failed a filtering MyString test.\n");
+        return -1;
+    }
+    printf("Passed all filtering MyString tests.\n");
+
+    result = sortingMyStringTest();
+    if (result == MYSTRING_ERROR)
+    {
+        printf("Failed a sorting MyString test.\n");
+        return -1;
+    }
+    printf("Passed all sorting MyString tests.\n");
+
+    return 0;
+}
 
 MyStringRetVal basicMyStringTest() {
     const char * cString = "I am a beautiful string";
@@ -69,10 +69,10 @@ MyStringRetVal basicMyStringTest() {
     int result;
 
     // initializing
-    MyString ** arr = getArrayOfMyStringBySize(arrSize);
+    MyString ** arr = allocateMyStringArrayBySize(arrSize);
     if (arr == NULL)
     {
-        return notifyHelper(MYSTRING_ERROR, "getArrayOfMyStringBySize failed", arr, arrSize);
+        return notifyHelper(MYSTRING_ERROR, "allocateMyStringArrayBySize failed", arr, arrSize);
     }
 
     MyString * a = *arr;
@@ -133,10 +133,10 @@ MyStringRetVal nullMyStringTest() {
     int result;
 
     // initializing
-    MyString ** arr = getArrayOfMyStringBySize(arrSize);
+    MyString ** arr = allocateMyStringArrayBySize(arrSize);
     if (arr == NULL)
     {
-        return notifyHelper(MYSTRING_ERROR, "getArrayOfMyStringBySize failed", arr, arrSize);
+        return notifyHelper(MYSTRING_ERROR, "allocateMyStringArrayBySize failed", arr, arrSize);
     }
 
     MyString * a = NULL;
@@ -209,16 +209,16 @@ MyStringRetVal nullMyStringTest() {
         return notifyHelper(MYSTRING_ERROR, "myStringToCString failed", arr, arrSize);
     }
 
-    result = myStringConcatToFirst(a, b);
+    result = myStringConcat(a, b);
     if (result != MYSTRING_ERROR)
     {
-        return notifyHelper(MYSTRING_ERROR, "myStringConcatToFirst failed", arr, arrSize);
+        return notifyHelper(MYSTRING_ERROR, "myStringConcat failed", arr, arrSize);
     }
 
-    result = myStringConcatToFirstResult(a, b, a);
+    result = myStringConcatToResult(a, b, a);
     if (result != MYSTRING_ERROR)
     {
-        return notifyHelper(MYSTRING_ERROR, "myStringConcatToFirstResult failed", arr, arrSize);
+        return notifyHelper(MYSTRING_ERROR, "myStringConcatToResult failed", arr, arrSize);
     }
 
     result = myStringCompare(a, b);
@@ -257,10 +257,10 @@ MyStringRetVal nullMyStringTest() {
         return notifyHelper(MYSTRING_ERROR, "getMyStringLength failed", arr, arrSize);
     }
 
-    result = myStringWrite(a, NULL);
+    result = myStringWriteStrValueToStream(a, NULL);
     if (result != MYSTRING_ERROR)
     {
-        return notifyHelper(MYSTRING_ERROR, "myStringWrite failed", arr, arrSize);
+        return notifyHelper(MYSTRING_ERROR, "myStringWriteStrValueToStream failed", arr, arrSize);
     }
 
     freeArrayOfMyStringBySize(arr, arrSize);
@@ -274,10 +274,10 @@ MyStringRetVal comparingMyStringTest() {
     int result;
 
     // initializing
-    MyString ** arr = getArrayOfMyStringBySize(arrSize);
+    MyString ** arr = allocateMyStringArrayBySize(arrSize);
     if (arr == NULL)
     {
-        return notifyHelper(MYSTRING_ERROR, "getArrayOfMyStringBySize failed", arr, arrSize);
+        return notifyHelper(MYSTRING_ERROR, "allocateMyStringArrayBySize failed", arr, arrSize);
     }
     MyString * a = *arr;
     MyString * b = *(arr + 1);
@@ -392,9 +392,9 @@ MyStringRetVal filteringMyStringTest() {
     int result;
 
     // initializing
-    MyString **arr = getArrayOfMyStringBySize(arrSize);
+    MyString **arr = allocateMyStringArrayBySize(arrSize);
     if (arr == NULL) {
-        return notifyHelper(MYSTRING_ERROR, "getArrayOfMyStringBySize failed", arr, arrSize);
+        return notifyHelper(MYSTRING_ERROR, "allocateMyStringArrayBySize failed", arr, arrSize);
     }
     MyString *a = *arr;
     MyString *b = *(arr + 1);
@@ -447,9 +447,9 @@ MyStringRetVal sortingMyStringTest() {
     int result;
 
     // initializing
-    MyString **arr = getArrayOfMyStringBySize(arrSize);
+    MyString **arr = allocateMyStringArrayBySize(arrSize);
     if (arr == NULL) {
-        return notifyHelper(MYSTRING_ERROR, "getArrayOfMyStringBySize failed", arr, arrSize);
+        return notifyHelper(MYSTRING_ERROR, "allocateMyStringArrayBySize failed", arr, arrSize);
     }
 
     // assigning string values
@@ -523,18 +523,18 @@ int testQuickSort()
     {
         MyString * ms = myStringAlloc();
         myStringSetFromCString(ms, words[i]);
-        myStringWrite(ms, pFile);
-        myStringWrite(newline, pFile);
+        myStringWriteStrValueToStream(ms, pFile);
+        myStringWriteStrValueToStream(newline, pFile);
         *(arr + i) = ms;
     }
 
-    myStringWrite(newline, pFile);
+    myStringWriteStrValueToStream(newline, pFile);
 
     myStringCustomSort(arr, 4, (int (*)(const void *, const void *)) myStringCompare);
     for (int i = 0; i < 4; i++)
     {
-        myStringWrite(*(arr + i), pFile);
-        myStringWrite(newline, pFile);
+        myStringWriteStrValueToStream(*(arr + i), pFile);
+        myStringWriteStrValueToStream(newline, pFile);
         free(*(arr + i));
     }
 

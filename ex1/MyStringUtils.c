@@ -9,7 +9,7 @@
 static int getTotalDigitsOfNumber(int number)
 {
     int result = 0;
-    if (number < 0)
+    if (number < 0) // count in the minus sign
     {
         result++;
     }
@@ -25,7 +25,7 @@ static int getTotalDigitsOfNumber(int number)
 
 // -------------------------- functions -------------------------
 
-int charArrayLen(const char * cStr)
+int cStringLength(const char * cStr)
 {
     CHECK_NULL_RETURN_MYSTRING_ERROR(cStr);
     const char * current = cStr;
@@ -36,7 +36,7 @@ int charArrayLen(const char * cStr)
     return (current - cStr) + NULL_CHAR_SIZE;
 }
 
-int charToInt(char * cStr, unsigned int size)
+int cStringToInt(char * cStr, unsigned int size)
 {
     CHECK_NULL_RETURN_MYSTRING_ERROR(cStr);
     CHECK_ZERO_RETURN_MYSTRING_ERROR(size);
@@ -66,7 +66,7 @@ int charToInt(char * cStr, unsigned int size)
     return output * sign;
 }
 
-char * intToChar(int number)
+char * intToCString(int number)
 {
     int totalDigits = getTotalDigitsOfNumber(number);
     char * output = (char *) malloc(sizeof(char)*totalDigits);
@@ -106,7 +106,7 @@ char * charConcat(const char * cStr1, unsigned int cStr1Length, const char * cSt
     return output;
 }
 
-int myCStringFilter(char *cStr, unsigned int strLength, char *output, FilterFunction *filterFunction)
+int myCStringFilter(char *cStr, unsigned int strLength, char *output, filter_function_t *filterFunction)
 {
     CHECK_NULL_RETURN_MYSTRING_ERROR(cStr);
     CHECK_NULL_RETURN_MYSTRING_ERROR(output);

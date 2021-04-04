@@ -20,29 +20,29 @@
 
 /**
  * @brief returns the length of a char array
- * @param str
+ * @param cStr
  *
  * @return the length of the char array, -1 if str is NULL
  */
-int charArrayLen(const char * str);
+int cStringLength(const char * str);
 
 /**
  * @brief Returns the value of the char array as an integer.
- * @param cString
+ * @param cStr
  * @param size
  *
  * @return an integer
  */
-int charToInt(char * cString, unsigned int size);
+int cStringToInt(char * cString, unsigned int size);
 
 /**
  * @brief Returns the value of an int as a char array, terminated with the
  * 	null character.
  * @param ch, will hold that output char array
- * @param n
+ * @param number
  *
  */
-char * intToChar(int n);
+char * intToCString(int n);
 
 /**
  * @brief Create a new cStr by appending a copy of cStr2 to cStr1
@@ -62,7 +62,7 @@ char * charConcat(const char * cStr1, unsigned int cStr1Length, const char * cSt
  * @param filterFunction
  * RETURN VALUE:
  *  @return new string size on success, MYSTRING_ERROR on failure. */
-int myCStringFilter(char *cStr, unsigned int strLength, char *output, FilterFunction *filterFunction);
+int myCStringFilter(char *cStr, unsigned int strLength, char *output, filter_function_t *filterFunction);
 
 /**
  * @brief a wrapper for memcmp to compare two single chars, used as a simple comparator

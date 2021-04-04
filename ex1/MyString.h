@@ -48,9 +48,9 @@ typedef enum {
   MYSTRING_SUCCESS = 0,
 } MyStringRetVal;
 
-typedef bool (FilterFunction)(const char *);
-typedef int (MyStringComparator)(const char, const char);
-typedef int (MyStringSortComparator)(const void *, const void *);
+typedef bool (filter_function_t)(const char *);
+typedef int (my_string_comparator_t)(const char, const char);
+typedef int (my_string_sort_comparator_t)(const void *, const void *);
 
 // ------------------------------ functions -----------------------------
 
@@ -143,14 +143,14 @@ int myStringToInt(const MyString *str);
 char *myStringToCString(const MyString *str);
 
 /**
- * @brief Appends a copy of str2 to str1
+ * @brief Appends a copy of source to dest
  * dst.
- * @param str1 to alter
- * @param str2 to append
+ * @param dest to alter
+ * @param source to append
  * RETURN VALUE:
  *  @return MYSTRING_SUCCESS on success, MYSTRING_ERROR on failure.
  */
-MyStringRetVal myStringConcatToFirst(MyString *str1, const MyString *str2);
+MyStringRetVal myStringConcat(MyString *dest, const MyString *source);
 
 /**
  * @brief Sets result to be the concatenation of str1 and str2.
@@ -162,8 +162,8 @@ MyStringRetVal myStringConcatToFirst(MyString *str1, const MyString *str2);
  * RETURN VALUE:
  *  @return MYSTRING_SUCCESS on success, MYSTRING_ERROR on failure.
  */
-MyStringRetVal myStringConcatToFirstResult(const MyString *str1, const MyString *str2,
-                                           MyString *result);
+MyStringRetVal myStringConcatToResult(const MyString *str1, const MyString *str2,
+                                      MyString *result);
 
 /**
  * @brief Compare str1 and str2.
@@ -244,7 +244,7 @@ unsigned long getMyStringLength(const MyString *str);
  * RETURNS:
  *  @return MYSTRING_SUCCESS on success, MYSTRING_ERROR on failure.
  */
-MyStringRetVal myStringWrite(const MyString *str, FILE *stream);
+MyStringRetVal myStringWriteStrValueToStream(const MyString *str, FILE *stream);
 
 /**
  * @brief sort an array of MyString pointers
@@ -274,7 +274,7 @@ void myStringSort(MyString **arr, unsigned int len);
  *
  * RETURN VALUE: a pointer to the array
  */
-MyString ** getArrayOfMyStringBySize(unsigned int arraySize);
+MyString ** allocateMyStringArrayBySize(unsigned int arraySize);
 
 /**
  * @brief given a pointer to an array of MyString objects, it frees all of them and itself
