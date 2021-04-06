@@ -1,0 +1,6 @@
+In this ex:
+1. Build a server-client (only 1 client) program
+2. The client will be able to send commands to the server for it to do
+    e. write to file, read file and print to stdout, etc.
+3. Will support using sockets AND communication via files.
+    will support in the future other communication methods.

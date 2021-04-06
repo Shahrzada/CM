@@ -165,7 +165,7 @@
 //
 //    MyString * output = *(arr + 3);
 //    MyStringRetVal result;
-//    FILE * pFile;
+//    FILE_METHOD * pFile;
 //
 //    pFile = fopen("test.out","w+");
 //    if (pFile == NULL)
