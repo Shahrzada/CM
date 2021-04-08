@@ -40,10 +40,11 @@ typedef struct _Message Message;
  * @return a pointer to the new msg, or NULL if the allocation failed.
  */
 Message *messageAllocate();
-Message *messageFree();
+void messageFree(Message * msg);
 
 // setter
-ReturnValue *messageSet(Message * msg, Command commandType, Sender sender, unsigned int length, char * contents);
+ReturnValue messageSet(Message * msg, Command commandType, Sender sender,
+                        unsigned int length, char * contents);
 
 // getters
 Command messageGetCommand(Message * msg);
@@ -53,5 +54,5 @@ char *messageGetContents(Message * msg);
 
 //  char *   <-->  msg
 char *messageToCString(Message * msg);
-Message *messageFromCString(char * cStr);
+ReturnValue messageFromCString(Message * msg, const char * cStr);
 //TODO think about how a msgs's char * will look like

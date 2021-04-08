@@ -11,7 +11,7 @@ Client *clientInitialize(CommunicationMethodCode cMethod)
     /* allocate memory for Client and initiate its params */
 //    ClientCommunicationMethod *clientCMethodSet(CommunicationMethodCode cMethod);
     /* connect it via the communication method */
-//    ReturnValue result = client->clientCMethod->clientConnectFunction();
+//    ReturnValue result = client->clientCMethod->clientInitConnectionFunction();
 //    return client;
     return NULL;
 }

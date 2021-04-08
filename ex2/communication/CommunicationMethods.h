@@ -26,25 +26,25 @@
 // -------------------------- const definitions -------------------------
 
 /* These are the "virtual functions" the communication methods must implement */
-typedef ReturnValue (server_connect_function_t)();
-typedef ReturnValue (server_close_function_t)();
-typedef ReturnValue (client_connect_function_t)();
-typedef ReturnValue (client_close_function_t)();
+typedef ReturnValue (server_init_connection_function_t)();
+typedef ReturnValue (server_close_connection_function_t)();
+typedef ReturnValue (client_init_connection_function_t)();
+typedef ReturnValue (client_close_connection_function_t)();
 typedef ReturnValue (listen_function_t)(Message msg);
 typedef ReturnValue (send_function_t)(Message msg, Message reply);
 
 /* The program's server communication method struct */
 typedef struct {
-    server_connect_function_t *serverConnectFunction;
-    server_close_function_t *serverCloseFunction;
+    server_init_connection_function_t *serverInitConnectionFunction;
+    server_close_connection_function_t *serverCloseConnectionFunction;
     listen_function_t *listenFunction;
     send_function_t *sendFunction;
 } ServerCommunicationMethod;
 
 /* The program's client communication method struct */
 typedef struct {
-    client_connect_function_t *clientConnectFunction;
-    client_close_function_t *clientCloseFunction;
+    client_init_connection_function_t *clientInitConnectionFunction;
+    client_close_connection_function_t *clientCloseConnectionFunction;
     send_function_t *sendFunction;
 } ClientCommunicationMethod;
 

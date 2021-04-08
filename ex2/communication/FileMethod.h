@@ -22,11 +22,14 @@
 
 // -------------------------- const definitions -------------------------
 
+struct _FileData;
+typedef struct _FileData FileData;
+
 
 // ------------------------------ functions -----------------------------
 
-ReturnValue fileServerConnect();
-ReturnValue fileServerClose();
-ReturnValue fileClientConnect();
-ReturnValue fileListen(Message * msg);
+FileData *fileServerInitConnect();
+ReturnValue fileServerCloseConnection(FileData * fileData);
+ReturnValue fileClientInitConnect();
+ReturnValue fileListen(FileData  *fileData, Message *msg);
 ReturnValue fileSend(Message * msg, Message * reply);
