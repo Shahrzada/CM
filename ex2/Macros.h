@@ -47,9 +47,9 @@ typedef enum {
 
 // -------------------------- macro functions -------------------------
 
+#define CHECK_NULL_RETURN_NULL(pointer) do {if ((pointer) == NULL) return NULL;} while(0)
 #define CHECK_NULL_RETURN_ERROR(pointer) do {if ((pointer) == NULL) return ERROR;} while(0)
 #define CHECK_NULL_RETURN(pointer) do {if ((pointer) == NULL) return;} while(0)
-#define CHECK_NULL_RETURN_NULL(pointer) do {if ((pointer) == NULL) return NULL;} while(0)
 #define CHECK_NULL_RETURN_ZERO(pointer) do {if ((pointer) == NULL) return 0;} while(0)
 #define CHECK_NULL_GOTO_CLEANUP(pointer) do {if ((pointer) == NULL) goto cleanup;} while(0)
 
@@ -58,6 +58,7 @@ typedef enum {
 #define CHECK_NON_ZERO_GOTO_CLEANUP(number) do {if ((number) != 0) goto cleanup;} while(0)
 
 #define CHECK_ERROR_RETURN_ERROR(number) do {if ((number) == ERROR) return ERROR;} while(0)
+#define CHECK_ERROR_RETURN_NULL(number) do {if ((number) == ERROR) return NULL;} while(0)
 #define CHECK_ERROR_GOTO_CLEANUP(number) do {if ((number) == ERROR) goto cleanup;} while(0)
 
 

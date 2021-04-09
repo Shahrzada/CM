@@ -66,3 +66,12 @@ ReturnValue messageFromCString(Message * msg, const char * cStr)
     char * contents = (char *) malloc(sizeof(char)*contentsLength);
     CHECK_NULL_RETURN_ERROR(contents);
 }
+
+Command messageGetCommand(Message * msg)
+{
+    if (msg == NULL)
+    {
+        return EMPTY_COMMAND;
+    }
+    return msg->commandType;
+}

@@ -1,8 +1,8 @@
 
-//#include "server/server.h"
+#include "server/Server.h"
 //#include "client/client.h"
 
-#include "communication/FileMethod.h"
+//#include "communication/CommunicationMethods.h"
 
 #define CHECK_ERROR_PRINT_AND_RETURN_ERROR(result, function) do { \
            if ((result) == ERROR) {                                 \
@@ -18,21 +18,18 @@
 
 int main(int argc, char const *argv[])
 {
-    FileData *fileData = fileServerInitConnect();
-    CHECK_NULL_PRINT_AND_RETURN_ERROR(fileData, "fileServerInitConnect");
+    Server *server = serverInitialize(FILE_METHOD);
+    CHECK_NULL_PRINT_AND_RETURN_ERROR(server, "serverInitialize");
 
-    ReturnValue result = fileClientInitConnect();
+    ClientCommunicationMethod *clientCM = clientCMethodSet(FILE_METHOD);
+    CHECK_NULL_PRINT_AND_RETURN_ERROR(clientCM, "serverCMethodSet");
+    ReturnValue result = clientCM->clientInitConnectionFunction();
     CHECK_ERROR_PRINT_AND_RETURN_ERROR(result, "fileClientInitConnect");
 
-    Message * msg = messageAllocate();
-    CHECK_NULL_RETURN_ERROR(msg);
+    // this would occur on another thread
+    serverListen(server);
 
-    fileListen(fileData, msg);
-    messageFree(msg);
-
-    result = fileServerCloseConnection(fileData);
-    CHECK_ERROR_PRINT_AND_RETURN_ERROR(result, "fileServerCloseConnection");
-
+    serverDisconnect(server);
 
     /* Ask user for desired communication method (present available, pick by number)
      * e.g. "For sockets, enter 0.\nFor file, enter 1.\n" */

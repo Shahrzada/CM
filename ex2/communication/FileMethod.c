@@ -77,7 +77,7 @@ static ReturnValue fileGetClientCommand(FILE *pFile, char *clientCommand, FileDa
     CHECK_NULL_RETURN_ERROR(fileData);
 
     // moving file pointer to the first unread char (that's why there's a +1)
-    int result = fseek(pFile, fileData->previousReadPosition + NEWLINE_CHAR_SIZE + 1, SEEK_SET);
+    int result = fseek(pFile, fileData->previousReadPosition + NEWLINE_CHAR_SIZE, SEEK_SET);
     CHECK_NON_ZERO_RETURN_ERROR(result);
 
     // fetch the total length of one client command
@@ -86,7 +86,7 @@ static ReturnValue fileGetClientCommand(FILE *pFile, char *clientCommand, FileDa
     CHECK_NULL_RETURN_ERROR(clientCommand);
 
     // moving file pointer back again to the first unread char (it moved because of the counting)
-    result = fseek(pFile, fileData->previousReadPosition + NEWLINE_CHAR_SIZE + 1, SEEK_SET);
+    result = fseek(pFile, fileData->previousReadPosition + NEWLINE_CHAR_SIZE, SEEK_SET);
     CHECK_NON_ZERO_RETURN_ERROR(result);
 
     // copying the command to our cString
@@ -203,13 +203,17 @@ ReturnValue fileListen(FileData  *fileData, Message *msg) {
     //              the server from main. same regarding sleep.
     while (true)
     {
-        sleep(1);
         stat(COMMUNICATION_FILE_NAME, &st);
         if (fileSize < st.st_size)
             return fileReadCommand(fileData, msg);
+        sleep(1);
     }
 }
 
 ReturnValue fileSend(Message *msg, Message *reply) {
+    return ERROR;
+}
+
+ReturnValue fileClientCloseConnect() {
     return ERROR;
 }

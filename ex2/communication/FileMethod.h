@@ -17,8 +17,8 @@
  ********************************************************************************/
 
 // ------------------------------ includes ------------------------------
-
 #include "Message.h"
+
 
 // -------------------------- const definitions -------------------------
 
@@ -31,5 +31,6 @@ typedef struct _FileData FileData;
 FileData *fileServerInitConnect();
 ReturnValue fileServerCloseConnection(FileData * fileData);
 ReturnValue fileClientInitConnect();
+ReturnValue fileClientCloseConnect();
 ReturnValue fileListen(FileData  *fileData, Message *msg);
 ReturnValue fileSend(Message * msg, Message * reply);

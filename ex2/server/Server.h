@@ -39,7 +39,9 @@ typedef struct _Server Server;
  */
 Server *serverInitialize(CommunicationMethodCode cMethod);
 
-ReturnValue serverKill(Server * server);
+void serverListen(Server * server);
+
+ReturnValue serverDisconnect(Server * server);
 
 /* These should be the only reachable functions, as the server works independently according
  * to client commands. */

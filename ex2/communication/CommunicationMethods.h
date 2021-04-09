@@ -18,20 +18,17 @@
 
 // ------------------------------ includes ------------------------------
 
-#include "FileMethod.h"
-#include "SocketMethod.h"
-/* This should be the only file (besides main due to input) that will
- * be edited after adding another communication method. */
+#include "Message.h"
 
 // -------------------------- const definitions -------------------------
 
 /* These are the "virtual functions" the communication methods must implement */
-typedef ReturnValue (server_init_connection_function_t)();
-typedef ReturnValue (server_close_connection_function_t)();
+typedef void *(server_init_connection_function_t)();
+typedef ReturnValue (server_close_connection_function_t)(void *);
 typedef ReturnValue (client_init_connection_function_t)();
 typedef ReturnValue (client_close_connection_function_t)();
-typedef ReturnValue (listen_function_t)(Message msg);
-typedef ReturnValue (send_function_t)(Message msg, Message reply);
+typedef ReturnValue (listen_function_t)(void*, Message *);
+typedef ReturnValue (send_function_t)(Message *, Message *);
 
 /* The program's server communication method struct */
 typedef struct {
@@ -47,10 +44,6 @@ typedef struct {
     client_close_connection_function_t *clientCloseConnectionFunction;
     send_function_t *sendFunction;
 } ClientCommunicationMethod;
-
-/* It is static because it should only be initialized once */
-static ServerCommunicationMethod serverCMethod;
-static ClientCommunicationMethod clientCMethod;
 
 // ------------------------------ functions -----------------------------
 
