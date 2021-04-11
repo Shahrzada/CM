@@ -2,6 +2,10 @@
 // ------------------------------ includes ------------------------------
 #include <unistd.h>
 #include <sys/stat.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "FileMethod.h"
 
 // -------------------------- const definitions -------------------------
@@ -11,11 +15,7 @@
 #define INIT_FILE_CLIENT_SUCCESS_MSG "[Client]: Connected successfully.\n"
 #define CLOSED_FILE_SUCCESS_MSG "[Server]: Closed the file successfully.\n"
 
-#define READ_STARTING_POSITION 76
-
-struct _FileData {
-    int previousReadPosition;
-};
+#define SERVER_READ_STARTING_POSITION 41
 
 // -------------------------- macros -------------------------
 
@@ -32,6 +32,8 @@ struct _FileData {
            } while(0)
 
 // ------------------------------ private functions -----------------------------
+
+static int serverPreviousReadPosition = 0;
 
 /* Returns total chars left from pFile position until EOF */
 static int fileGetTotalCharsFromFilePointer(FILE *pFile)
@@ -70,68 +72,54 @@ static int fileGetTotalCharsUntilEOFOrNextCommand(FILE * pFile)
     return count;
 }
 
-static ReturnValue fileGetClientCommand(FILE *pFile, char *clientCommand, FileData *fileData)
+static ReturnValue fileGetMessage(FILE *pFile, char *clientMsg)
 {
     CHECK_NULL_RETURN_ERROR(pFile);
-    CHECK_NULL_RETURN_ERROR(clientCommand);
-    CHECK_NULL_RETURN_ERROR(fileData);
+    CHECK_NULL_RETURN_ERROR(clientMsg);
 
     // moving file pointer to the first unread char (that's why there's a +1)
-    int result = fseek(pFile, fileData->previousReadPosition + NEWLINE_CHAR_SIZE, SEEK_SET);
+    int result = fseek(pFile, serverPreviousReadPosition + NEWLINE_CHAR_SIZE, SEEK_SET);
     CHECK_NON_ZERO_RETURN_ERROR(result);
 
     // fetch the total length of one client command
     int msgsLength = fileGetTotalCharsUntilEOFOrNextCommand(pFile);
-    clientCommand = (char *) realloc(clientCommand, sizeof(char) * (msgsLength + NULL_CHAR_SIZE));
-    CHECK_NULL_RETURN_ERROR(clientCommand);
+    clientMsg = (char *) realloc(clientMsg, sizeof(char) * (msgsLength + NULL_CHAR_SIZE));
+    CHECK_NULL_RETURN_ERROR(clientMsg);
 
     // moving file pointer back again to the first unread char (it moved because of the counting)
-    result = fseek(pFile, fileData->previousReadPosition + NEWLINE_CHAR_SIZE, SEEK_SET);
+    result = fseek(pFile, serverPreviousReadPosition + NEWLINE_CHAR_SIZE, SEEK_SET);
     CHECK_NON_ZERO_RETURN_ERROR(result);
 
     // copying the command to our cString
-    size_t totalCopiedChars = fread(clientCommand, sizeof(char), msgsLength, pFile);
+    size_t totalCopiedChars = fread(clientMsg, sizeof(char), msgsLength, pFile);
     if (totalCopiedChars != msgsLength)
         return ERROR;
 
     // making sure it is indeed a valid cString and updating the read position for next time
-    clientCommand[msgsLength] = NULL_CHAR;
-    fileData->previousReadPosition += msgsLength;
+    clientMsg[msgsLength] = NULL_CHAR;
+    serverPreviousReadPosition += msgsLength;
     return SUCCESS;
 }
 
-static ReturnValue fileReadCommand(FileData *fileData, Message *msg)
+static ReturnValue fileReceive(char *msg)
 {
-    CHECK_NULL_RETURN_ERROR(fileData);
     CHECK_NULL_RETURN_ERROR(msg);
 
     // open file for reading
-    FILE * pFile;
-    pFile = fopen(COMMUNICATION_FILE_NAME,"r");
+    FILE * pFile = fopen(COMMUNICATION_FILE_NAME, FILE_READ_MODE);
     CHECK_FILE_NULL_PRINT_OPEN_ERROR_GOTO_CLEANUP(pFile);
 
-    // get client command
-    char *clientCommand = (char *) malloc(sizeof(char));
-    ReturnValue result = fileGetClientCommand(pFile, clientCommand, fileData);
+    ReturnValue result = fileGetMessage(pFile, msg);
     fclose(pFile);
-    if (result == ERROR)
-        goto cStrCleanup;
-
-    result = messageFromCString(msg, clientCommand);
-    free(clientCommand);
     return result;
 
 cleanup:
     fclose(pFile);
     return ERROR;
-
-cStrCleanup:
-    free(clientCommand);
-    return ERROR;
 }
 // ------------------------------ functions -----------------------------
 
-FileData *fileServerInitConnect() {
+ReturnValue fileServerInitConnect() {
     // create and open the file
     FILE * pFile = fopen(COMMUNICATION_FILE_NAME,FILE_WRITE_UPDATE_MODE);
     CHECK_FILE_NULL_PRINT_OPEN_ERROR_GOTO_CLEANUP(pFile);
@@ -141,19 +129,15 @@ FileData *fileServerInitConnect() {
     CHECK_NEGATIVE_PRINT_WRITE_ERROR_GOTO_CLEANUP(result);
     fclose(pFile);
 
-    FileData *fileData = (FileData *) malloc(sizeof(FileData));
-    CHECK_NULL_RETURN_NULL(fileData);
-    fileData->previousReadPosition = READ_STARTING_POSITION;
-    return fileData;
+    serverPreviousReadPosition = SERVER_READ_STARTING_POSITION;
+    return SUCCESS;
 
 cleanup:
     fclose(pFile);
-    return NULL;
+    return ERROR;
 }
 
-ReturnValue fileServerCloseConnection(FileData * fileData) {
-    free(fileData);
-
+ReturnValue fileServerCloseConnection() {
     // open the file for appending
     FILE * pFile;
     pFile = fopen(COMMUNICATION_FILE_NAME,FILE_APPEND_MODE);
@@ -190,8 +174,7 @@ cleanup:
     return ERROR;
 }
 
-ReturnValue fileListen(FileData  *fileData, Message *msg) {
-    CHECK_NULL_RETURN_ERROR(fileData);
+ReturnValue fileListen(char *msg) {
     CHECK_NULL_RETURN_ERROR(msg);
 
     // stat helps us checking for new msgs without opening it (by the file's size)
@@ -205,12 +188,12 @@ ReturnValue fileListen(FileData  *fileData, Message *msg) {
     {
         stat(COMMUNICATION_FILE_NAME, &st);
         if (fileSize < st.st_size)
-            return fileReadCommand(fileData, msg);
+            return fileReceive(msg);
         sleep(1);
     }
 }
 
-ReturnValue fileSend(Message *msg, Message *reply) {
+ReturnValue fileSend(char *msg, char *reply) {
     return ERROR;
 }
 

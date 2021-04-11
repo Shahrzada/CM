@@ -18,15 +18,9 @@
 
 // ------------------------------ includes ------------------------------
 
-#include "../communication/CommunicationMethods.h"
+#include "../communication/Message.h"
 
 // -------------------------- const definitions -------------------------
-
-/*
- * ServerC represents a communication object for our server.
- */
-struct _Client;
-typedef struct _Client Client;
 
 
 // ------------------------------ functions -----------------------------
@@ -37,11 +31,11 @@ typedef struct _Client Client;
  * RETURN VALUE:
  * @return a pointer to the new client, or NULL if the initialization failed.
  */
-Client *clientInitialize(CommunicationMethodCode cMethod);
-ReturnValue clientKill(Client * client);
+ReturnValue clientInitialize(CommunicationMethodCode cMethod);
+ReturnValue clientKill();
 
 /* Request to send a command to the server, should return the server's reply
  * e.g. if sent 'read' then reply == whatever it read and msg SUCCESS.
  * e.g. if sent 'write' then msg will contain the msg to be sent, (it
  * shouldn't change) return SUCCESS. */
-ReturnValue clientSendCommand(Client * client, Command commandType, char * msg);
+ReturnValue clientSendCommand(Message *msg);

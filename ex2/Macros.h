@@ -59,6 +59,10 @@ typedef enum {
 
 #define CHECK_ERROR_RETURN_ERROR(number) do {if ((number) == ERROR) return ERROR;} while(0)
 #define CHECK_ERROR_RETURN_NULL(number) do {if ((number) == ERROR) return NULL;} while(0)
+#define CHECK_ERROR_RETURN(number) do {if ((number) == ERROR) return;} while(0)
 #define CHECK_ERROR_GOTO_CLEANUP(number) do {if ((number) == ERROR) goto cleanup;} while(0)
 
 
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>

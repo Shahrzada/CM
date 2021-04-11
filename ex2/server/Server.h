@@ -22,12 +22,6 @@
 
 // -------------------------- const definitions -------------------------
 
-/*
- * ServerC represents a communication object for our server.
- */
-struct _Server;
-typedef struct _Server Server;
-
 
 // ------------------------------ functions -----------------------------
 
@@ -37,11 +31,11 @@ typedef struct _Server Server;
  * RETURN VALUE:
  * @return a pointer to the new server, or NULL if the initialization failed.
  */
-Server *serverInitialize(CommunicationMethodCode cMethod);
+ReturnValue serverInitialize(CommunicationMethodCode cMethod);
 
-void serverListen(Server * server);
+void serverListen();
 
-ReturnValue serverDisconnect(Server * server);
+ReturnValue serverDisconnect();
 
 /* These should be the only reachable functions, as the server works independently according
  * to client commands. */

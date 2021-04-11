@@ -19,9 +19,9 @@ ReturnValue initServerFileCMethod()
     serverCMethod = (ServerCommunicationMethod *) malloc(sizeof(ServerCommunicationMethod));
     CHECK_NULL_RETURN_ERROR(serverCMethod);
 
-    serverCMethod->serverInitConnectionFunction = (void *(*)()) &fileServerInitConnect;
-    serverCMethod->serverCloseConnectionFunction = (ReturnValue (*)(void *)) fileServerCloseConnection;
-    serverCMethod->listenFunction = (ReturnValue (*)(void *, Message *)) fileListen;
+    serverCMethod->serverInitConnectionFunction = fileServerInitConnect;
+    serverCMethod->serverCloseConnectionFunction = fileServerCloseConnection;
+    serverCMethod->receiveFunction = fileListen;
     serverCMethod->sendFunction = fileSend;
 
     return SUCCESS;

@@ -18,23 +18,23 @@
 
 // ------------------------------ includes ------------------------------
 
-#include "Message.h"
+#include "../Macros.h"
 
 // -------------------------- const definitions -------------------------
 
 /* These are the "virtual functions" the communication methods must implement */
-typedef void *(server_init_connection_function_t)();
-typedef ReturnValue (server_close_connection_function_t)(void *);
+typedef ReturnValue (server_init_connection_function_t)();
+typedef ReturnValue (server_close_connection_function_t)();
 typedef ReturnValue (client_init_connection_function_t)();
 typedef ReturnValue (client_close_connection_function_t)();
-typedef ReturnValue (listen_function_t)(void*, Message *);
-typedef ReturnValue (send_function_t)(Message *, Message *);
+typedef ReturnValue (receive_function_t)(char *);
+typedef ReturnValue (send_function_t)(char *, char *);
 
 /* The program's server communication method struct */
 typedef struct {
     server_init_connection_function_t *serverInitConnectionFunction;
     server_close_connection_function_t *serverCloseConnectionFunction;
-    listen_function_t *listenFunction;
+    receive_function_t *receiveFunction;
     send_function_t *sendFunction;
 } ServerCommunicationMethod;
 

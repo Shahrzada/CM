@@ -17,20 +17,18 @@
  ********************************************************************************/
 
 // ------------------------------ includes ------------------------------
-#include "Message.h"
 
+#include "../Macros.h"
 
 // -------------------------- const definitions -------------------------
 
-struct _FileData;
-typedef struct _FileData FileData;
 
 
 // ------------------------------ functions -----------------------------
 
-FileData *fileServerInitConnect();
-ReturnValue fileServerCloseConnection(FileData * fileData);
+ReturnValue fileServerInitConnect();
+ReturnValue fileServerCloseConnection();
 ReturnValue fileClientInitConnect();
 ReturnValue fileClientCloseConnect();
-ReturnValue fileListen(FileData  *fileData, Message *msg);
-ReturnValue fileSend(Message * msg, Message * reply);
+ReturnValue fileListen(char *msg);
+ReturnValue fileSend(char *msg, char *reply);
