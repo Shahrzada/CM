@@ -1,6 +1,6 @@
 #include <unistd.h>
 #include "Server.h"
-#include "../communication/Message.h"
+#include "../communication/MessageProtocol.h"
 
 // -------------------------- const definitions -------------------------
 

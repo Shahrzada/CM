@@ -15,11 +15,6 @@
 
 // ------------------------------ includes ------------------------------
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "../Macros.h"
 
 // -------------------------- const definitions -------------------------
@@ -56,13 +51,3 @@ char *messageGetContents(Message * msg);
 char *messageToCString(Message * msg);
 ReturnValue messageFromCString(Message * msg, const char * cStr);
 //TODO think about how a msgs's char * will look like
-
-ReturnValue getServerCMethod(CommunicationMethodCode cMethod);
-ReturnValue getClientCMethod(CommunicationMethodCode cMethod);
-
-ReturnValue msgServerInitConnect(CommunicationMethodCode cMethod);
-ReturnValue msgServerCloseConnection();
-ReturnValue clientInitConnect(CommunicationMethodCode cMethod);
-ReturnValue clientCloseConnect();
-ReturnValue msgServerReceive(Message *msg);
-ReturnValue send(Message *msg, Message *reply);

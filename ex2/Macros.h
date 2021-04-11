@@ -62,7 +62,19 @@ typedef enum {
 #define CHECK_ERROR_RETURN(number) do {if ((number) == ERROR) return;} while(0)
 #define CHECK_ERROR_GOTO_CLEANUP(number) do {if ((number) == ERROR) goto cleanup;} while(0)
 
+#define CHECK_ERROR_PRINT_AND_RETURN_ERROR(result, function) do { \
+           if ((result) == ERROR) {                                 \
+                printf("Error with %s.\n", (function));             \
+                 return ERROR; }                                   \
+           } while(0)
+
+#define CHECK_NULL_PRINT_AND_RETURN_ERROR(result, function) do { \
+           if ((result) == NULL) {                                 \
+                printf("Error with %s.\n", (function));             \
+                 return ERROR; }                                   \
+           } while(0)
 
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>

@@ -1,13 +1,10 @@
 #pragma once
 
 /********************************************************************************
- * @brief The server class.
+ * @brief A message formatter.
  *
  *
  * @section DESCRIPTION
- *
- *
- *
  *
  * Error handling
  * ~~~~~~~~~~~~~~
@@ -18,24 +15,23 @@
 
 // ------------------------------ includes ------------------------------
 
-#include "../Macros.h."
+#include "Message.h"
 
 // -------------------------- const definitions -------------------------
 
 
+
 // ------------------------------ functions -----------------------------
 
-/**
- * @brief initializes the server given the connection method
- *
- * RETURN VALUE:
- * @return a pointer to the new server, or NULL if the initialization failed.
- */
-ReturnValue serverInitialize(CommunicationMethodCode cMethod);
+ReturnValue getServerCMethod(CommunicationMethodCode cMethod);
+ReturnValue getClientCMethod(CommunicationMethodCode cMethod);
 
-void serverListen();
+ReturnValue msgServerInitConnect(CommunicationMethodCode cMethod);
+ReturnValue msgServerCloseConnection();
 
-ReturnValue serverDisconnect();
+ReturnValue clientInitConnect(CommunicationMethodCode cMethod);
+ReturnValue clientCloseConnect();
 
-/* These should be the only reachable functions, as the server works independently according
- * to client commands. */
+ReturnValue msgServerReceive(Message *msg);
+
+ReturnValue send(Message *msg, Message *reply);

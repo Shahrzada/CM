@@ -9,6 +9,8 @@ add_executable(ex2
         ex2/Macros.h
         ex2/communication/Message.c
         ex2/communication/Message.h
+        ex2/communication/MessageProtocol.c
+        ex2/communication/MessageProtocol.h
         ex2/communication/FileMethod.c
         ex2/communication/FileMethod.h
         ex2/communication/SocketMethod.c
@@ -19,4 +21,4 @@ add_executable(ex2
         ex2/server/Server.h
         ex2/client/Client.c
         ex2/client/Client.h
-        ex2/Main.c)
+        ex2/server/ServerMain.c)

@@ -1,5 +1,6 @@
 #include "Client.h"
 
+#include "../communication/MessageProtocol.h"
 
 ReturnValue clientInitialize(CommunicationMethodCode cMethod)
 {
