@@ -18,7 +18,7 @@
 
 // ------------------------------ includes ------------------------------
 
-#include "../communication/Message.h"
+#include "../communicationProtocol/include/Message.h"
 
 // -------------------------- const definitions -------------------------
 

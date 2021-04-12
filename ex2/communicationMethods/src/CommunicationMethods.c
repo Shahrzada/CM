@@ -1,7 +1,7 @@
-#include "communicationMethods/include/CommunicationMethods.h"
+#include "../include/CommunicationMethods.h"
 
-#include "communicationMethods/include/FileMethod.h"
-#include "communicationMethods/include/SocketMethod.h"
+#include "../include/FileMethod.h"
+//#include "../include/SocketMethod.h"
 /* This should be the only file (besides main due to input) that will
  * be edited after adding another communicationMethods method. */
 

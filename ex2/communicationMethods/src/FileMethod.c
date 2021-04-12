@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "communicationMethods/include/FileMethod.h"
+#include "../include/FileMethod.h"
 
 // -------------------------- const definitions -------------------------
 

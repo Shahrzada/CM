@@ -1,6 +1,6 @@
 
-#include "communicationProtocol/include/MessageProtocol.h"
-#include "communicationMethods/include/CommunicationMethods.h"
+#include "../include/MessageProtocol.h"
+#include "../../communicationMethods/include/CommunicationMethods.h"
 
 
 static ServerCommunicationMethod *serverCMethod = NULL;

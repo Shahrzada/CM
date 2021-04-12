@@ -1,5 +1,4 @@
-#include "communicationProtocol/include/Message.h"
-#include "communicationMethods/include/CommunicationMethods.h"
+#include "../include/Message.h"
 
 #define CHECK_MESSAGE_NULL_RETURN_NULL(msg) do { \
            CHECK_NULL_RETURN_NULL(msg);\
@@ -19,6 +18,7 @@ struct _Message {
     char * contents;
     /* time stamp? */
 };
+
 
 Message *messageAllocate()
 {
