@@ -7,16 +7,16 @@ include_directories(ex2)
 
 add_executable(ex2
         ex2/Macros.h
-        ex2/communication/Message.c
-        ex2/communication/Message.h
-        ex2/communication/MessageProtocol.c
-        ex2/communication/MessageProtocol.h
-        ex2/communication/FileMethod.c
-        ex2/communication/FileMethod.h
-        ex2/communication/SocketMethod.c
-        ex2/communication/SocketMethod.h
-        ex2/communication/CommunicationMethods.c
-        ex2/communication/CommunicationMethods.h
+        ex2/communicationProtocol/src/Message.c
+        ex2/communicationProtocol/include/Message.h
+        ex2/communicationProtocol/src/MessageProtocol.c
+        ex2/communicationProtocol/include/MessageProtocol.h
+        ex2/communicationMethods/src/FileMethod.c
+        ex2/communicationMethods/include/FileMethod.h
+        ex2/communicationMethods/src/SocketMethod.c
+        ex2/communicationMethods/include/SocketMethod.h
+        ex2/communicationMethods/src/CommunicationMethods.c
+        ex2/communicationMethods/include/CommunicationMethods.h
         ex2/server/Server.c
         ex2/server/Server.h
         ex2/client/Client.c

@@ -1,5 +1,5 @@
-#include "Message.h"
-#include "CommunicationMethods.h"
+#include "communicationProtocol/include/Message.h"
+#include "communicationMethods/include/CommunicationMethods.h"
 
 #define CHECK_MESSAGE_NULL_RETURN_NULL(msg) do { \
            CHECK_NULL_RETURN_NULL(msg);\

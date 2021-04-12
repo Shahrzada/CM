@@ -23,9 +23,6 @@
 
 // ------------------------------ functions -----------------------------
 
-ReturnValue getServerCMethod(CommunicationMethodCode cMethod);
-ReturnValue getClientCMethod(CommunicationMethodCode cMethod);
-
 ReturnValue msgServerInitConnect(CommunicationMethodCode cMethod);
 ReturnValue msgServerCloseConnection();
 

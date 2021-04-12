@@ -1,19 +1,19 @@
 
-#include "MessageProtocol.h"
-#include "CommunicationMethods.h"
+#include "communicationProtocol/include/MessageProtocol.h"
+#include "communicationMethods/include/CommunicationMethods.h"
 
 
 static ServerCommunicationMethod *serverCMethod = NULL;
 static ClientCommunicationMethod *clientCMethod = NULL;
 
-ReturnValue getServerCMethod(CommunicationMethodCode cMethod)
+static ReturnValue getServerCMethod(CommunicationMethodCode cMethod)
 {
     serverCMethod = serverCMethodSet(cMethod);
     CHECK_NULL_RETURN_ERROR(serverCMethod);
     return SUCCESS;
 }
 
-ReturnValue getClientCMethodSet(CommunicationMethodCode cMethod)
+static ReturnValue getClientCMethodSet(CommunicationMethodCode cMethod)
 {
     clientCMethod = clientCMethodSet(cMethod);
     CHECK_NULL_RETURN_ERROR(clientCMethod);

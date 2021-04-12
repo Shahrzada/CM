@@ -1,9 +1,9 @@
-#include "CommunicationMethods.h"
+#include "communicationMethods/include/CommunicationMethods.h"
 
-#include "FileMethod.h"
-#include "SocketMethod.h"
+#include "communicationMethods/include/FileMethod.h"
+#include "communicationMethods/include/SocketMethod.h"
 /* This should be the only file (besides main due to input) that will
- * be edited after adding another communication method. */
+ * be edited after adding another communicationMethods method. */
 
 /* It is static because it should only be initialized once */
 static ServerCommunicationMethod *serverCMethod = NULL;

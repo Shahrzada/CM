@@ -1,7 +1,7 @@
 #pragma once
 
 /********************************************************************************
- * @brief The file communication method implementation.
+ * @brief The socket communicationMethods method implementation.
  *
  *
  * @section DESCRIPTION
@@ -18,17 +18,17 @@
 
 // ------------------------------ includes ------------------------------
 
-#include "../Macros.h"
+#include "communicationProtocol/include/Message.h"
 
 // -------------------------- const definitions -------------------------
 
 
-
 // ------------------------------ functions -----------------------------
 
-ReturnValue fileServerInitConnect();
-ReturnValue fileServerCloseConnection();
-ReturnValue fileClientInitConnect();
-ReturnValue fileClientCloseConnect();
-ReturnValue fileListen(char *msg);
-ReturnValue fileSend(char *msg, char *reply);
+ReturnValue socketServerConnect();
+ReturnValue socketServerClose();
+ReturnValue socketClientConnect();
+ReturnValue socketListen(Message * msg);
+ReturnValue socketSend(Message * msg, Message * reply);
+
+

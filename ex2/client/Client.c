@@ -7,7 +7,7 @@ ReturnValue clientInitialize(CommunicationMethodCode cMethod)
 //    Client * client;
     /* allocate memory for Client and initiate its params */
 //    ClientCommunicationMethod *clientCMethodSet(CommunicationMethodCode cMethod);
-    /* connect it via the communication method */
+    /* connect it via the communicationMethods method */
 //    ReturnValue result = client->clientCMethod->clientInitConnectionFunction();
 //    return client;
     return SUCCESS;
