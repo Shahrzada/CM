@@ -9,13 +9,20 @@
 
 static void serverRead()
 {
-    // send client all of a file's contents.
+    // Assuming we did some reading from somewhere
+
+    ReturnValue result = SUCCESS;
+    MPServerSendSuccessOrFailure(result);
 }
 
 static void serverWrite(char *msg)
 {
     CHECK_NULL_RETURN(msg);
-    // write messageGetContents(msg) to file and answer with success/failure.
+
+    // Assuming server wrote content to somewhere, and succeeded nice.
+
+    ReturnValue result = SUCCESS;
+    MPServerSendSuccessOrFailure(result);
 }
 
 static void serverHandleMessage(char *msg)
@@ -53,9 +60,10 @@ void serverListen()
     while (true)
     {
         char *incomingMsg = MPServerReceive();
-        if (incomingMsg == NULL || !messageValidateFormat(incomingMsg))
-            //todo maybe send error?
+        if (incomingMsg == NULL || !messageValidateFormat(incomingMsg)) {
+            perror("Bad incoming message");
             return;
+        }
         serverHandleMessage(incomingMsg);
         free(incomingMsg);
         sleep(1);

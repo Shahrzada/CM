@@ -19,7 +19,7 @@ ReturnValue initServerFileCMethod()
     serverCMethod->serverInitConnectionFunction = fileServerInitConnect;
     serverCMethod->serverCloseConnectionFunction = fileServerCloseConnection;
     serverCMethod->receiveFunction = fileListen;
-    serverCMethod->sendFunction = fileSend;
+    serverCMethod->sendFunction = fileServerSend;
 
     return SUCCESS;
 }
@@ -35,7 +35,7 @@ ReturnValue initClientFileCMethod()
 
     clientCMethod->clientInitConnectionFunction = fileClientInitConnect;
     clientCMethod->clientCloseConnectionFunction = fileClientCloseConnect;
-    clientCMethod->sendFunction = fileSend;
+    clientCMethod->sendFunction = fileClientSend;
 
     return SUCCESS;
 }

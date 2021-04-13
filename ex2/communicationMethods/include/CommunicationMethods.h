@@ -28,21 +28,22 @@ typedef ReturnValue (server_close_connection_function_t)();
 typedef ReturnValue (client_init_connection_function_t)();
 typedef ReturnValue (client_close_connection_function_t)();
 typedef char * (receive_function_t)();
-typedef char * (send_function_t)(char *);
+typedef ReturnValue (server_send_function_t)(char *);
+typedef char * (client_send_function_t)(char *);
 
 /* The program's server communicationMethods method struct */
 typedef struct {
     server_init_connection_function_t *serverInitConnectionFunction;
     server_close_connection_function_t *serverCloseConnectionFunction;
     receive_function_t *receiveFunction;
-    send_function_t *sendFunction;
+    server_send_function_t *sendFunction;
 } ServerCommunicationMethod;
 
 /* The program's client communicationMethods method struct */
 typedef struct {
     client_init_connection_function_t *clientInitConnectionFunction;
     client_close_connection_function_t *clientCloseConnectionFunction;
-    send_function_t *sendFunction;
+    client_send_function_t *sendFunction;
 } ClientCommunicationMethod;
 
 // ------------------------------ functions -----------------------------

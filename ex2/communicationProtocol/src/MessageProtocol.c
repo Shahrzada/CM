@@ -44,7 +44,19 @@ char *MPServerReceive()
 }
 
 
-char *MPSend(char *msg)
+ReturnValue MPServerSend(char *msg)
+{
+    CHECK_NULL_RETURN_ERROR(serverCMethod);
+    CHECK_NULL_RETURN_ERROR(msg);
+
+    if (!messageValidateFormat(msg))
+        return ERROR;
+
+    // use the communication method to send the msg
+    return serverCMethod->sendFunction(msg);
+}
+
+char *MPClientSend(char *msg)
 {
     CHECK_NULL_RETURN_NULL(clientCMethod);
     CHECK_NULL_RETURN_NULL(msg);
@@ -54,4 +66,12 @@ char *MPSend(char *msg)
 
     // use the communication method to send the msg
     return clientCMethod->sendFunction(msg);
+}
+
+void MPServerSendSuccessOrFailure(ReturnValue result)
+{
+    if (result == SUCCESS)
+        MPServerSend(SERVER_SUCCESS_MSG);
+    else if (result == ERROR)
+        MPServerSend(SERVER_FAILURE_MSG);
 }

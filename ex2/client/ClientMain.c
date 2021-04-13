@@ -1,4 +1,5 @@
 
+#include <unistd.h>
 #include "Client.h"
 
 int main(int argc, char const *argv[])

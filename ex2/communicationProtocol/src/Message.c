@@ -18,7 +18,8 @@ static bool messageValidateSender(Sender sender)
 
 static bool messageValidateCommand(Command command)
 {
-    return (command == READ || command == WRITE || command == ABORT);
+    return (command == READ || command == WRITE
+    || command == ABORT || command == REPLY);
 }
 
 // ------------------------------ functions -----------------------------

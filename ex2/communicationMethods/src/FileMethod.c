@@ -100,6 +100,9 @@ static char *fileGetMessage(FILE *pFile)
 
     // making sure it is indeed a valid cString
     msg[msgLength] = NULL_CHAR;
+
+    //todo:remove this
+    printf("Got this msg:\n%s\n", msg);
     return msg;
 
 cleanup:
@@ -175,12 +178,8 @@ ReturnValue fileClientInitConnect() {
     FILE * pFile;
     pFile = fopen(COMMUNICATION_FILE_NAME,FILE_APPEND_MODE);
     CHECK_FILE_NULL_PRINT_OPEN_ERROR_GOTO_CLEANUP(pFile);
-
-    // write init connection success msg
-    int result = fputs(INIT_FILE_CLIENT_SUCCESS_MSG, pFile);
-    CHECK_NEGATIVE_PRINT_WRITE_ERROR_GOTO_CLEANUP(result);
-
     fclose(pFile);
+
     isServer = false;
     return SUCCESS;
 
@@ -206,7 +205,7 @@ char *fileListen() {
     }
 }
 
-char *fileSend(char *msg) {
+ReturnValue fileServerSend(char *msg) {
     // open the file for appending
     FILE *pFile = fopen(COMMUNICATION_FILE_NAME,FILE_APPEND_MODE);
     CHECK_FILE_NULL_PRINT_OPEN_ERROR_GOTO_CLEANUP(pFile);
@@ -233,13 +232,17 @@ char *fileSend(char *msg) {
         clientPreviousReadPosition = position;
 
     fclose(pFile);
-
-    // wait until reply
-    return fileListen();
+    return SUCCESS;
 
 cleanup:
     fclose(pFile);
-    return NULL;
+    return ERROR;
+}
+
+char *fileClientSend(char *msg) {
+    ReturnValue result = fileServerSend(msg);
+    CHECK_ERROR_RETURN_NULL(result);
+    return fileListen();
 }
 
 ReturnValue fileClientCloseConnect() {

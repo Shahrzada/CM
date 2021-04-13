@@ -27,7 +27,7 @@ ReturnValue clientSendCommand(char *msg)
         return ERROR;
 
     // send the message and wait & get its reply
-    char *reply = MPSend(msg);
+    char *reply = MPClientSend(msg);
     ReturnValue result = handleReply(reply);
     free(reply);
     return result;

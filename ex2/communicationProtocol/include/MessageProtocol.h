@@ -30,4 +30,7 @@ ReturnValue MPClientInitConnection(CommunicationMethodCode cMethodCode);
 ReturnValue MPClientCloseConnection();
 
 char *MPServerReceive();
-char *MPSend(char *msg);
+ReturnValue MPServerSend(char *msg);
+void MPServerSendSuccessOrFailure(ReturnValue result);
+
+char *MPClientSend(char *msg);

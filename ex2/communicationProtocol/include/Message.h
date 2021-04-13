@@ -18,7 +18,8 @@
 #include "../../Macros.h"
 
 // -------------------------- macros -------------------------
-
+#define SERVER_SUCCESS_MSG "0,3,SUCCESS"
+#define SERVER_FAILURE_MSG "0,3,FAILURE"
 
 // ------------------------------ functions -----------------------------
 

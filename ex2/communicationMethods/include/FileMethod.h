@@ -31,4 +31,5 @@ ReturnValue fileServerCloseConnection();
 ReturnValue fileClientInitConnect();
 ReturnValue fileClientCloseConnect();
 char *fileListen();
-char *fileSend(char *msg) ;
+ReturnValue fileServerSend(char *msg);
+char *fileClientSend(char *msg);
