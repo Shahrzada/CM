@@ -38,7 +38,8 @@ char *messageSet(Sender sender, Command commandType, char * contents)
     msg[2] = (char)(commandType + '0');
     msg[3] = COMMA_CHAR;
 
-    char *pOutput = msg + MSG_FORMAT_LENGTH;
+    char *pOutput = msg;
+    pOutput += MSG_FORMAT_LENGTH;
     strncpy(pOutput, contents, contentsLength);
 
     msg[msgLength] = NULL_CHAR;
@@ -78,4 +79,10 @@ Command messageGetCommand(char *msg)
     if (msg == NULL || !messageValidateFormat(msg))
         return EMPTY_COMMAND;
     return msg[MSG_FORMAT_COMMAND_POSITION];
+}
+
+char *messageGetContents(char *msg)
+{
+    char *pMsg = msg;
+    return pMsg + MSG_FORMAT_LENGTH;
 }

@@ -2,20 +2,33 @@
 
 #include "../communicationProtocol/include/MessageProtocol.h"
 
+
 ReturnValue clientInitialize(CommunicationMethodCode cMethod)
 {
     return MPClientInitConnection(cMethod);
 }
 
+static ReturnValue handleReply(char *reply)
+{
+    if (reply == NULL || !messageValidateFormat(reply))
+        return ERROR;
+
+    // there's nothing really I should check here atm, maybe will check
+    // for success in the future.
+    char *pointerToMsg = messageGetContents(reply);
+    printf("Client received: %s.\n", pointerToMsg);
+
+    return SUCCESS;
+}
+
 ReturnValue clientSendCommand(char *msg)
 {
-    CHECK_NULL_RETURN_ERROR(msg);
+    if (msg == NULL || !messageValidateFormat(msg))
+        return ERROR;
 
+    // send the message and wait & get its reply
     char *reply = MPSend(msg);
-    CHECK_NULL_RETURN_ERROR(reply);
-
-    //todo: do something with reply
-
+    ReturnValue result = handleReply(reply);
     free(reply);
-    return SUCCESS;
+    return result;
 }

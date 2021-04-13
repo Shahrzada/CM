@@ -20,6 +20,7 @@ typedef enum {
     READ = 0,
     WRITE,
     ABORT,
+    REPLY,
 } Command;
 
 /* Sender types */

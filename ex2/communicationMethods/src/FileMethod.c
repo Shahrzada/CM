@@ -82,7 +82,7 @@ static char *fileGetMessage(FILE *pFile)
         previousReadPosition = serverPreviousReadPosition;
 
     // moving file pointer to the first unread char
-    int result = fseek(pFile, previousReadPosition + NEWLINE_CHAR_SIZE, SEEK_SET);
+    int result = fseek(pFile, previousReadPosition + NEWLINE_CHAR_SIZE + NEWLINE_CHAR_SIZE, SEEK_SET);
     CHECK_NON_ZERO_RETURN_NULL(result);
 
     // fetch the total length of chars until EOF or EOL
@@ -91,7 +91,7 @@ static char *fileGetMessage(FILE *pFile)
     CHECK_NULL_RETURN_NULL(msg);
 
     // moving file pointer back again to the first unread char
-    result = fseek(pFile, previousReadPosition + NEWLINE_CHAR_SIZE, SEEK_SET);
+    result = fseek(pFile, previousReadPosition + NEWLINE_CHAR_SIZE + NEWLINE_CHAR_SIZE, SEEK_SET);
     if (result != 0)
         goto cleanup;
 
@@ -206,6 +206,9 @@ char *fileSend(char *msg) {
     // write wanted msg
     int writingResult = fputs(msg, pFile);
     CHECK_NEGATIVE_PRINT_WRITE_ERROR_GOTO_CLEANUP(writingResult);
+
+    writingResult = fputs("\n", pFile);
+    CHECK_NEGATIVE_PRINT_WRITE_ERROR_GOTO_CLEANUP(writingResult);
     fclose(pFile);
 
     // update position for future listening/reading
@@ -219,7 +222,7 @@ char *fileSend(char *msg) {
     if (isServer)
         serverPreviousReadPosition = position;
     else
-        clientPreviousReadPosition = position + NULL_CHAR_SIZE;
+        clientPreviousReadPosition = position;
 
     fclose(pFile);
 
