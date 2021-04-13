@@ -53,7 +53,9 @@ void serverListen()
     while (true)
     {
         char *incomingMsg = MPServerReceive();
-        CHECK_NULL_RETURN(incomingMsg);
+        if (incomingMsg == NULL || !messageValidateFormat(incomingMsg))
+            //todo maybe send error?
+            return;
         serverHandleMessage(incomingMsg);
         free(incomingMsg);
         sleep(1);

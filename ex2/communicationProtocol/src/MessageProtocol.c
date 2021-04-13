@@ -18,6 +18,7 @@ ReturnValue MPServerCloseConnection()
 {
     ReturnValue result = serverCMethod->serverCloseConnectionFunction();
     free(serverCMethod);
+    serverCMethod = NULL;
     return result;
 }
 
@@ -38,6 +39,7 @@ ReturnValue MPClientCloseConnection()
 
 char *MPServerReceive()
 {
+    CHECK_NULL_RETURN_NULL(serverCMethod);
     return serverCMethod->receiveFunction();
 }
 

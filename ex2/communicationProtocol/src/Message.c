@@ -71,14 +71,14 @@ Sender messageGetSender(char *msg)
 {
     if (msg == NULL || !messageValidateFormat(msg))
         return EMPTY_SENDER;
-    return msg[MSG_FORMAT_SENDER_POSITION];
+    return msg[MSG_FORMAT_SENDER_POSITION] - ZERO_CHAR;
 }
 
 Command messageGetCommand(char *msg)
 {
     if (msg == NULL || !messageValidateFormat(msg))
         return EMPTY_COMMAND;
-    return msg[MSG_FORMAT_COMMAND_POSITION];
+    return msg[MSG_FORMAT_COMMAND_POSITION] - ZERO_CHAR;
 }
 
 char *messageGetContents(char *msg)

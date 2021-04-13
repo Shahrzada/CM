@@ -16,8 +16,6 @@
 #define CLOSED_FILE_SUCCESS_MSG "[Server]: Closed the file successfully.\n"
 #define CLOSED_FILE_CLIENT_SUCCESS_MSG "[Client]: Closed the file successfully.\n"
 
-#define SERVER_READ_STARTING_POSITION 41
-
 // -------------------------- macros -------------------------
 
 #define CHECK_FILE_NULL_PRINT_OPEN_ERROR_GOTO_CLEANUP(pFile) do { \
@@ -77,12 +75,12 @@ static char *fileGetMessage(FILE *pFile)
 {
     CHECK_NULL_RETURN_NULL(pFile);
 
-    int previousReadPosition = clientPreviousReadPosition;
+    int previousReadPosition = clientPreviousReadPosition + NULL_CHAR_SIZE;
     if (isServer)
         previousReadPosition = serverPreviousReadPosition;
 
     // moving file pointer to the first unread char
-    int result = fseek(pFile, previousReadPosition + NEWLINE_CHAR_SIZE + NEWLINE_CHAR_SIZE, SEEK_SET);
+    int result = fseek(pFile, previousReadPosition + NEWLINE_CHAR_SIZE, SEEK_SET);
     CHECK_NON_ZERO_RETURN_NULL(result);
 
     // fetch the total length of chars until EOF or EOL
@@ -91,7 +89,7 @@ static char *fileGetMessage(FILE *pFile)
     CHECK_NULL_RETURN_NULL(msg);
 
     // moving file pointer back again to the first unread char
-    result = fseek(pFile, previousReadPosition + NEWLINE_CHAR_SIZE + NEWLINE_CHAR_SIZE, SEEK_SET);
+    result = fseek(pFile, previousReadPosition + NEWLINE_CHAR_SIZE, SEEK_SET);
     if (result != 0)
         goto cleanup;
 
@@ -136,7 +134,17 @@ ReturnValue fileServerInitConnect() {
     CHECK_NEGATIVE_PRINT_WRITE_ERROR_GOTO_CLEANUP(result);
     fclose(pFile);
 
-    serverPreviousReadPosition = SERVER_READ_STARTING_POSITION;
+    // update position for future listening/reading
+    pFile = fopen(COMMUNICATION_FILE_NAME,FILE_READ_MODE);
+    CHECK_FILE_NULL_PRINT_OPEN_ERROR_GOTO_CLEANUP(pFile);
+
+    int position = fileGetTotalCharsFromFilePointer(pFile);
+    if (position == 0)
+        goto cleanup;
+
+    fclose(pFile);
+    serverPreviousReadPosition = position;
+
     return SUCCESS;
 
 cleanup:
