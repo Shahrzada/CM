@@ -16,9 +16,6 @@ ReturnValue initServerSocketCMethod()
 
 ReturnValue initServerFileCMethod()
 {
-    serverCMethod = (ServerCommunicationMethod *) malloc(sizeof(ServerCommunicationMethod));
-    CHECK_NULL_RETURN_ERROR(serverCMethod);
-
     serverCMethod->serverInitConnectionFunction = fileServerInitConnect;
     serverCMethod->serverCloseConnectionFunction = fileServerCloseConnection;
     serverCMethod->receiveFunction = fileListen;
@@ -34,7 +31,6 @@ ReturnValue initClientSocketCMethod()
 
 ReturnValue initClientFileCMethod()
 {
-    clientCMethod = (ClientCommunicationMethod *) malloc(sizeof(ClientCommunicationMethod));
     CHECK_NULL_RETURN_ERROR(clientCMethod);
 
     clientCMethod->clientInitConnectionFunction = fileClientInitConnect;
@@ -47,8 +43,13 @@ ReturnValue initClientFileCMethod()
 // if serverCMethod is null then allocate and set it, ow return the existing one
 ServerCommunicationMethod *serverCMethodSet(CommunicationMethodCode cMethod)
 {
-    ReturnValue result = 0;
+    if (serverCMethod != NULL)
+        return serverCMethod;
 
+    serverCMethod = (ServerCommunicationMethod *) malloc(sizeof(ServerCommunicationMethod));
+    CHECK_NULL_RETURN_NULL(serverCMethod);
+
+    ReturnValue result = ERROR;
     if (cMethod == SOCKET_METHOD)
     {
         result = initServerSocketCMethod();
@@ -57,15 +58,24 @@ ServerCommunicationMethod *serverCMethodSet(CommunicationMethodCode cMethod)
     {
         result = initServerFileCMethod();
     }
-
-    CHECK_ERROR_RETURN_NULL(result);
+    CHECK_ERROR_GOTO_CLEANUP(result);
     return serverCMethod;
+
+cleanup:
+    free(serverCMethod);
+    return NULL;
 }
 
 // if clientCMethod is null then allocate and set it, ow return the existing one
 ClientCommunicationMethod *clientCMethodSet(CommunicationMethodCode cMethod)
 {
-    ReturnValue result = 0;
+    if (clientCMethod != NULL)
+        return clientCMethod;
+
+    clientCMethod = (ClientCommunicationMethod *) malloc(sizeof(ClientCommunicationMethod));
+    CHECK_NULL_RETURN_NULL(clientCMethod);
+
+    ReturnValue result = ERROR;
     if (cMethod == SOCKET_METHOD)
     {
         result = initClientSocketCMethod();
@@ -75,7 +85,10 @@ ClientCommunicationMethod *clientCMethodSet(CommunicationMethodCode cMethod)
         result = initClientFileCMethod();
     }
 
-    CHECK_ERROR_RETURN_NULL(result);
+    CHECK_ERROR_GOTO_CLEANUP(result);
     return clientCMethod;
 
+cleanup:
+    free(clientCMethod);
+    return NULL;
 }

@@ -19,35 +19,17 @@
 
 // -------------------------- const definitions -------------------------
 
-/*
- * Message represents our format for communicating.
- */
-struct _Message;
-typedef struct _Message Message;
-
 
 // ------------------------------ functions -----------------------------
 
-/**
- * @brief allocates a new msg.
- *
- * RETURN VALUE:
- * @return a pointer to the new msg, or NULL if the allocation failed.
- */
-Message *messageAllocate();
-void messageFree(Message * msg);
 
-// setter
-ReturnValue messageSet(Message * msg, Command commandType, Sender sender,
-                        unsigned int length, char * contents);
+// setters
+char * messageSet(Sender sender, Command commandType, char *contents);
+char *messageSetEmpty();
+bool messageValidateFormat(char *msg);
 
 // getters
-Command messageGetCommand(Message * msg);
-Sender messageGetSender(Message * msg);
-unsigned int messageGetLength(Message * msg);
-char *messageGetContents(Message * msg);
-
-//  char *   <-->  msg
-char *messageToCString(Message * msg);
-ReturnValue messageFromCString(Message * msg, const char * cStr);
-//TODO think about how a msgs's char * will look like
+Command messageGetCommand(char *msg);
+Sender messageGetSender(char *msg);
+unsigned int messageGetLength(char *msg);
+char *messageGetContents(char *msg);

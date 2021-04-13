@@ -25,4 +25,4 @@ add_executable(ex2
         ex2/client/Client.c
         ex2/client/Client.h
 
-        ex2/server/ServerMain.c)
+        ex2/client/ClientMain.c)

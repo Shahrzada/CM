@@ -45,7 +45,7 @@ int main(int argc, char const *argv[])
 
     if (listen(server_fd, 3) < 0)
     {
-        perror("msgServerReceive");
+        perror("MPServerReceive");
         exit(EXIT_FAILURE);
     }
 

@@ -1,85 +1,81 @@
+
+// ------------------------------ includes ------------------------------
+
 #include "../include/Message.h"
 
-#define CHECK_MESSAGE_NULL_RETURN_NULL(msg) do { \
-           CHECK_NULL_RETURN_NULL(msg);\
-           CHECK_NULL_RETURN_NULL(msg->contents);\
-           } while(0)
+// -------------------------- macros -------------------------
 
-#define CHECK_MESSAGE_NULL_RETURN_ERROR(msg) do { \
-           CHECK_NULL_RETURN_ERROR(msg);\
-           CHECK_NULL_RETURN_ERROR(msg->contents);\
-           } while(0)
+#define MSG_FORMAT_LENGTH 4
+#define MSG_FORMAT_SENDER_POSITION 0
+#define MSG_FORMAT_COMMAND_POSITION 2
 
+// ------------------------------ private functions -----------------------------
 
-struct _Message {
-    Command commandType;
-    Sender sender;
-    unsigned int length;
-    char * contents;
-    /* time stamp? */
-};
-
-
-Message *messageAllocate()
+static bool messageValidateSender(Sender sender)
 {
-    Message *msg = (Message *) malloc(sizeof(Message));
+    return (sender == SERVER || sender == CLIENT);
+}
+
+static bool messageValidateCommand(Command command)
+{
+    return (command == READ || command == WRITE || command == ABORT);
+}
+
+// ------------------------------ functions -----------------------------
+
+char *messageSet(Sender sender, Command commandType, char * contents)
+{
+    CHECK_NULL_RETURN_NULL(contents);
+
+    int contentsLength = (int)strlen(contents);
+    int msgLength = contentsLength + MSG_FORMAT_LENGTH;
+
+    char *msg = (char *) malloc(sizeof(char)*msgLength);
     CHECK_NULL_RETURN_NULL(msg);
-    msg->contents = (char *) malloc(sizeof(char));
-    CHECK_NULL_GOTO_CLEANUP(msg->contents);
-    msg->commandType = EMPTY_COMMAND;
-    msg->sender = EMPTY_SENDER;
-    msg->length = 0;
+
+    msg[0] = (char)(sender + '0');
+    msg[1] = COMMA_CHAR;
+    msg[2] = (char)(commandType + '0');
+    msg[3] = COMMA_CHAR;
+
+    char *pOutput = msg + MSG_FORMAT_LENGTH;
+    strncpy(pOutput, contents, contentsLength);
+
+    msg[msgLength] = NULL_CHAR;
     return msg;
-
-cleanup:
-    free(msg);
-    return NULL;
 }
 
-void messageFree(Message * msg)
+char *messageSetEmpty()
 {
-    CHECK_NULL_RETURN(msg);
-    if (msg->contents != NULL)
-        free(msg->contents);
-    free(msg);
+    return messageSet(EMPTY_SENDER, EMPTY_COMMAND, "");
 }
 
-ReturnValue messageSet(Message * msg, Command commandType, Sender sender,
-                        unsigned int length, char * contents)
-{
-    CHECK_MESSAGE_NULL_RETURN_ERROR(msg);
-    CHECK_NULL_RETURN_ERROR(contents);
-    free(msg->contents);
+bool messageValidateFormat(char *msg) {
+    CHECK_NULL_RETURN_FALSE(msg);
 
-    msg->commandType = commandType;
-    msg->sender = sender;
-    msg->length = length;
-    msg->contents = contents;
-    return SUCCESS;
+    unsigned int msgLength = strlen(msg);
+    if (msgLength < MSG_FORMAT_LENGTH)
+        return false;
+
+    if (!messageValidateSender(msg[MSG_FORMAT_SENDER_POSITION] - ZERO_CHAR))
+        return false;
+
+    if (!messageValidateCommand(msg[MSG_FORMAT_COMMAND_POSITION] - ZERO_CHAR))
+        return false;
+
+    return true;
 }
 
-Command messageGetCommand(Message * msg)
+Sender messageGetSender(char *msg)
 {
-    if (msg == NULL)
-    {
+    if (msg == NULL || !messageValidateFormat(msg))
+        return EMPTY_SENDER;
+    return msg[MSG_FORMAT_SENDER_POSITION];
+}
+
+Command messageGetCommand(char *msg)
+{
+    if (msg == NULL || !messageValidateFormat(msg))
         return EMPTY_COMMAND;
-    }
-    return msg->commandType;
-}
-
-ReturnValue messageFromCString(Message * msg, const char * cStr)
-{
-    CHECK_MESSAGE_NULL_RETURN_ERROR(msg);
-    CHECK_NULL_RETURN_ERROR(cStr);
-
-    unsigned int contentsLength = strlen(cStr) + NULL_CHAR_SIZE;
-    char * contents = (char *) malloc(sizeof(char)*contentsLength);
-    CHECK_NULL_RETURN_ERROR(contents);
-    return SUCCESS;
-}
-
-char *messageToCString(Message * msg)
-{
-    CHECK_NULL_RETURN_NULL(msg);
-    return "";
+    return msg[MSG_FORMAT_COMMAND_POSITION];
 }

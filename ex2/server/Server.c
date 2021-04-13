@@ -12,13 +12,13 @@ static void serverRead()
     // send client all of a file's contents.
 }
 
-static void serverWrite(Message * msg)
+static void serverWrite(char *msg)
 {
     CHECK_NULL_RETURN(msg);
     // write messageGetContents(msg) to file and answer with success/failure.
 }
 
-static void serverHandleMessage(Message * msg)
+static void serverHandleMessage(char *msg)
 {
     CHECK_NULL_RETURN(msg);
 
@@ -44,26 +44,23 @@ static void serverHandleMessage(Message * msg)
 
 ReturnValue serverInitialize(CommunicationMethodCode cMethod)
 {
-    return msgServerInitConnect(cMethod);
+    return MPServerInitConnection(cMethod);
 }
 
 void serverListen()
 {
-    ReturnValue result = ERROR;
     // todo: until client sends abort?
     while (true)
     {
-        Message * msg = messageAllocate();
-        CHECK_NULL_RETURN(msg); // todo: print error
-        result = msgServerReceive(msg);
-        CHECK_ERROR_RETURN(result);
-        serverHandleMessage(msg);
-        messageFree(msg);
+        char *incomingMsg = MPServerReceive();
+        CHECK_NULL_RETURN(incomingMsg);
+        serverHandleMessage(incomingMsg);
+        free(incomingMsg);
         sleep(1);
     }
 }
 
 ReturnValue serverDisconnect()
 {
-    return msgServerCloseConnection();
+    return MPServerCloseConnection();
 }

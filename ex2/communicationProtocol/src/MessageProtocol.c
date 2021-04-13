@@ -6,64 +6,50 @@
 static ServerCommunicationMethod *serverCMethod = NULL;
 static ClientCommunicationMethod *clientCMethod = NULL;
 
-static ReturnValue getServerCMethod(CommunicationMethodCode cMethod)
-{
-    serverCMethod = serverCMethodSet(cMethod);
-    CHECK_NULL_RETURN_ERROR(serverCMethod);
-    return SUCCESS;
-}
 
-static ReturnValue getClientCMethodSet(CommunicationMethodCode cMethod)
+ReturnValue MPServerInitConnection(CommunicationMethodCode cMethodCode)
 {
-    clientCMethod = clientCMethodSet(cMethod);
-    CHECK_NULL_RETURN_ERROR(clientCMethod);
-    return SUCCESS;
-}
-
-ReturnValue msgServerInitConnect(CommunicationMethodCode cMethod)
-{
-    getServerCMethod(cMethod);
+    serverCMethod = serverCMethodSet(cMethodCode);
     CHECK_NULL_RETURN_ERROR(serverCMethod);
     return serverCMethod->serverInitConnectionFunction();
 }
 
-ReturnValue msgServerCloseConnection()
+ReturnValue MPServerCloseConnection()
 {
-    return serverCMethod->serverCloseConnectionFunction();
-}
-
-ReturnValue clientInitConnect(CommunicationMethodCode cMethod)
-{
-    return ERROR;
-}
-
-ReturnValue clientCloseConnect()
-{
-    return ERROR;
-}
-
-
-ReturnValue msgServerReceive(Message *msg)
-{
-    CHECK_NULL_RETURN_ERROR(msg);
-
-    char * incomingMsg = (char *) malloc(sizeof(char));
-    CHECK_NULL_RETURN_ERROR(incomingMsg);
-
-    ReturnValue result = serverCMethod->receiveFunction(incomingMsg);
-    CHECK_ERROR_GOTO_CLEANUP(result);
-
-    result = messageFromCString(msg, incomingMsg);
-    free(incomingMsg);
+    ReturnValue result = serverCMethod->serverCloseConnectionFunction();
+    free(serverCMethod);
     return result;
+}
 
-    cleanup:
-    free(incomingMsg);
-    return ERROR;
+ReturnValue MPClientInitConnection(CommunicationMethodCode cMethodCode)
+{
+    clientCMethod = clientCMethodSet(cMethodCode);
+    CHECK_NULL_RETURN_ERROR(clientCMethod);
+    return clientCMethod->clientInitConnectionFunction();
+}
+
+ReturnValue MPClientCloseConnection()
+{
+    ReturnValue result = clientCMethod->clientCloseConnectionFunction();
+    free(clientCMethod);
+    return result;
 }
 
 
-ReturnValue send(Message *msg, Message *reply)
+char *MPServerReceive()
 {
-    return ERROR;
+    return serverCMethod->receiveFunction();
+}
+
+
+char *MPSend(char *msg)
+{
+    CHECK_NULL_RETURN_NULL(clientCMethod);
+    CHECK_NULL_RETURN_NULL(msg);
+
+    if (!messageValidateFormat(msg))
+        return NULL;
+
+    // use the communication method to send the msg
+    return clientCMethod->sendFunction(msg);
 }

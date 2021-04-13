@@ -32,11 +32,13 @@ typedef enum {
 
 // -------------------------- macros -------------------------
 
-#define NULL_CHAR '\0'
 #define QUOTATION_MARK_CHAR_ASCII_DEC_VALUE 34
 #define APOSTROPHE_CHAR_ASCII_DEC_VALUE 39
 #define EOL_CHAR_ASCII_DEC_VALUE 10
+#define NULL_CHAR '\0'
 #define NEWLINE_CHAR '\n'
+#define COMMA_CHAR ','
+#define ZERO_CHAR '0'
 
 #define NULL_CHAR_SIZE 1
 #define NEWLINE_CHAR_SIZE 1
@@ -44,11 +46,13 @@ typedef enum {
 #define FILE_READ_MODE "r"
 #define FILE_WRITE_UPDATE_MODE "w+"
 #define FILE_APPEND_MODE "a"
+#define FILE_APPEND_AND_READ_MODE "a+"
 
 // -------------------------- macro functions -------------------------
 
 #define CHECK_NULL_RETURN_NULL(pointer) do {if ((pointer) == NULL) return NULL;} while(0)
 #define CHECK_NULL_RETURN_ERROR(pointer) do {if ((pointer) == NULL) return ERROR;} while(0)
+#define CHECK_NULL_RETURN_FALSE(pointer) do {if ((pointer) == NULL) return false;} while(0)
 #define CHECK_NULL_RETURN(pointer) do {if ((pointer) == NULL) return;} while(0)
 #define CHECK_NULL_RETURN_ZERO(pointer) do {if ((pointer) == NULL) return 0;} while(0)
 #define CHECK_NULL_GOTO_CLEANUP(pointer) do {if ((pointer) == NULL) goto cleanup;} while(0)

@@ -4,20 +4,18 @@
 
 ReturnValue clientInitialize(CommunicationMethodCode cMethod)
 {
-//    Client * client;
-    /* allocate memory for Client and initiate its params */
-//    ClientCommunicationMethod *clientCMethodSet(CommunicationMethodCode cMethod);
-    /* connect it via the communicationMethods method */
-//    ReturnValue result = client->clientCMethod->clientInitConnectionFunction();
-//    return client;
-    return SUCCESS;
+    return MPClientInitConnection(cMethod);
 }
 
-ReturnValue clientSendCommand(Message *msg)
+ReturnValue clientSendCommand(char *msg)
 {
-//    Message *message = clientCreateMessageFromCommand(commandType, msg);
-//    Message *reply;
-//    ReturnValue result = client->clientCMethod->sendFunction(message, reply);
-//    clientGenerateReplyToUser(msg, reply);
+    CHECK_NULL_RETURN_ERROR(msg);
+
+    char *reply = MPSend(msg);
+    CHECK_NULL_RETURN_ERROR(reply);
+
+    //todo: do something with reply
+
+    free(reply);
     return SUCCESS;
 }

@@ -28,7 +28,7 @@
 ReturnValue socketServerConnect();
 ReturnValue socketServerClose();
 ReturnValue socketClientConnect();
-ReturnValue socketListen(Message * msg);
-ReturnValue socketSend(Message * msg, Message * reply);
+ReturnValue socketListen(char* msg);
+ReturnValue socketSend(char *msg, char *reply);
 
 

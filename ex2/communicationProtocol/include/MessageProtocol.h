@@ -23,12 +23,11 @@
 
 // ------------------------------ functions -----------------------------
 
-ReturnValue msgServerInitConnect(CommunicationMethodCode cMethod);
-ReturnValue msgServerCloseConnection();
+ReturnValue MPServerInitConnection(CommunicationMethodCode cMethodCode);
+ReturnValue MPServerCloseConnection();
 
-ReturnValue clientInitConnect(CommunicationMethodCode cMethod);
-ReturnValue clientCloseConnect();
+ReturnValue MPClientInitConnection(CommunicationMethodCode cMethodCode);
+ReturnValue MPClientCloseConnection();
 
-ReturnValue msgServerReceive(Message *msg);
-
-ReturnValue send(Message *msg, Message *reply);
+char *MPServerReceive();
+char *MPSend(char *msg);

@@ -32,10 +32,10 @@
  * @return a pointer to the new client, or NULL if the initialization failed.
  */
 ReturnValue clientInitialize(CommunicationMethodCode cMethod);
-ReturnValue clientKill();
+ReturnValue clientClose();
 
 /* Request to send a command to the server, should return the server's reply
  * e.g. if sent 'read' then reply == whatever it read and msg SUCCESS.
  * e.g. if sent 'write' then msg will contain the msg to be sent, (it
  * shouldn't change) return SUCCESS. */
-ReturnValue clientSendCommand(Message *msg);
+ReturnValue clientSendCommand(char *msg);
