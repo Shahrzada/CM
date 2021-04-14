@@ -27,10 +27,10 @@
 // setters
 char * messageSet(Sender sender, Command commandType, char *contents);
 char *messageSetEmpty();
-bool messageValidateFormat(char *msg);
+bool messageValidateFormat(const char *msg);
 
 // getters
-Command messageGetCommand(char *msg);
-Sender messageGetSender(char *msg);
-unsigned int messageGetLength(char *msg);
-char *messageGetContents(char *msg);
+Command messageGetCommand(const char *msg);
+Sender messageGetSender(const char *msg);
+unsigned int messageGetLength(const char *msg);
+const char *messageGetContents(const char *msg);

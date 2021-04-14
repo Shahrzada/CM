@@ -38,4 +38,4 @@ ReturnValue clientClose();
  * e.g. if sent 'read' then reply == whatever it read and msg SUCCESS.
  * e.g. if sent 'write' then msg will contain the msg to be sent, (it
  * shouldn't change) return SUCCESS. */
-ReturnValue clientSendCommand(char *msg);
+ReturnValue clientSendCommand(const char *msg);

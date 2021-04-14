@@ -5,17 +5,17 @@
 /* This should be the only file (besides main due to input) that will
  * be edited after adding another communicationMethods method. */
 
-/* It is static because it should only be initialized once */
-static ServerCommunicationMethod *serverCMethod = NULL;
-static ClientCommunicationMethod *clientCMethod = NULL;
-
-ReturnValue initServerSocketCMethod()
+ReturnValue initServerSocketCMethod(ServerCommunicationMethod *serverCMethod)
 {
-    return (ReturnValue) NULL;
+    CHECK_NULL_RETURN_ERROR(serverCMethod);
+
+    return SUCCESS;
 }
 
-ReturnValue initServerFileCMethod()
+ReturnValue initServerFileCMethod(ServerCommunicationMethod *serverCMethod)
 {
+    CHECK_NULL_RETURN_ERROR(serverCMethod);
+
     serverCMethod->serverInitConnectionFunction = fileServerInitConnect;
     serverCMethod->serverCloseConnectionFunction = fileServerCloseConnection;
     serverCMethod->receiveFunction = fileListen;
@@ -24,12 +24,14 @@ ReturnValue initServerFileCMethod()
     return SUCCESS;
 }
 
-ReturnValue initClientSocketCMethod()
+ReturnValue initClientSocketCMethod(ClientCommunicationMethod *clientCMethod)
 {
-    return (ReturnValue) NULL;
+    CHECK_NULL_RETURN_ERROR(clientCMethod);
+
+    return SUCCESS;
 }
 
-ReturnValue initClientFileCMethod()
+ReturnValue initClientFileCMethod(ClientCommunicationMethod *clientCMethod)
 {
     CHECK_NULL_RETURN_ERROR(clientCMethod);
 
@@ -43,20 +45,17 @@ ReturnValue initClientFileCMethod()
 // if serverCMethod is null then allocate and set it, ow return the existing one
 ServerCommunicationMethod *serverCMethodSet(CommunicationMethodCode cMethod)
 {
-    if (serverCMethod != NULL)
-        return serverCMethod;
-
-    serverCMethod = (ServerCommunicationMethod *) malloc(sizeof(ServerCommunicationMethod));
+    ServerCommunicationMethod *serverCMethod = (ServerCommunicationMethod *) malloc(sizeof(ServerCommunicationMethod));
     CHECK_NULL_RETURN_NULL(serverCMethod);
 
     ReturnValue result = ERROR;
     if (cMethod == SOCKET_METHOD)
     {
-        result = initServerSocketCMethod();
+        result = initServerSocketCMethod(serverCMethod);
     }
     else if (cMethod == FILE_METHOD)
     {
-        result = initServerFileCMethod();
+        result = initServerFileCMethod(serverCMethod);
     }
     CHECK_ERROR_GOTO_CLEANUP(result);
     return serverCMethod;
@@ -69,20 +68,17 @@ cleanup:
 // if clientCMethod is null then allocate and set it, ow return the existing one
 ClientCommunicationMethod *clientCMethodSet(CommunicationMethodCode cMethod)
 {
-    if (clientCMethod != NULL)
-        return clientCMethod;
-
-    clientCMethod = (ClientCommunicationMethod *) malloc(sizeof(ClientCommunicationMethod));
+    ClientCommunicationMethod *clientCMethod = (ClientCommunicationMethod *) malloc(sizeof(ClientCommunicationMethod));
     CHECK_NULL_RETURN_NULL(clientCMethod);
 
     ReturnValue result = ERROR;
     if (cMethod == SOCKET_METHOD)
     {
-        result = initClientSocketCMethod();
+        result = initClientSocketCMethod(clientCMethod);
     }
     else if (cMethod == FILE_METHOD)
     {
-        result = initClientFileCMethod();
+        result = initClientFileCMethod(clientCMethod);
     }
 
     CHECK_ERROR_GOTO_CLEANUP(result);

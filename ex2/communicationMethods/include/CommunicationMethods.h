@@ -28,8 +28,8 @@ typedef ReturnValue (server_close_connection_function_t)();
 typedef ReturnValue (client_init_connection_function_t)();
 typedef ReturnValue (client_close_connection_function_t)();
 typedef char * (receive_function_t)();
-typedef ReturnValue (server_send_function_t)(char *);
-typedef char * (client_send_function_t)(char *);
+typedef ReturnValue (server_send_function_t)(const char *);
+typedef char * (client_send_function_t)(const char *);
 
 /* The program's server communicationMethods method struct */
 typedef struct {
@@ -53,3 +53,6 @@ ServerCommunicationMethod *serverCMethodSet(CommunicationMethodCode cMethod);
 
 ClientCommunicationMethod *clientCMethodSet(CommunicationMethodCode cMethod);
 // if clientCMethod is null then allocate and set it, ow return the existing one
+
+void serverCMethodFree(ServerCommunicationMethod *serverCMethod);
+void clientCMethodFree(ClientCommunicationMethod *clientCMethod);

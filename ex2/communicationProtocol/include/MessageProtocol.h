@@ -33,4 +33,4 @@ char *MPServerReceive();
 ReturnValue MPServerSend(char *msg);
 void MPServerSendSuccessOrFailure(ReturnValue result);
 
-char *MPClientSend(char *msg);
+char *MPClientSend(const char *msg);

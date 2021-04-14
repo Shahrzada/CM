@@ -8,6 +8,11 @@ ReturnValue clientInitialize(CommunicationMethodCode cMethod)
     return MPClientInitConnection(cMethod);
 }
 
+ReturnValue clientClose()
+{
+    return MPClientCloseConnection();
+}
+
 static ReturnValue handleReply(char *reply)
 {
     if (reply == NULL || !messageValidateFormat(reply))
@@ -15,13 +20,13 @@ static ReturnValue handleReply(char *reply)
 
     // there's nothing really I should check here atm, maybe will check
     // for success in the future.
-    char *pointerToMsg = messageGetContents(reply);
+    const char *pointerToMsg = messageGetContents(reply);
     printf("Client received: %s.\n", pointerToMsg);
 
     return SUCCESS;
 }
 
-ReturnValue clientSendCommand(char *msg)
+ReturnValue clientSendCommand(const char *msg)
 {
     if (msg == NULL || !messageValidateFormat(msg))
         return ERROR;

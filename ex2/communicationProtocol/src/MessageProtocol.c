@@ -56,7 +56,7 @@ ReturnValue MPServerSend(char *msg)
     return serverCMethod->sendFunction(msg);
 }
 
-char *MPClientSend(char *msg)
+char *MPClientSend(const char *msg)
 {
     CHECK_NULL_RETURN_NULL(clientCMethod);
     CHECK_NULL_RETURN_NULL(msg);

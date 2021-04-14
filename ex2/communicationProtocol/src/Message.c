@@ -24,12 +24,12 @@ static bool messageValidateCommand(Command command)
 
 // ------------------------------ functions -----------------------------
 
-char *messageSet(Sender sender, Command commandType, char * contents)
+char *messageSet(Sender sender, Command commandType, char *contents)
 {
     CHECK_NULL_RETURN_NULL(contents);
 
     int contentsLength = (int)strlen(contents);
-    int msgLength = contentsLength + MSG_FORMAT_LENGTH;
+    int msgLength = contentsLength + MSG_FORMAT_LENGTH + NULL_CHAR_SIZE;
 
     char *msg = (char *) malloc(sizeof(char)*msgLength);
     CHECK_NULL_RETURN_NULL(msg);
@@ -42,8 +42,9 @@ char *messageSet(Sender sender, Command commandType, char * contents)
     char *pOutput = msg;
     pOutput += MSG_FORMAT_LENGTH;
     strncpy(pOutput, contents, contentsLength);
+    free(contents);
 
-    msg[msgLength] = NULL_CHAR;
+    msg[msgLength - 1] = NULL_CHAR;
     return msg;
 }
 
@@ -52,7 +53,7 @@ char *messageSetEmpty()
     return messageSet(EMPTY_SENDER, EMPTY_COMMAND, "");
 }
 
-bool messageValidateFormat(char *msg) {
+bool messageValidateFormat(const char *msg) {
     CHECK_NULL_RETURN_FALSE(msg);
 
     unsigned int msgLength = strlen(msg);
@@ -68,22 +69,22 @@ bool messageValidateFormat(char *msg) {
     return true;
 }
 
-Sender messageGetSender(char *msg)
+Sender messageGetSender(const char *msg)
 {
     if (msg == NULL || !messageValidateFormat(msg))
         return EMPTY_SENDER;
     return msg[MSG_FORMAT_SENDER_POSITION] - ZERO_CHAR;
 }
 
-Command messageGetCommand(char *msg)
+Command messageGetCommand(const char *msg)
 {
     if (msg == NULL || !messageValidateFormat(msg))
         return EMPTY_COMMAND;
     return msg[MSG_FORMAT_COMMAND_POSITION] - ZERO_CHAR;
 }
 
-char *messageGetContents(char *msg)
+const char *messageGetContents(const char *msg)
 {
-    char *pMsg = msg;
+    const char *pMsg = msg;
     return pMsg + MSG_FORMAT_LENGTH;
 }

@@ -75,7 +75,7 @@ static char *fileGetMessage(FILE *pFile)
 {
     CHECK_NULL_RETURN_NULL(pFile);
 
-    int previousReadPosition = clientPreviousReadPosition + NULL_CHAR_SIZE;
+    int previousReadPosition = clientPreviousReadPosition;
     if (isServer)
         previousReadPosition = serverPreviousReadPosition;
 
@@ -205,7 +205,7 @@ char *fileListen() {
     }
 }
 
-ReturnValue fileServerSend(char *msg) {
+ReturnValue fileServerSend(const char *msg) {
     // open the file for appending
     FILE *pFile = fopen(COMMUNICATION_FILE_NAME,FILE_APPEND_MODE);
     CHECK_FILE_NULL_PRINT_OPEN_ERROR_GOTO_CLEANUP(pFile);
@@ -239,7 +239,7 @@ cleanup:
     return ERROR;
 }
 
-char *fileClientSend(char *msg) {
+char *fileClientSend(const char *msg) {
     ReturnValue result = fileServerSend(msg);
     CHECK_ERROR_RETURN_NULL(result);
     return fileListen();
