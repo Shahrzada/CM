@@ -16,6 +16,7 @@ ReturnValue MPServerInitConnection(CommunicationMethodCode cMethodCode)
 
 ReturnValue MPServerCloseConnection()
 {
+    CHECK_NULL_RETURN_ERROR(serverCMethod);
     ReturnValue result = serverCMethod->serverCloseConnectionFunction();
     free(serverCMethod);
     serverCMethod = NULL;
@@ -24,25 +25,25 @@ ReturnValue MPServerCloseConnection()
 
 ReturnValue MPClientInitConnection(CommunicationMethodCode cMethodCode)
 {
-    clientCMethod = clientCMethodSet(cMethodCode);
+    if (clientCMethod == NULL)
+        clientCMethod = clientCMethodSet(cMethodCode);
     CHECK_NULL_RETURN_ERROR(clientCMethod);
     return clientCMethod->clientInitConnectionFunction();
 }
 
 ReturnValue MPClientCloseConnection()
 {
+    CHECK_NULL_RETURN_ERROR(clientCMethod);
     ReturnValue result = clientCMethod->clientCloseConnectionFunction();
     free(clientCMethod);
     return result;
 }
-
 
 char *MPServerReceive()
 {
     CHECK_NULL_RETURN_NULL(serverCMethod);
     return serverCMethod->receiveFunction();
 }
-
 
 ReturnValue MPServerSend(char *msg)
 {

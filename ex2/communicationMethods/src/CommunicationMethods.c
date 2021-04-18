@@ -2,61 +2,60 @@
 
 #include "../include/FileMethod.h"
 //#include "../include/SocketMethod.h"
-/* This should be the only file (besides main due to input) that will
+
+/* SHAH: This should be the only existing file that will
  * be edited after adding another communicationMethods method. */
 
-ReturnValue initServerSocketCMethod(ServerCommunicationMethod *serverCMethod)
+ReturnValue initServerCMethod(ServerCommunicationMethod *serverCMethod,
+                              server_init_connection_function_t *serverInitConnectionFunction,
+                              server_close_connection_function_t *serverCloseConnectionFunction,
+                              receive_function_t *receiveFunction, server_send_function_t *sendFunction)
 {
     CHECK_NULL_RETURN_ERROR(serverCMethod);
+    CHECK_NULL_RETURN_ERROR(serverInitConnectionFunction);
+    CHECK_NULL_RETURN_ERROR(serverCloseConnectionFunction);
+    CHECK_NULL_RETURN_ERROR(receiveFunction);
+    CHECK_NULL_RETURN_ERROR(sendFunction);
+
+    serverCMethod->serverInitConnectionFunction = serverInitConnectionFunction;
+    serverCMethod->serverCloseConnectionFunction = serverCloseConnectionFunction;
+    serverCMethod->receiveFunction = receiveFunction;
+    serverCMethod->sendFunction = sendFunction;
 
     return SUCCESS;
 }
 
-ReturnValue initServerFileCMethod(ServerCommunicationMethod *serverCMethod)
-{
-    CHECK_NULL_RETURN_ERROR(serverCMethod);
-
-    serverCMethod->serverInitConnectionFunction = fileServerInitConnect;
-    serverCMethod->serverCloseConnectionFunction = fileServerCloseConnection;
-    serverCMethod->receiveFunction = fileListen;
-    serverCMethod->sendFunction = fileServerSend;
-
-    return SUCCESS;
-}
-
-ReturnValue initClientSocketCMethod(ClientCommunicationMethod *clientCMethod)
-{
-    CHECK_NULL_RETURN_ERROR(clientCMethod);
-
-    return SUCCESS;
-}
-
-ReturnValue initClientFileCMethod(ClientCommunicationMethod *clientCMethod)
+ReturnValue initClientCMethod(ClientCommunicationMethod *clientCMethod,
+                              client_init_connection_function_t *clientInitConnectionFunction,
+                              client_close_connection_function_t *clientCloseConnectionFunction,
+                              client_send_function_t *sendFunction)
 {
     CHECK_NULL_RETURN_ERROR(clientCMethod);
+    CHECK_NULL_RETURN_ERROR(clientInitConnectionFunction);
+    CHECK_NULL_RETURN_ERROR(clientCloseConnectionFunction);
+    CHECK_NULL_RETURN_ERROR(sendFunction);
 
-    clientCMethod->clientInitConnectionFunction = fileClientInitConnect;
-    clientCMethod->clientCloseConnectionFunction = fileClientCloseConnect;
-    clientCMethod->sendFunction = fileClientSend;
+    clientCMethod->clientInitConnectionFunction = clientInitConnectionFunction;
+    clientCMethod->clientCloseConnectionFunction = clientCloseConnectionFunction;
+    clientCMethod->sendFunction = sendFunction;
 
     return SUCCESS;
 }
 
-// if serverCMethod is null then allocate and set it, ow return the existing one
 ServerCommunicationMethod *serverCMethodSet(CommunicationMethodCode cMethod)
 {
     ServerCommunicationMethod *serverCMethod = (ServerCommunicationMethod *) malloc(sizeof(ServerCommunicationMethod));
     CHECK_NULL_RETURN_NULL(serverCMethod);
 
     ReturnValue result = ERROR;
-    if (cMethod == SOCKET_METHOD)
+    switch (cMethod)
     {
-        result = initServerSocketCMethod(serverCMethod);
+        case SOCKET_METHOD: /* result = send socket funcs; */ break;
+        case FILE_METHOD: result = initServerCMethod(serverCMethod, fileServerInitConnect, fileServerCloseConnection,
+                              fileListen, fileSend); break;
+        default: PRINT_ERROR_MSG_AND_FUNCTION_NAME("serverCMethodSet", "Bad cMethod"); break;
     }
-    else if (cMethod == FILE_METHOD)
-    {
-        result = initServerFileCMethod(serverCMethod);
-    }
+
     CHECK_ERROR_GOTO_CLEANUP(result);
     return serverCMethod;
 
@@ -65,20 +64,18 @@ cleanup:
     return NULL;
 }
 
-// if clientCMethod is null then allocate and set it, ow return the existing one
 ClientCommunicationMethod *clientCMethodSet(CommunicationMethodCode cMethod)
 {
     ClientCommunicationMethod *clientCMethod = (ClientCommunicationMethod *) malloc(sizeof(ClientCommunicationMethod));
     CHECK_NULL_RETURN_NULL(clientCMethod);
 
     ReturnValue result = ERROR;
-    if (cMethod == SOCKET_METHOD)
+    switch (cMethod)
     {
-        result = initClientSocketCMethod(clientCMethod);
-    }
-    else if (cMethod == FILE_METHOD)
-    {
-        result = initClientFileCMethod(clientCMethod);
+        case SOCKET_METHOD: /* result = send socket funcs; */ break;
+        case FILE_METHOD: result = initClientCMethod(clientCMethod, fileClientInitConnect, fileClientCloseConnect,
+                                                     fileClientSend); break;
+        default: PRINT_ERROR_MSG_AND_FUNCTION_NAME("clientCMethodSet", "Bad cMethod"); break;
     }
 
     CHECK_ERROR_GOTO_CLEANUP(result);

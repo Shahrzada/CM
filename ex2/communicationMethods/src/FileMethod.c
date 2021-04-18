@@ -30,11 +30,14 @@
                 goto cleanup; }                                            \
            } while(0)
 
-// ------------------------------ private functions -----------------------------
+// ------------------------------ static global variables -----------------------------
 
 static bool isServer = true;
 static int serverPreviousReadPosition = 0;
 static int clientPreviousReadPosition = 0;
+
+// ------------------------------ private functions -----------------------------
+
 
 /* Returns total chars left from pFile position until EOF */
 static int fileGetTotalCharsFromFilePointer(FILE *pFile)
@@ -69,6 +72,28 @@ static int fileGetTotalCharsUntilEOFOrNextEOL(FILE *pFile)
         count++;
     }
     return count;
+}
+
+static ReturnValue updateReadPosition()
+{
+    FILE *pFile = fopen(COMMUNICATION_FILE_NAME,FILE_READ_MODE);
+    CHECK_NULL_RETURN_ERROR(pFile);
+
+    int position = fileGetTotalCharsFromFilePointer(pFile);
+    if (position == 0)
+    {
+        fclose(pFile);
+        PRINT_ERROR_MSG_AND_FUNCTION_NAME("updateReadPosition", "Empty file");
+        return ERROR;
+    }
+
+    if (isServer)
+        serverPreviousReadPosition = position;
+    else
+        clientPreviousReadPosition = position;
+
+    fclose(pFile);
+    return SUCCESS;
 }
 
 static char *fileGetMessage(FILE *pFile)
@@ -129,7 +154,7 @@ cleanup:
 
 ReturnValue fileServerInitConnect() {
     // create and open the file
-    FILE * pFile = fopen(COMMUNICATION_FILE_NAME,FILE_WRITE_UPDATE_MODE);
+    FILE *pFile = fopen(COMMUNICATION_FILE_NAME,FILE_WRITE_UPDATE_MODE);
     CHECK_FILE_NULL_PRINT_OPEN_ERROR_GOTO_CLEANUP(pFile);
 
     // write first success msg
@@ -205,34 +230,23 @@ char *fileListen() {
     }
 }
 
-ReturnValue fileServerSend(const char *msg) {
-    // open the file for appending
+ReturnValue fileSend(const char *msg) {
+    CHECK_NULL_RETURN_ERROR(msg);
+
+    // open file for appending
     FILE *pFile = fopen(COMMUNICATION_FILE_NAME,FILE_APPEND_MODE);
     CHECK_FILE_NULL_PRINT_OPEN_ERROR_GOTO_CLEANUP(pFile);
 
-    // write wanted msg
+    // write given msg
     int writingResult = fputs(msg, pFile);
     CHECK_NEGATIVE_PRINT_WRITE_ERROR_GOTO_CLEANUP(writingResult);
 
-    writingResult = fputs("\n", pFile);
+    // add EOL to differentiate msgs
+    writingResult = fputs(EOL_STRING, pFile);
     CHECK_NEGATIVE_PRINT_WRITE_ERROR_GOTO_CLEANUP(writingResult);
-    fclose(pFile);
-
-    // update position for future listening/reading
-    pFile = fopen(COMMUNICATION_FILE_NAME,FILE_READ_MODE);
-    CHECK_FILE_NULL_PRINT_OPEN_ERROR_GOTO_CLEANUP(pFile);
-
-    int position = fileGetTotalCharsFromFilePointer(pFile);
-    if (position == 0)
-        goto cleanup;
-
-    if (isServer)
-        serverPreviousReadPosition = position;
-    else
-        clientPreviousReadPosition = position;
 
     fclose(pFile);
-    return SUCCESS;
+    return updateReadPosition();
 
 cleanup:
     fclose(pFile);
@@ -240,7 +254,8 @@ cleanup:
 }
 
 char *fileClientSend(const char *msg) {
-    ReturnValue result = fileServerSend(msg);
+    CHECK_NULL_RETURN_NULL(msg);
+    ReturnValue result = fileSend(msg);
     CHECK_ERROR_RETURN_NULL(result);
     return fileListen();
 }

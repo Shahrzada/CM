@@ -28,10 +28,10 @@ static ReturnValue handleReply(char *reply)
 
 ReturnValue clientSendCommand(const char *msg)
 {
-    if (msg == NULL || !messageValidateFormat(msg))
+    if (!messageValidateFormat(msg))
         return ERROR;
 
-    // send the message and wait & get its reply
+    // send the message and wait to handle its reply
     char *reply = MPClientSend(msg);
     ReturnValue result = handleReply(reply);
     free(reply);

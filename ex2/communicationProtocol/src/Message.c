@@ -29,16 +29,16 @@ char *messageSet(Sender sender, Command commandType, char *contents)
     CHECK_NULL_RETURN_NULL(contents);
 
     int contentsLength = (int)strlen(contents);
-    int msgLength = contentsLength + MSG_FORMAT_LENGTH + NULL_CHAR_SIZE;
+    int msgLength = MSG_FORMAT_LENGTH + contentsLength + NULL_CHAR_SIZE;
 
-    char *msg = (char *) malloc(sizeof(char)*msgLength);
+    char *msg = (char *) malloc(sizeof(char) * msgLength);
     CHECK_NULL_RETURN_NULL(msg);
 
-    msg[0] = (char)(sender + '0');
-    msg[1] = COMMA_CHAR;
-    msg[2] = (char)(commandType + '0');
-    msg[3] = COMMA_CHAR;
+    // msg starts at [sender][,][command][,], for example "1,0," is for a client sending read command
+    char msgPrefix[MSG_FORMAT_LENGTH] = {(char)(sender + '0'), COMMA_CHAR, (char)(commandType + '0'), COMMA_CHAR};
+    strncpy(msg, msgPrefix, MSG_FORMAT_LENGTH);
 
+    // adding content
     char *pOutput = msg;
     pOutput += MSG_FORMAT_LENGTH;
     strncpy(pOutput, contents, contentsLength);
@@ -57,7 +57,7 @@ bool messageValidateFormat(const char *msg) {
     CHECK_NULL_RETURN_FALSE(msg);
 
     unsigned int msgLength = strlen(msg);
-    if (msgLength < MSG_FORMAT_LENGTH)
+    if (msgLength <= MSG_FORMAT_LENGTH)
         return false;
 
     if (!messageValidateSender(msg[MSG_FORMAT_SENDER_POSITION] - ZERO_CHAR))

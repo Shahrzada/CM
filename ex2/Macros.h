@@ -38,6 +38,7 @@ typedef enum {
 #define EOL_CHAR_ASCII_DEC_VALUE 10
 #define NULL_CHAR '\0'
 #define NEWLINE_CHAR '\n'
+#define EOL_STRING "\n"
 #define COMMA_CHAR ','
 #define ZERO_CHAR '0'
 
@@ -77,6 +78,10 @@ typedef enum {
            if ((result) == NULL) {                                 \
                 printf("Error with %s.\n", (function));             \
                  return ERROR; }                                   \
+           } while(0)
+
+#define PRINT_ERROR_MSG_AND_FUNCTION_NAME(functionName, msg) do { \
+           printf("[ERROR]: In %s - %s.\n", (functionName),(msg)); \
            } while(0)
 
 #include <stdbool.h>
