@@ -8,5 +8,6 @@ int main(int argc, char const *argv[])
 
     serverListen();
 
+    serverDisconnect();
     return SUCCESS;
 }

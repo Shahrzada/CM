@@ -56,12 +56,12 @@ ReturnValue serverInitialize(CommunicationMethodCode cMethod)
 
 void serverListen()
 {
-    // todo: until client sends abort?
+    // todo: until client sends abort? yes!
     while (true)
     {
-        char *incomingMsg = MPServerReceive();
-        if (incomingMsg == NULL || !messageValidateFormat(incomingMsg)) {
-            perror("Bad incoming message");
+        char *incomingMsg = MPServerListen();
+        if (!messageValidateFormat(incomingMsg)) {
+            PRINT_ERROR_MSG_AND_FUNCTION_NAME("serverListen", "Bad msg format");
             return;
         }
         serverHandleMessage(incomingMsg);

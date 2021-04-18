@@ -14,6 +14,5 @@ int main(int argc, char const *argv[])
     free(msg);
 
     clientClose();
-
     return result;
 }

@@ -57,7 +57,7 @@ bool messageValidateFormat(const char *msg) {
     CHECK_NULL_RETURN_FALSE(msg);
 
     unsigned int msgLength = strlen(msg);
-    if (msgLength <= MSG_FORMAT_LENGTH)
+    if (msgLength < MSG_FORMAT_LENGTH)
         return false;
 
     if (!messageValidateSender(msg[MSG_FORMAT_SENDER_POSITION] - ZERO_CHAR))

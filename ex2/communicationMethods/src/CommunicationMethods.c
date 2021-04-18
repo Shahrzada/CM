@@ -9,17 +9,17 @@
 ReturnValue initServerCMethod(ServerCommunicationMethod *serverCMethod,
                               server_init_connection_function_t *serverInitConnectionFunction,
                               server_close_connection_function_t *serverCloseConnectionFunction,
-                              receive_function_t *receiveFunction, server_send_function_t *sendFunction)
+                              listen_function_t *listenFunction, server_send_function_t *sendFunction)
 {
     CHECK_NULL_RETURN_ERROR(serverCMethod);
     CHECK_NULL_RETURN_ERROR(serverInitConnectionFunction);
     CHECK_NULL_RETURN_ERROR(serverCloseConnectionFunction);
-    CHECK_NULL_RETURN_ERROR(receiveFunction);
+    CHECK_NULL_RETURN_ERROR(listenFunction);
     CHECK_NULL_RETURN_ERROR(sendFunction);
 
     serverCMethod->serverInitConnectionFunction = serverInitConnectionFunction;
     serverCMethod->serverCloseConnectionFunction = serverCloseConnectionFunction;
-    serverCMethod->receiveFunction = receiveFunction;
+    serverCMethod->listenFunction = listenFunction;
     serverCMethod->sendFunction = sendFunction;
 
     return SUCCESS;

@@ -15,11 +15,10 @@ ReturnValue clientClose()
 
 static ReturnValue handleReply(char *reply)
 {
-    if (reply == NULL || !messageValidateFormat(reply))
+    if (!messageValidateFormat(reply))
         return ERROR;
 
-    // there's nothing really I should check here atm, maybe will check
-    // for success in the future.
+    // TODO: there's nothing really I check here atm, maybe will check for success in the future.
     const char *pointerToMsg = messageGetContents(reply);
     printf("Client received: %s.\n", pointerToMsg);
 
@@ -35,5 +34,6 @@ ReturnValue clientSendCommand(const char *msg)
     char *reply = MPClientSend(msg);
     ReturnValue result = handleReply(reply);
     free(reply);
+
     return result;
 }

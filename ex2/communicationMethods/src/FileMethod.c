@@ -12,9 +12,7 @@
 
 #define COMMUNICATION_FILE_NAME "bebi.txt"
 #define INIT_FILE_SUCCESS_MSG "[Server]: Created the file successfully.\n"
-#define INIT_FILE_CLIENT_SUCCESS_MSG "[Client]: Connected successfully.\n"
 #define CLOSED_FILE_SUCCESS_MSG "[Server]: Closed the file successfully.\n"
-#define CLOSED_FILE_CLIENT_SUCCESS_MSG "[Client]: Closed the file successfully.\n"
 
 // -------------------------- macros -------------------------
 
@@ -51,26 +49,18 @@ static int fileGetTotalCharsFromFilePointer(FILE *pFile)
     return count;
 }
 
-/* Returns total chars left from pFile position until next either EOL or EOF */
-static int fileGetTotalCharsUntilEOFOrNextEOL(FILE *pFile)
+/* Returns total chars left from pFile position until next EOF or EOL */
+static int fileGetTotalCharsUntilEOFOrEOL(FILE *pFile)
 {
     CHECK_NULL_RETURN_ZERO(pFile);
     int count = 0, ch = 0;
 
     while((ch = fgetc(pFile)) != EOF) {
-        // we ignore EOL that are part of the client's msg, we consider it part of
-        // the client's msg if it is inside quotation marks or apostrophes.
-
         if (ch == EOL_CHAR_ASCII_DEC_VALUE)
-        {
-            if (count == 0)
-                continue;
-            else
                 break;
-        }
-
         count++;
     }
+
     return count;
 }
 
@@ -99,35 +89,28 @@ static ReturnValue updateReadPosition()
 static char *fileGetMessage(FILE *pFile)
 {
     CHECK_NULL_RETURN_NULL(pFile);
-
-    int previousReadPosition = clientPreviousReadPosition;
-    if (isServer)
-        previousReadPosition = serverPreviousReadPosition;
+    int previousReadPosition = (isServer) ? serverPreviousReadPosition : clientPreviousReadPosition;
 
     // moving file pointer to the first unread char
     int result = fseek(pFile, previousReadPosition + NEWLINE_CHAR_SIZE, SEEK_SET);
     CHECK_NON_ZERO_RETURN_NULL(result);
 
     // fetch the total length of chars until EOF or EOL
-    int msgLength = fileGetTotalCharsUntilEOFOrNextEOL(pFile);
+    int msgLength = fileGetTotalCharsUntilEOFOrEOL(pFile);
     char *msg = (char *) malloc(sizeof(char) * (msgLength + NULL_CHAR_SIZE));
     CHECK_NULL_RETURN_NULL(msg);
 
-    // moving file pointer back again to the first unread char
+    // moving file pointer back to the first unread char
     result = fseek(pFile, previousReadPosition + NEWLINE_CHAR_SIZE, SEEK_SET);
     if (result != 0)
         goto cleanup;
 
-    // copying the command to our cString
+    // get the msg
     size_t totalCopiedChars = fread(msg, sizeof(char), msgLength, pFile);
     if (totalCopiedChars != msgLength)
         goto cleanup;
 
-    // making sure it is indeed a valid cString
     msg[msgLength] = NULL_CHAR;
-
-    //todo:remove this
-    printf("Got this msg:\n%s\n", msg);
     return msg;
 
 cleanup:
@@ -144,6 +127,7 @@ static char *fileReceive()
     // get msg
     char *msgReceived = fileGetMessage(pFile);
     fclose(pFile);
+
     return msgReceived;
 
 cleanup:
@@ -162,18 +146,7 @@ ReturnValue fileServerInitConnect() {
     CHECK_NEGATIVE_PRINT_WRITE_ERROR_GOTO_CLEANUP(result);
     fclose(pFile);
 
-    // update position for future listening/reading
-    pFile = fopen(COMMUNICATION_FILE_NAME,FILE_READ_MODE);
-    CHECK_FILE_NULL_PRINT_OPEN_ERROR_GOTO_CLEANUP(pFile);
-
-    int position = fileGetTotalCharsFromFilePointer(pFile);
-    if (position == 0)
-        goto cleanup;
-
-    fclose(pFile);
-    serverPreviousReadPosition = position;
-
-    return SUCCESS;
+    return updateReadPosition();
 
 cleanup:
     fclose(pFile);
@@ -199,13 +172,28 @@ cleanup:
 }
 
 ReturnValue fileClientInitConnect() {
+    isServer = false;
+
     // open the file for appending
     FILE * pFile;
     pFile = fopen(COMMUNICATION_FILE_NAME,FILE_APPEND_MODE);
     CHECK_FILE_NULL_PRINT_OPEN_ERROR_GOTO_CLEANUP(pFile);
-    fclose(pFile);
 
-    isServer = false;
+    fclose(pFile);
+    return SUCCESS;
+
+cleanup:
+    fclose(pFile);
+    return ERROR;
+}
+
+ReturnValue fileClientCloseConnect() {
+    // open the file for appending
+    FILE * pFile;
+    pFile = fopen(COMMUNICATION_FILE_NAME,FILE_APPEND_MODE);
+    CHECK_FILE_NULL_PRINT_OPEN_ERROR_GOTO_CLEANUP(pFile);
+
+    fclose(pFile);
     return SUCCESS;
 
 cleanup:
@@ -214,7 +202,7 @@ cleanup:
 }
 
 char *fileListen() {
-    // stat helps us checking for new msgs without opening it (by the file's size)
+    // stat helps us checking for new msgs without opening it (using file size)
     struct stat st;
     stat(COMMUNICATION_FILE_NAME, &st);
     int fileSize = st.st_size;
@@ -258,22 +246,4 @@ char *fileClientSend(const char *msg) {
     ReturnValue result = fileSend(msg);
     CHECK_ERROR_RETURN_NULL(result);
     return fileListen();
-}
-
-ReturnValue fileClientCloseConnect() {
-    // open the file for appending
-    FILE * pFile;
-    pFile = fopen(COMMUNICATION_FILE_NAME,FILE_APPEND_MODE);
-    CHECK_FILE_NULL_PRINT_OPEN_ERROR_GOTO_CLEANUP(pFile);
-
-    // write last closing success msg
-    int result = fputs(CLOSED_FILE_CLIENT_SUCCESS_MSG, pFile);
-    CHECK_NEGATIVE_PRINT_WRITE_ERROR_GOTO_CLEANUP(result);
-
-    fclose(pFile);
-    return SUCCESS;
-
-cleanup:
-    fclose(pFile);
-    return ERROR;
 }

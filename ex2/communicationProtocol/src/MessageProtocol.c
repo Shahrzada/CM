@@ -9,7 +9,8 @@ static ClientCommunicationMethod *clientCMethod = NULL;
 
 ReturnValue MPServerInitConnection(CommunicationMethodCode cMethodCode)
 {
-    serverCMethod = serverCMethodSet(cMethodCode);
+    if (serverCMethod == NULL)
+        serverCMethod = serverCMethodSet(cMethodCode);
     CHECK_NULL_RETURN_ERROR(serverCMethod);
     return serverCMethod->serverInitConnectionFunction();
 }
@@ -39,10 +40,10 @@ ReturnValue MPClientCloseConnection()
     return result;
 }
 
-char *MPServerReceive()
+char *MPServerListen()
 {
     CHECK_NULL_RETURN_NULL(serverCMethod);
-    return serverCMethod->receiveFunction();
+    return serverCMethod->listenFunction();
 }
 
 ReturnValue MPServerSend(char *msg)
