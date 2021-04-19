@@ -20,16 +20,13 @@
 
 #include "../../Macros.h"
 
-// -------------------------- const definitions -------------------------
-
-
-
 // ------------------------------ functions -----------------------------
 
-ReturnValue fileServerInitConnect();
+ReturnValue fileServerInitConnection();
 ReturnValue fileServerCloseConnection();
-ReturnValue fileClientInitConnect();
-ReturnValue fileClientCloseConnect();
 char *fileListen();
 ReturnValue fileSend(const char *msg);
+
+ReturnValue fileClientInitConnection();
+ReturnValue fileClientCloseConnection();
 char *fileClientSend(const char *msg);

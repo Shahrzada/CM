@@ -1,12 +1,13 @@
-#include "../include/CommunicationMethods.h"
 
+// ------------------------------ includes ------------------------------
+
+#include "../include/CommunicationMethods.h"
 #include "../include/FileMethod.h"
 //#include "../include/SocketMethod.h"
 
-/* SHAH: This should be the only existing file that will
- * be edited after adding another communicationMethods method. */
+// ------------------------------ private functions -----------------------------
 
-ReturnValue initServerCMethod(ServerCommunicationMethod *serverCMethod,
+static ReturnValue initServerCMethod(ServerCommunicationMethod *serverCMethod,
                               server_init_connection_function_t *serverInitConnectionFunction,
                               server_close_connection_function_t *serverCloseConnectionFunction,
                               listen_function_t *listenFunction, server_send_function_t *sendFunction)
@@ -25,7 +26,7 @@ ReturnValue initServerCMethod(ServerCommunicationMethod *serverCMethod,
     return SUCCESS;
 }
 
-ReturnValue initClientCMethod(ClientCommunicationMethod *clientCMethod,
+static ReturnValue initClientCMethod(ClientCommunicationMethod *clientCMethod,
                               client_init_connection_function_t *clientInitConnectionFunction,
                               client_close_connection_function_t *clientCloseConnectionFunction,
                               client_send_function_t *sendFunction)
@@ -42,6 +43,8 @@ ReturnValue initClientCMethod(ClientCommunicationMethod *clientCMethod,
     return SUCCESS;
 }
 
+// ------------------------------ functions -----------------------------
+
 ServerCommunicationMethod *serverCMethodSet(CommunicationMethodCode cMethod)
 {
     ServerCommunicationMethod *serverCMethod = (ServerCommunicationMethod *) malloc(sizeof(ServerCommunicationMethod));
@@ -50,9 +53,10 @@ ServerCommunicationMethod *serverCMethodSet(CommunicationMethodCode cMethod)
     ReturnValue result = ERROR;
     switch (cMethod)
     {
-        case SOCKET_METHOD: /* result = send socket funcs; */ break;
-        case FILE_METHOD: result = initServerCMethod(serverCMethod, fileServerInitConnect, fileServerCloseConnection,
+        case FILE_METHOD: result = initServerCMethod(serverCMethod, fileServerInitConnection, fileServerCloseConnection,
                               fileListen, fileSend); break;
+        case SOCKET_METHOD: /* result = send socket funcs; */ break;
+        /*case NEW_METHOD: result = initServerCMethod(relevant functions); break;*/
         default: PRINT_ERROR_MSG_AND_FUNCTION_NAME("serverCMethodSet", "Bad cMethod"); break;
     }
 
@@ -72,9 +76,10 @@ ClientCommunicationMethod *clientCMethodSet(CommunicationMethodCode cMethod)
     ReturnValue result = ERROR;
     switch (cMethod)
     {
-        case SOCKET_METHOD: /* result = send socket funcs; */ break;
-        case FILE_METHOD: result = initClientCMethod(clientCMethod, fileClientInitConnect, fileClientCloseConnect,
+        case FILE_METHOD: result = initClientCMethod(clientCMethod, fileClientInitConnection, fileClientCloseConnection,
                                                      fileClientSend); break;
+        case SOCKET_METHOD: /* result = send socket funcs; */ break;
+        /*case NEW_METHOD: result = initClientCMethod(relevant functions); break;*/
         default: PRINT_ERROR_MSG_AND_FUNCTION_NAME("clientCMethodSet", "Bad cMethod"); break;
     }
 

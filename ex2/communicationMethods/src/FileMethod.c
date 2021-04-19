@@ -13,7 +13,7 @@
 #define COMMUNICATION_FILE_NAME "bebi.txt"
 #define INIT_FILE_SUCCESS_MSG "[Server]: Created the file successfully.\n"
 #define CLOSED_FILE_SUCCESS_MSG "[Server]: Closed the file successfully.\n"
-#define MAX_LINE_LENGTH 65
+#define MAX_LINE_LENGTH 257
 
 // -------------------------- macros -------------------------
 
@@ -29,69 +29,26 @@
                 goto cleanup; }                                            \
            } while(0)
 
-// ------------------------------ static global variables -----------------------------
-
-
 // ------------------------------ private functions -----------------------------
-
-
-/* Returns total chars left from pFile position until EOF */
-static int fileGetTotalCharsFromFilePointer(FILE *pFile)
-{
-    CHECK_NULL_RETURN_ZERO(pFile);
-    int count = 0;
-    while(fgetc(pFile) != EOF)
-        count++;
-    return count;
-}
-
-/* Returns total chars left from pFile position until next EOF or EOL */
-static int fileGetTotalCharsUntilEOFOrEOL(FILE *pFile)
-{
-    CHECK_NULL_RETURN_ZERO(pFile);
-    int count = 0, ch = 0;
-
-    while((ch = fgetc(pFile)) != EOF)
-    {
-        if (ch == EOL_CHAR_ASCII_DEC_VALUE)
-                break;
-        count++;
-    }
-
-    return count;
-}
-
-static char *fileGetLastLine(FILE *pFile)
-{
-    CHECK_NULL_RETURN_NULL(pFile);
-
-    char buf[MAX_LINE_LENGTH];
-    while(!feof(pFile))
-        fgets(buf, MAX_LINE_LENGTH, pFile);
-
-    unsigned int msgLength = strlen(buf);
-    char *msg = (char *) malloc(sizeof(char) * msgLength);
-    CHECK_NULL_RETURN_NULL(msg);
-    strncpy(msg, buf, msgLength);
-    msg[msgLength] = NULL_CHAR;
-
-    return msg;
-}
 
 static char *fileGetMessage(FILE *pFile)
 {
     CHECK_NULL_RETURN_NULL(pFile);
 
+    // get the last line in the file
     char buf[MAX_LINE_LENGTH];
     while(!feof(pFile))
         fgets(buf, MAX_LINE_LENGTH, pFile);
 
+    // ignore the '\n'
     buf[strlen(buf) - EOL_CHAR_SIZE] = NULL_CHAR;
 
+    // allocate memory for the msg
     unsigned int msgLength = strlen(buf) + NULL_CHAR_SIZE;
     char *msg = (char *) malloc(sizeof(char) * msgLength);
     CHECK_NULL_RETURN_NULL(msg);
 
+    // and copy the last line into it
     strncpy(msg, buf, msgLength - NULL_CHAR_SIZE);
     msg[msgLength - 1] = NULL_CHAR;
 
@@ -107,7 +64,6 @@ static char *fileReceive()
     // get msg
     char *msgReceived = fileGetMessage(pFile);
     fclose(pFile);
-
     return msgReceived;
 
 cleanup:
@@ -116,8 +72,8 @@ cleanup:
 }
 // ------------------------------ functions -----------------------------
 
-ReturnValue fileServerInitConnect() {
-    // create and open the file
+ReturnValue fileServerInitConnection() {
+    // create and open the file for writing
     FILE *pFile = fopen(COMMUNICATION_FILE_NAME,FILE_WRITE_UPDATE_MODE);
     CHECK_FILE_NULL_PRINT_OPEN_ERROR_GOTO_CLEANUP(pFile);
 
@@ -151,34 +107,6 @@ cleanup:
     return ERROR;
 }
 
-ReturnValue fileClientInitConnect() {
-    // open the file for appending
-    FILE * pFile;
-    pFile = fopen(COMMUNICATION_FILE_NAME,FILE_APPEND_MODE);
-    CHECK_FILE_NULL_PRINT_OPEN_ERROR_GOTO_CLEANUP(pFile);
-
-    fclose(pFile);
-    return SUCCESS;
-
-cleanup:
-    fclose(pFile);
-    return ERROR;
-}
-
-ReturnValue fileClientCloseConnect() {
-    // open the file for appending
-    FILE * pFile;
-    pFile = fopen(COMMUNICATION_FILE_NAME,FILE_APPEND_MODE);
-    CHECK_FILE_NULL_PRINT_OPEN_ERROR_GOTO_CLEANUP(pFile);
-
-    fclose(pFile);
-    return SUCCESS;
-
-cleanup:
-    fclose(pFile);
-    return ERROR;
-}
-
 char *fileListen() {
     // stat helps us checking for new msgs without opening it (using file size)
     struct stat st;
@@ -187,11 +115,17 @@ char *fileListen() {
 
     while (true)
     {
+        // get file size
         stat(COMMUNICATION_FILE_NAME, &st);
+
+        // larger size means new msgs
         if (fileSize < st.st_size)
             return fileReceive();
+
+        // smaller size means the file was corrupted
         else if (st.st_size < fileSize)
             return NULL;
+
         sleep(1);
     }
 }
@@ -219,9 +153,31 @@ cleanup:
     return ERROR;
 }
 
+ReturnValue fileClientInitConnection() {
+    // open the file for appending, just to check the file is okay really
+    FILE * pFile;
+    pFile = fopen(COMMUNICATION_FILE_NAME,FILE_APPEND_MODE);
+    CHECK_FILE_NULL_PRINT_OPEN_ERROR_GOTO_CLEANUP(pFile);
+
+    fclose(pFile);
+    return SUCCESS;
+
+cleanup:
+    fclose(pFile);
+    return ERROR;
+}
+
+ReturnValue fileClientCloseConnection() {
+    return SUCCESS;
+}
+
 char *fileClientSend(const char *msg) {
     CHECK_NULL_RETURN_NULL(msg);
+
+    // write the msg to the file
     ReturnValue result = fileSend(msg);
     CHECK_ERROR_RETURN_NULL(result);
+
+    // wait for server reply
     return fileListen();
 }
