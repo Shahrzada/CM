@@ -40,6 +40,8 @@ static void serverHandleMessage(char *msg)
     else if (currentCommand == ABORT)
     {
         free(msg);
+        MPServerSendSuccessOrFailure(SUCCESS);
+        sleep(1);
         serverDisconnect();
     }
     else
@@ -56,7 +58,7 @@ ReturnValue serverInitialize(CommunicationMethodCode cMethod)
     return MPServerInitConnection(cMethod);
 }
 
-void serverListen()
+_Noreturn void serverListen()
 {
     // todo: until client sends abort? yes!
     while (true)
@@ -64,7 +66,7 @@ void serverListen()
         char *incomingMsg = MPServerListen();
         if (!messageValidateFormat(incomingMsg)) {
             PRINT_ERROR_MSG_AND_FUNCTION_NAME("serverListen", "Bad msg format");
-            return;
+            printf("Server got: %s\n", incomingMsg);
         }
         serverHandleMessage(incomingMsg);
         free(incomingMsg);
@@ -72,7 +74,8 @@ void serverListen()
     }
 }
 
-ReturnValue serverDisconnect()
+void serverDisconnect()
 {
-    return MPServerCloseConnection();
+    MPServerCloseConnection();
+    exit(SUCCESS);
 }

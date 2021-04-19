@@ -11,8 +11,15 @@ int main(int argc, char const *argv[])
     CHECK_NULL_PRINT_AND_RETURN_ERROR(msg, "messageSet");
     result = clientSendCommand(msg);
     free(msg);
+    sleep(1);
 
     msg = messageSet(CLIENT, READ, "Heyo#2");
+    CHECK_NULL_PRINT_AND_RETURN_ERROR(msg, "messageSet");
+    result = clientSendCommand(msg);
+    free(msg);
+    sleep(1);
+
+    msg = messageSet(CLIENT, ABORT, "Goodbye");
     CHECK_NULL_PRINT_AND_RETURN_ERROR(msg, "messageSet");
     result = clientSendCommand(msg);
     free(msg);

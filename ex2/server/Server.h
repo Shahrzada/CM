@@ -33,9 +33,9 @@
  */
 ReturnValue serverInitialize(CommunicationMethodCode cMethod);
 
-void serverListen();
+_Noreturn void serverListen();
 
-ReturnValue serverDisconnect();
+void serverDisconnect();
 
 /* These should be the only reachable functions, as the server works independently according
  * to client commands. */
