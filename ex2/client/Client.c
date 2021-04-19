@@ -1,5 +1,6 @@
 
 // ------------------------------ includes ------------------------------
+
 #include "Client.h"
 #include "../communicationProtocol/include/MessageProtocol.h"
 

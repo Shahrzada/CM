@@ -39,7 +39,7 @@ char *messageSet(Sender sender, Command commandType, char *contents)
                                          (char)(commandType + ZERO_CHAR), COMMA_CHAR};
     strncpy(msg, msgPrefix, MSG_FORMAT_LENGTH);
 
-    // adding content
+    // adding the content
     char *pOutput = msg;
     pOutput += MSG_FORMAT_LENGTH;
     strncpy(pOutput, contents, contentsLength);
@@ -57,6 +57,7 @@ char *messageSetEmpty()
 bool messageValidateFormat(const char *msg) {
     CHECK_NULL_RETURN_FALSE(msg);
 
+    // msg length must be at least equal to MSG_FORMAT_LENGTH
     unsigned int msgLength = strlen(msg);
     if (msgLength < MSG_FORMAT_LENGTH)
         return false;
@@ -86,14 +87,17 @@ Command messageGetCommand(const char *msg)
 
 const char *messageGetContents(const char *msg)
 {
-    CHECK_NULL_RETURN_NULL(msg);
+    if (!messageValidateFormat(msg))
+        return NULL;
     const char *pMsg = msg;
     return pMsg + MSG_FORMAT_LENGTH;
 }
 
-unsigned int messageGetLength(const char *msg)
+unsigned int messageGetContentsLength(const char *msg)
 {
-    CHECK_NULL_RETURN_ZERO(msg);
+    if (!messageValidateFormat(msg))
+        return 0;
+
     unsigned int length = strlen(msg) - MSG_FORMAT_LENGTH;
 
     if (length < 0)
