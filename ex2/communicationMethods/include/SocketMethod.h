@@ -4,8 +4,8 @@
  * @brief The socket communicationMethods method implementation.
  *
  *
- * @section DESCRIPTION
- *
+ * @section created by using microsoft docs:
+ * https://docs.microsoft.com/en-us/windows/win32/winsock
  *
  *
  *
@@ -18,17 +18,17 @@
 
 // ------------------------------ includes ------------------------------
 
-#include "communicationProtocol/include/Message.h"
-
-// -------------------------- const definitions -------------------------
-
+#include "../../Macros.h"
 
 // ------------------------------ functions -----------------------------
 
-ReturnValue socketServerConnect();
-ReturnValue socketServerClose();
-ReturnValue socketClientConnect();
-ReturnValue socketListen(char* msg);
-ReturnValue socketSend(char *msg, char *reply);
+ReturnValue socketServerInitConnection();
+ReturnValue socketServerCloseConnection();
+char *socketListen();
+ReturnValue socketSend(const char *msg);
+
+ReturnValue socketClientInitConnection();
+ReturnValue socketClientCloseConnection();
+char *socketClientSend(const char *msg);
 
 

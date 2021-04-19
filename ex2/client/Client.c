@@ -11,7 +11,7 @@ static ReturnValue handleReply(char *reply)
     if (!messageValidateFormat(reply))
         return ERROR;
 
-    // TODO: there's nothing I check atm
+    // SHAH: there's nothing I check atm
     const char *pointerToMsg = messageGetContents(reply);
     printf("Client received reply: %s.\n", pointerToMsg);
 

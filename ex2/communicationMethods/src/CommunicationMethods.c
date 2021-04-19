@@ -3,7 +3,7 @@
 
 #include "../include/CommunicationMethods.h"
 #include "../include/FileMethod.h"
-//#include "../include/SocketMethod.h"
+#include "../include/SocketMethod.h"
 
 // ------------------------------ private functions -----------------------------
 
@@ -55,7 +55,8 @@ ServerCommunicationMethod *serverCMethodSet(CommunicationMethodCode cMethod)
     {
         case FILE_METHOD: result = initServerCMethod(serverCMethod, fileServerInitConnection, fileServerCloseConnection,
                               fileListen, fileSend); break;
-        case SOCKET_METHOD: /* result = send socket funcs; */ break;
+        case SOCKET_METHOD: result = initServerCMethod(serverCMethod, socketServerInitConnection,
+                                                       socketServerCloseConnection, socketListen, socketSend); break;
         /*case NEW_METHOD: result = initServerCMethod(relevant functions); break;*/
         default: PRINT_ERROR_MSG_AND_FUNCTION_NAME("serverCMethodSet", "Bad cMethod"); break;
     }
@@ -78,7 +79,8 @@ ClientCommunicationMethod *clientCMethodSet(CommunicationMethodCode cMethod)
     {
         case FILE_METHOD: result = initClientCMethod(clientCMethod, fileClientInitConnection, fileClientCloseConnection,
                                                      fileClientSend); break;
-        case SOCKET_METHOD: /* result = send socket funcs; */ break;
+        case SOCKET_METHOD: result = initClientCMethod(clientCMethod, socketClientInitConnection,
+                                                       socketClientCloseConnection, socketClientSend); break;
         /*case NEW_METHOD: result = initClientCMethod(relevant functions); break;*/
         default: PRINT_ERROR_MSG_AND_FUNCTION_NAME("clientCMethodSet", "Bad cMethod"); break;
     }
