@@ -28,14 +28,21 @@
 /**
  * @brief initializes the client given the connection method
  *
- * RETURN VALUE:
- * @return a pointer to the new client, or NULL if the initialization failed.
+ * @return SUCCESS if connection was established, ERROR ow.
  */
 ReturnValue clientInitialize(CommunicationMethodCode cMethod);
+
+/**
+ * @brief closes the client connection
+ *
+ * @return SUCCESS if connection was closed, ERROR ow.
+ */
 ReturnValue clientClose();
 
-/* Request to send a command to the server, should return the server's reply
- * e.g. if sent 'read' then reply == whatever it read and msg SUCCESS.
- * e.g. if sent 'write' then msg will contain the msg to be sent, (it
- * shouldn't change) return SUCCESS. */
+
+/**
+ * @brief given a string (already in a valid msg format), sends it to the server.
+ *
+ * @return SUCCESS if the msg was sent and the reply was SUCCESS, ERROR ow.
+ */
 ReturnValue clientSendCommand(const char *msg);

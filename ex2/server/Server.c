@@ -1,34 +1,39 @@
+
+// ------------------------------ includes ------------------------------
+
 #include <unistd.h>
+
 #include "Server.h"
 #include "../communicationProtocol/include/MessageProtocol.h"
-
-// -------------------------- const definitions -------------------------
-
 
 // ------------------------------ private functions -----------------------------
 
 static void serverRead()
 {
     // Assuming we did some reading from somewhere
-
-    ReturnValue result = SUCCESS;
-    MPServerSendSuccessOrFailure(result);
+    MPServerSendSuccessOrFailure(SUCCESS);
 }
 
-static void serverWrite(char *msg)
+static void serverWrite(const char *msg)
 {
     CHECK_NULL_RETURN(msg);
 
-    // Assuming server wrote content to somewhere, and succeeded nice.
+    // Assuming server wrote content to somewhere, and succeeded.
+    MPServerSendSuccessOrFailure(SUCCESS);
+}
 
-    ReturnValue result = SUCCESS;
-    MPServerSendSuccessOrFailure(result);
+static void serverAbort(char *msg)
+{
+    CHECK_NULL_RETURN(msg);
+    free(msg);
+    MPServerSendSuccessOrFailure(SUCCESS);
+    sleep(1);
+    serverClose();
 }
 
 static void serverHandleMessage(char *msg)
 {
     CHECK_NULL_RETURN(msg);
-
     Command currentCommand = messageGetCommand(msg);
 
     if (currentCommand == READ)
@@ -38,17 +43,10 @@ static void serverHandleMessage(char *msg)
         serverWrite(msg);
 
     else if (currentCommand == ABORT)
-    {
-        free(msg);
-        MPServerSendSuccessOrFailure(SUCCESS);
-        sleep(1);
-        serverDisconnect();
-    }
+        serverAbort(msg);
+
     else
-    {
         PRINT_ERROR_MSG_AND_FUNCTION_NAME("serverHandleMessage", "Bad COMMAND");
-        return;
-    }
 }
 
 // ------------------------------ functions -----------------------------
@@ -60,7 +58,6 @@ ReturnValue serverInitialize(CommunicationMethodCode cMethod)
 
 _Noreturn void serverListen()
 {
-    // todo: until client sends abort? yes!
     while (true)
     {
         char *incomingMsg = MPServerListen();
@@ -74,8 +71,9 @@ _Noreturn void serverListen()
     }
 }
 
-void serverDisconnect()
+void serverClose()
 {
     MPServerCloseConnection();
+    printf("Server got ABORT command, closing...");
     exit(SUCCESS);
 }

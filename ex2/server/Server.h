@@ -20,22 +20,21 @@
 
 #include "../Macros.h"
 
-// -------------------------- const definitions -------------------------
-
-
 // ------------------------------ functions -----------------------------
 
 /**
  * @brief initializes the server given the connection method
  *
- * RETURN VALUE:
- * @return a pointer to the new server, or NULL if the initialization failed.
+ * @return SUCCESS if the connection was established, ERROR ow.
  */
 ReturnValue serverInitialize(CommunicationMethodCode cMethod);
 
+/**
+ * @brief Closes the connection.
+ */
+void serverClose();
+
+/**
+ * @brief listens to the connection until interrupted or receives ABORT.
+ */
 _Noreturn void serverListen();
-
-void serverDisconnect();
-
-/* These should be the only reachable functions, as the server works independently according
- * to client commands. */

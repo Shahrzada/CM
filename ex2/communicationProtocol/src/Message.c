@@ -35,7 +35,8 @@ char *messageSet(Sender sender, Command commandType, char *contents)
     CHECK_NULL_RETURN_NULL(msg);
 
     // msg starts at [sender][,][command][,], for example "1,0," is for a client sending read command
-    char msgPrefix[MSG_FORMAT_LENGTH] = {(char)(sender + '0'), COMMA_CHAR, (char)(commandType + '0'), COMMA_CHAR};
+    char msgPrefix[MSG_FORMAT_LENGTH] = {(char)(sender + ZERO_CHAR), COMMA_CHAR,
+                                         (char)(commandType + ZERO_CHAR), COMMA_CHAR};
     strncpy(msg, msgPrefix, MSG_FORMAT_LENGTH);
 
     // adding content
@@ -71,20 +72,32 @@ bool messageValidateFormat(const char *msg) {
 
 Sender messageGetSender(const char *msg)
 {
-    if (msg == NULL || !messageValidateFormat(msg))
+    if (!messageValidateFormat(msg))
         return EMPTY_SENDER;
     return msg[MSG_FORMAT_SENDER_POSITION] - ZERO_CHAR;
 }
 
 Command messageGetCommand(const char *msg)
 {
-    if (msg == NULL || !messageValidateFormat(msg))
+    if (!messageValidateFormat(msg))
         return EMPTY_COMMAND;
     return msg[MSG_FORMAT_COMMAND_POSITION] - ZERO_CHAR;
 }
 
 const char *messageGetContents(const char *msg)
 {
+    CHECK_NULL_RETURN_NULL(msg);
     const char *pMsg = msg;
     return pMsg + MSG_FORMAT_LENGTH;
+}
+
+unsigned int messageGetLength(const char *msg)
+{
+    CHECK_NULL_RETURN_ZERO(msg);
+    unsigned int length = strlen(msg) - MSG_FORMAT_LENGTH;
+
+    if (length < 0)
+        return 0;
+
+    return length;
 }

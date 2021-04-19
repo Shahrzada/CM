@@ -25,6 +25,7 @@
 
 
 // setters
+/* Whoever calls this function must free the allocated string */
 char * messageSet(Sender sender, Command commandType, char *contents);
 char *messageSetEmpty();
 bool messageValidateFormat(const char *msg);
