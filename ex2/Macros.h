@@ -38,12 +38,13 @@ typedef enum {
 #define EOL_CHAR_ASCII_DEC_VALUE 10
 #define NULL_CHAR '\0'
 #define NEWLINE_CHAR '\n'
+#define EOL_CHAR '\n'
 #define EOL_STRING "\n"
 #define COMMA_CHAR ','
 #define ZERO_CHAR '0'
 
 #define NULL_CHAR_SIZE 1
-#define NEWLINE_CHAR_SIZE 1
+#define EOL_CHAR_SIZE 1
 
 #define FILE_READ_MODE "r"
 #define FILE_WRITE_UPDATE_MODE "w+"

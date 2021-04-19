@@ -38,11 +38,13 @@ static void serverHandleMessage(char *msg)
         serverWrite(msg);
 
     else if (currentCommand == ABORT)
+    {
+        free(msg);
         serverDisconnect();
-
+    }
     else
     {
-        // todo: report error
+        PRINT_ERROR_MSG_AND_FUNCTION_NAME("serverHandleMessage", "Bad COMMAND");
         return;
     }
 }

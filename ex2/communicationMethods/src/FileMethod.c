@@ -13,6 +13,7 @@
 #define COMMUNICATION_FILE_NAME "bebi.txt"
 #define INIT_FILE_SUCCESS_MSG "[Server]: Created the file successfully.\n"
 #define CLOSED_FILE_SUCCESS_MSG "[Server]: Closed the file successfully.\n"
+#define MAX_LINE_LENGTH 65
 
 // -------------------------- macros -------------------------
 
@@ -30,9 +31,6 @@
 
 // ------------------------------ static global variables -----------------------------
 
-static bool isServer = true;
-static int serverPreviousReadPosition = 0;
-static int clientPreviousReadPosition = 0;
 
 // ------------------------------ private functions -----------------------------
 
@@ -41,11 +39,9 @@ static int clientPreviousReadPosition = 0;
 static int fileGetTotalCharsFromFilePointer(FILE *pFile)
 {
     CHECK_NULL_RETURN_ZERO(pFile);
-
     int count = 0;
     while(fgetc(pFile) != EOF)
         count++;
-
     return count;
 }
 
@@ -55,7 +51,8 @@ static int fileGetTotalCharsUntilEOFOrEOL(FILE *pFile)
     CHECK_NULL_RETURN_ZERO(pFile);
     int count = 0, ch = 0;
 
-    while((ch = fgetc(pFile)) != EOF) {
+    while((ch = fgetc(pFile)) != EOF)
+    {
         if (ch == EOL_CHAR_ASCII_DEC_VALUE)
                 break;
         count++;
@@ -64,58 +61,41 @@ static int fileGetTotalCharsUntilEOFOrEOL(FILE *pFile)
     return count;
 }
 
-static ReturnValue updateReadPosition()
+static char *fileGetLastLine(FILE *pFile)
 {
-    FILE *pFile = fopen(COMMUNICATION_FILE_NAME,FILE_READ_MODE);
-    CHECK_NULL_RETURN_ERROR(pFile);
+    CHECK_NULL_RETURN_NULL(pFile);
 
-    int position = fileGetTotalCharsFromFilePointer(pFile);
-    if (position == 0)
-    {
-        fclose(pFile);
-        PRINT_ERROR_MSG_AND_FUNCTION_NAME("updateReadPosition", "Empty file");
-        return ERROR;
-    }
+    char buf[MAX_LINE_LENGTH];
+    while(!feof(pFile))
+        fgets(buf, MAX_LINE_LENGTH, pFile);
 
-    if (isServer)
-        serverPreviousReadPosition = position;
-    else
-        clientPreviousReadPosition = position;
+    unsigned int msgLength = strlen(buf);
+    char *msg = (char *) malloc(sizeof(char) * msgLength);
+    CHECK_NULL_RETURN_NULL(msg);
+    strncpy(msg, buf, msgLength);
+    msg[msgLength] = NULL_CHAR;
 
-    fclose(pFile);
-    return SUCCESS;
+    return msg;
 }
 
 static char *fileGetMessage(FILE *pFile)
 {
     CHECK_NULL_RETURN_NULL(pFile);
-    int previousReadPosition = (isServer) ? serverPreviousReadPosition : clientPreviousReadPosition;
 
-    // moving file pointer to the first unread char
-    int result = fseek(pFile, previousReadPosition + NEWLINE_CHAR_SIZE, SEEK_SET);
-    CHECK_NON_ZERO_RETURN_NULL(result);
+    char buf[MAX_LINE_LENGTH];
+    while(!feof(pFile))
+        fgets(buf, MAX_LINE_LENGTH, pFile);
 
-    // fetch the total length of chars until EOF or EOL
-    int msgLength = fileGetTotalCharsUntilEOFOrEOL(pFile);
-    char *msg = (char *) malloc(sizeof(char) * (msgLength + NULL_CHAR_SIZE));
+    buf[strlen(buf) - EOL_CHAR_SIZE] = NULL_CHAR;
+
+    unsigned int msgLength = strlen(buf) + NULL_CHAR_SIZE;
+    char *msg = (char *) malloc(sizeof(char) * msgLength);
     CHECK_NULL_RETURN_NULL(msg);
 
-    // moving file pointer back to the first unread char
-    result = fseek(pFile, previousReadPosition + NEWLINE_CHAR_SIZE, SEEK_SET);
-    if (result != 0)
-        goto cleanup;
+    strncpy(msg, buf, msgLength - NULL_CHAR_SIZE);
+    msg[msgLength - 1] = NULL_CHAR;
 
-    // get the msg
-    size_t totalCopiedChars = fread(msg, sizeof(char), msgLength, pFile);
-    if (totalCopiedChars != msgLength)
-        goto cleanup;
-
-    msg[msgLength] = NULL_CHAR;
     return msg;
-
-cleanup:
-    free(msg);
-    return NULL;
 }
 
 static char *fileReceive()
@@ -146,7 +126,7 @@ ReturnValue fileServerInitConnect() {
     CHECK_NEGATIVE_PRINT_WRITE_ERROR_GOTO_CLEANUP(result);
     fclose(pFile);
 
-    return updateReadPosition();
+    return SUCCESS;
 
 cleanup:
     fclose(pFile);
@@ -172,8 +152,6 @@ cleanup:
 }
 
 ReturnValue fileClientInitConnect() {
-    isServer = false;
-
     // open the file for appending
     FILE * pFile;
     pFile = fopen(COMMUNICATION_FILE_NAME,FILE_APPEND_MODE);
@@ -234,7 +212,7 @@ ReturnValue fileSend(const char *msg) {
     CHECK_NEGATIVE_PRINT_WRITE_ERROR_GOTO_CLEANUP(writingResult);
 
     fclose(pFile);
-    return updateReadPosition();
+    return SUCCESS;
 
 cleanup:
     fclose(pFile);
