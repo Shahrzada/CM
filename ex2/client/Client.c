@@ -30,8 +30,10 @@ ReturnValue clientClose()
     return MPClientCloseConnection();
 }
 
-ReturnValue clientSendCommand(const char *msg)
+ReturnValue clientSendCommand(Command commandType, char *contents)
 {
+    CHECK_NULL_RETURN_ERROR(contents);
+    char *msg = messageSet(CLIENT, commandType, contents);
     if (!messageValidateFormat(msg))
         return PROJECT_ERROR;
 
@@ -39,6 +41,7 @@ ReturnValue clientSendCommand(const char *msg)
     char *reply = MPClientSend(msg);
     ReturnValue result = handleReply(reply);
 
+    free(msg);
     free(reply);
     return result;
 }

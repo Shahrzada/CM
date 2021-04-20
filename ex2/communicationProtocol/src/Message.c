@@ -43,7 +43,6 @@ char *messageSet(Sender sender, Command commandType, char *contents)
     char *pOutput = msg;
     pOutput += MSG_FORMAT_LENGTH;
     strncpy(pOutput, contents, contentsLength);
-    free(contents);
 
     msg[msgLength - 1] = NULL_CHAR;
     return msg;

@@ -4,7 +4,6 @@
 #include "../include/SocketMethod.h"
 
 #include <winsock2.h>
-#include <stdlib.h>
 
 // -------------------------- const definitions -------------------------
 
@@ -23,14 +22,17 @@
            fprintf(stderr,"%s: %s failed with error %d\n", role, functionName, returnValue); \
            WSACleanup(); \
            } while(0)
+
 #define PRINT_ERROR_CALL_CLEANUP_RETURN_NULL(role, functionName, returnValue) do { \
            fprintf(stderr,"%s: %s failed with error %d\n", role, functionName, returnValue); \
            WSACleanup(); \
            return NULL; \
            } while(0)
 
-
-#define CHECK_INVALID_SOCKET_RETURN_ERROR(socket) do {if ((socket) == INVALID_SOCKET) return ERROR;} while(0)
+#define CLOSE_SOCKET(socket) do { \
+           closesocket((socket)); \
+           (socket) = INVALID_SOCKET; \
+           } while(0)
 
 // ------------------------------ global variables -----------------------------
 
@@ -102,23 +104,23 @@ ReturnValue socketServerInitConnection() {
         goto cleanup;
 
     // No longer need server socket
-    closesocket(listenSocket);
+    CLOSE_SOCKET(listenSocket);
 
     return PROJECT_SUCCESS;
 
 cleanup:
-    closesocket(listenSocket);
-    listenSocket = INVALID_SOCKET;
+    CLOSE_SOCKET(listenSocket);
     PRINT_ERROR_CALL_CLEANUP("Server", "listen()", returnValue);
     return PROJECT_ERROR;
 }
 
 ReturnValue socketServerCloseConnection() {
-    CHECK_INVALID_SOCKET_RETURN_ERROR(clientSocket);
+    if (clientSocket == INVALID_SOCKET)
+        return PROJECT_ERROR;
 
     // Shutdown the send half of the connection since no more data will be sent
     int returnValue = shutdown(clientSocket, SD_SEND);
-    closesocket(clientSocket);
+    CLOSE_SOCKET(clientSocket);
     if (returnValue == SOCKET_ERROR)
     {
         PRINT_ERROR_CALL_CLEANUP("Server", "shutdown()", returnValue);
@@ -130,14 +132,15 @@ ReturnValue socketServerCloseConnection() {
 }
 
 char *socketListen() {
-    CHECK_INVALID_SOCKET_RETURN_ERROR(clientSocket);
+    if (clientSocket == INVALID_SOCKET)
+        return NULL;
     char buf[MAX_MSG_LENGTH] = {0};
 
     // Receive msg
     int returnValue = recv(clientSocket, buf, MAX_MSG_LENGTH, 0);
     if (returnValue == SOCKET_ERROR || returnValue == 0)
     {
-        closesocket(clientSocket);
+        CLOSE_SOCKET(clientSocket);
         PRINT_ERROR_CALL_CLEANUP_RETURN_NULL("Server", "recv()", returnValue);
     }
 
@@ -146,12 +149,13 @@ char *socketListen() {
 
 ReturnValue socketSend(const char *msg) {
     CHECK_NULL_RETURN_ERROR(msg);
-    CHECK_INVALID_SOCKET_RETURN_ERROR(clientSocket);
+    if (clientSocket == INVALID_SOCKET)
+        return PROJECT_ERROR;
 
     int returnValue = send(clientSocket, msg, (int)strlen(msg), 0);
     if (returnValue == SOCKET_ERROR)
     {
-        closesocket(clientSocket);
+        CLOSE_SOCKET(clientSocket);
         PRINT_ERROR_CALL_CLEANUP("Server", "send()", returnValue);
         return PROJECT_ERROR;
     }
@@ -181,7 +185,7 @@ ReturnValue socketClientInitConnection() {
 
     // Create the connection socket
     connectionSocket = socket(DEFAULT_ADDRESS_FAMILY, DEFAULT_SOCKET_TYPE, DEFAULT_PROTOCOL);
-    if (connectionSocket == INVALID_SOCKET )
+    if (connectionSocket == INVALID_SOCKET)
     {
         PRINT_ERROR_CALL_CLEANUP("Client", "socket()", WSAGetLastError());
         return PROJECT_ERROR;
@@ -191,7 +195,7 @@ ReturnValue socketClientInitConnection() {
     int connectionResult = connect(connectionSocket, (struct sockaddr*)&server, sizeof(server));
     if (connectionResult == SOCKET_ERROR)
     {
-        closesocket(connectionSocket);
+        CLOSE_SOCKET(connectionSocket);
         PRINT_ERROR_CALL_CLEANUP("Client", "connect()", WSAGetLastError());
         return PROJECT_ERROR;
     }
@@ -200,21 +204,23 @@ ReturnValue socketClientInitConnection() {
 }
 
 ReturnValue socketClientCloseConnection() {
-    CHECK_INVALID_SOCKET_RETURN_ERROR(connectionSocket);
-    closesocket(connectionSocket);
+    if (connectionSocket == INVALID_SOCKET)
+        return PROJECT_ERROR;
+    CLOSE_SOCKET(connectionSocket);
     WSACleanup();
     return PROJECT_SUCCESS;
 }
 
 char *socketClientSend(const char *msg) {
     CHECK_NULL_RETURN_NULL(msg);
-    CHECK_INVALID_SOCKET_RETURN_ERROR(connectionSocket);
+    if (connectionSocket == INVALID_SOCKET)
+        return NULL;
 
     // Send msg to server
     int result = send(connectionSocket, msg, (int) strlen(msg), 0);
     if (result == SOCKET_ERROR)
     {
-        closesocket(connectionSocket);
+        CLOSE_SOCKET(connectionSocket);
         PRINT_ERROR_CALL_CLEANUP_RETURN_NULL("Client", "send()", WSAGetLastError());
     }
 
@@ -223,7 +229,7 @@ char *socketClientSend(const char *msg) {
     result = recv(connectionSocket, buf, MAX_MSG_LENGTH, 0);
     if (result == SOCKET_ERROR || result == 0)
     {
-        closesocket(connectionSocket);
+        CLOSE_SOCKET(connectionSocket);
         PRINT_ERROR_CALL_CLEANUP_RETURN_NULL("Client", "recv()", WSAGetLastError());
     }
 

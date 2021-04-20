@@ -2,9 +2,6 @@
 // ------------------------------ includes ------------------------------
 #include <unistd.h>
 #include <sys/stat.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "../include/FileMethod.h"
 
@@ -179,5 +176,7 @@ char *fileClientSend(const char *msg) {
     CHECK_ERROR_RETURN_NULL(result);
 
     // wait for server reply
-    return fileListen();
+    char *reply = fileListen();
+    sleep(1);
+    return reply;
 }

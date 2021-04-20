@@ -41,8 +41,8 @@ ReturnValue clientClose();
 
 
 /**
- * @brief given a string (already in a valid msg format), sends it to the server.
+ * @brief given a command and a string as the msg, sends it to the server.
  *
  * @return PROJECT_SUCCESS if the msg was sent and the reply was PROJECT_SUCCESS, PROJECT_ERROR ow.
  */
-ReturnValue clientSendCommand(const char *msg);
+ReturnValue clientSendCommand(Command commandType, char *contents);

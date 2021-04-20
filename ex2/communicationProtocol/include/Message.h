@@ -26,7 +26,7 @@
 
 /**
  * @brief allocates and creates a formatted msg for the protocol given its params.
- * The called of this function is responsible to freeing the memory of the msg.
+ * The caller of this function is responsible to freeing the memory of the msg.
  *
  * @return the formatted msg as a char* if succeeded, NULL ow.
  */

@@ -33,8 +33,6 @@ typedef enum {
 
 // -------------------------- macros -------------------------
 
-#define QUOTATION_MARK_CHAR_ASCII_DEC_VALUE 34
-#define APOSTROPHE_CHAR_ASCII_DEC_VALUE 39
 #define EOL_CHAR_ASCII_DEC_VALUE 10
 #define NULL_CHAR '\0'
 #define NEWLINE_CHAR '\n'
