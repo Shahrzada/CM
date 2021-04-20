@@ -30,11 +30,6 @@
 ReturnValue serverInitialize(CommunicationMethodCode cMethod);
 
 /**
- * @brief Closes the connection.
- */
-void serverClose();
-
-/**
  * @brief listens to the connection until interrupted or receives ABORT.
  */
 _Noreturn void serverListen();
