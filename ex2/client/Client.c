@@ -9,13 +9,13 @@
 static ReturnValue handleReply(char *reply)
 {
     if (!messageValidateFormat(reply))
-        return ERROR;
+        return PROJECT_ERROR;
 
     // SHAH: there's nothing I check atm
     const char *pointerToMsg = messageGetContents(reply);
     printf("Client received reply: %s.\n", pointerToMsg);
 
-    return SUCCESS;
+    return PROJECT_SUCCESS;
 }
 
 // ------------------------------ functions -----------------------------
@@ -33,7 +33,7 @@ ReturnValue clientClose()
 ReturnValue clientSendCommand(const char *msg)
 {
     if (!messageValidateFormat(msg))
-        return ERROR;
+        return PROJECT_ERROR;
 
     // send the message and wait to handle its reply
     char *reply = MPClientSend(msg);

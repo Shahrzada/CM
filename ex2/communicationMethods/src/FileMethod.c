@@ -82,11 +82,11 @@ ReturnValue fileServerInitConnection() {
     CHECK_NEGATIVE_PRINT_WRITE_ERROR_GOTO_CLEANUP(result);
     fclose(pFile);
 
-    return SUCCESS;
+    return PROJECT_SUCCESS;
 
 cleanup:
     fclose(pFile);
-    return ERROR;
+    return PROJECT_ERROR;
 }
 
 ReturnValue fileServerCloseConnection() {
@@ -100,11 +100,11 @@ ReturnValue fileServerCloseConnection() {
     CHECK_NEGATIVE_PRINT_WRITE_ERROR_GOTO_CLEANUP(result);
 
     fclose(pFile);
-    return SUCCESS;
+    return PROJECT_SUCCESS;
 
 cleanup:
     fclose(pFile);
-    return ERROR;
+    return PROJECT_ERROR;
 }
 
 char *fileListen() {
@@ -146,11 +146,11 @@ ReturnValue fileSend(const char *msg) {
     CHECK_NEGATIVE_PRINT_WRITE_ERROR_GOTO_CLEANUP(writingResult);
 
     fclose(pFile);
-    return SUCCESS;
+    return PROJECT_SUCCESS;
 
 cleanup:
     fclose(pFile);
-    return ERROR;
+    return PROJECT_ERROR;
 }
 
 ReturnValue fileClientInitConnection() {
@@ -160,15 +160,15 @@ ReturnValue fileClientInitConnection() {
     CHECK_FILE_NULL_PRINT_OPEN_ERROR_GOTO_CLEANUP(pFile);
 
     fclose(pFile);
-    return SUCCESS;
+    return PROJECT_SUCCESS;
 
 cleanup:
     fclose(pFile);
-    return ERROR;
+    return PROJECT_ERROR;
 }
 
 ReturnValue fileClientCloseConnection() {
-    return SUCCESS;
+    return PROJECT_SUCCESS;
 }
 
 char *fileClientSend(const char *msg) {

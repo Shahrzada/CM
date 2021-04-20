@@ -25,7 +25,7 @@
 /**
  * @brief initializes the server given the connection method
  *
- * @return SUCCESS if the connection was established, ERROR ow.
+ * @return PROJECT_SUCCESS if the connection was established, PROJECT_ERROR ow.
  */
 ReturnValue serverInitialize(CommunicationMethodCode cMethod);
 

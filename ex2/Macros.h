@@ -10,8 +10,8 @@ typedef enum {
 
 /* Return values */
 typedef enum {
-    SUCCESS = 0,
-    ERROR = -999,
+    PROJECT_SUCCESS = 0,
+    PROJECT_ERROR = -999,
 } ReturnValue;
 
 /* Command types */
@@ -54,35 +54,35 @@ typedef enum {
 // -------------------------- macro functions -------------------------
 
 #define CHECK_NULL_RETURN_NULL(pointer) do {if ((pointer) == NULL) return NULL;} while(0)
-#define CHECK_NULL_RETURN_ERROR(pointer) do {if ((pointer) == NULL) return ERROR;} while(0)
+#define CHECK_NULL_RETURN_ERROR(pointer) do {if ((pointer) == NULL) return PROJECT_ERROR;} while(0)
 #define CHECK_NULL_RETURN_FALSE(pointer) do {if ((pointer) == NULL) return false;} while(0)
 #define CHECK_NULL_RETURN(pointer) do {if ((pointer) == NULL) return;} while(0)
 #define CHECK_NULL_RETURN_ZERO(pointer) do {if ((pointer) == NULL) return 0;} while(0)
 #define CHECK_NULL_GOTO_CLEANUP(pointer) do {if ((pointer) == NULL) goto cleanup;} while(0)
 
-#define CHECK_NON_ZERO_RETURN_ERROR(number) do {if ((number) != 0) return ERROR;} while(0)
+#define CHECK_NON_ZERO_RETURN_ERROR(number) do {if ((number) != 0) return PROJECT_ERROR;} while(0)
 #define CHECK_NON_ZERO_RETURN_NULL(number) do {if ((number) != 0) return NULL;} while(0)
 #define CHECK_NON_ZERO_GOTO_CLEANUP(number) do {if ((number) != 0) goto cleanup;} while(0)
 
-#define CHECK_ERROR_RETURN_ERROR(number) do {if ((number) == ERROR) return ERROR;} while(0)
-#define CHECK_ERROR_RETURN_NULL(number) do {if ((number) == ERROR) return NULL;} while(0)
-#define CHECK_ERROR_RETURN(number) do {if ((number) == ERROR) return;} while(0)
-#define CHECK_ERROR_GOTO_CLEANUP(number) do {if ((number) == ERROR) goto cleanup;} while(0)
+#define CHECK_ERROR_RETURN_ERROR(number) do {if ((number) == PROJECT_ERROR) return PROJECT_ERROR;} while(0)
+#define CHECK_ERROR_RETURN_NULL(number) do {if ((number) == PROJECT_ERROR) return NULL;} while(0)
+#define CHECK_ERROR_RETURN(number) do {if ((number) == PROJECT_ERROR) return;} while(0)
+#define CHECK_ERROR_GOTO_CLEANUP(number) do {if ((number) == PROJECT_ERROR) goto cleanup;} while(0)
 
 #define CHECK_ERROR_PRINT_AND_RETURN_ERROR(result, function) do { \
-           if ((result) == ERROR) {                                 \
+           if ((result) == PROJECT_ERROR) {                                 \
                 printf("Error with %s.\n", (function));             \
-                 return ERROR; }                                   \
+                 return PROJECT_ERROR; }                                   \
            } while(0)
 
 #define CHECK_NULL_PRINT_AND_RETURN_ERROR(result, function) do { \
            if ((result) == NULL) {                                 \
                 printf("Error with %s.\n", (function));             \
-                 return ERROR; }                                   \
+                 return PROJECT_ERROR; }                                   \
            } while(0)
 
 #define PRINT_ERROR_MSG_AND_FUNCTION_NAME(functionName, msg) do { \
-           printf("[ERROR]: In %s - %s.\n", (functionName),(msg)); \
+           printf("[PROJECT_ERROR]: In %s - %s.\n", (functionName),(msg)); \
            } while(0)
 
 #include <stdbool.h>

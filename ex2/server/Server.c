@@ -11,7 +11,7 @@
 static void serverRead()
 {
     // Assuming we did some reading from somewhere
-    MPServerSendSuccessOrFailure(SUCCESS);
+    MPServerSendSuccessOrFailure(PROJECT_SUCCESS);
 }
 
 static void serverWrite(const char *msg)
@@ -19,14 +19,14 @@ static void serverWrite(const char *msg)
     CHECK_NULL_RETURN(msg);
 
     // Assuming server wrote content to somewhere, and succeeded.
-    MPServerSendSuccessOrFailure(SUCCESS);
+    MPServerSendSuccessOrFailure(PROJECT_SUCCESS);
 }
 
 static void serverAbort(char *msg)
 {
     CHECK_NULL_RETURN(msg);
     free(msg);
-    MPServerSendSuccessOrFailure(SUCCESS);
+    MPServerSendSuccessOrFailure(PROJECT_SUCCESS);
     sleep(1);
     serverClose();
 }
@@ -75,5 +75,5 @@ void serverClose()
 {
     MPServerCloseConnection();
     printf("Server got ABORT command, closing...");
-    exit(SUCCESS);
+    exit(PROJECT_SUCCESS);
 }

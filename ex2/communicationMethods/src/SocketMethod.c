@@ -19,10 +19,9 @@
 
 // -------------------------- macros -------------------------
 
-#define PRINT_ERROR_CALL_CLEANUP_RETURN_ERROR(role, functionName, returnValue) do { \
+#define PRINT_ERROR_CALL_CLEANUP(role, functionName, returnValue) do { \
            fprintf(stderr,"%s: %s failed with error %d\n", role, functionName, returnValue); \
            WSACleanup(); \
-           return ERROR; \
            } while(0)
 #define PRINT_ERROR_CALL_CLEANUP_RETURN_NULL(role, functionName, returnValue) do { \
            fprintf(stderr,"%s: %s failed with error %d\n", role, functionName, returnValue); \
@@ -40,15 +39,16 @@ static SOCKET connectionSocket = INVALID_SOCKET;
 
 // ------------------------------ private functions -----------------------------
 
+/* initialize Winsock version 2.2 */
 static ReturnValue initWinSock() {
     WSADATA wsaData;
-
-    // initialize Winsock version 2.2
-    int returnValue = WSAStartup(MAKEWORD(2,2), &wsaData);
+    int returnValue = WSAStartup(MAKEWORD(2, 2), &wsaData);
     if (returnValue != 0)
-        PRINT_ERROR_CALL_CLEANUP_RETURN_ERROR("Server", "WSAStartup()", returnValue);
-
-    return SUCCESS;
+    {
+        PRINT_ERROR_CALL_CLEANUP("Socket init", "WSAStartup()", returnValue);
+        return PROJECT_ERROR;
+    }
+    return PROJECT_SUCCESS;
 }
 
 static char *fromBufferToAllocatedMsg(char * buf) {
@@ -70,7 +70,7 @@ static char *fromBufferToAllocatedMsg(char * buf) {
 
 ReturnValue socketServerInitConnection() {
     ReturnValue result = initWinSock();
-//    CHECK_ERROR_RETURN_ERROR(result);
+    CHECK_ERROR_RETURN_ERROR(result);
 
     // Initialize the socket object for the server + Resolve the local address and port
     struct sockaddr_in local;
@@ -81,7 +81,10 @@ ReturnValue socketServerInitConnection() {
     // Create a SOCKET for the server to listen for client connections
     SOCKET listenSocket = socket(DEFAULT_ADDRESS_FAMILY, DEFAULT_SOCKET_TYPE, DEFAULT_PROTOCOL);
     if (listenSocket == INVALID_SOCKET)
-        PRINT_ERROR_CALL_CLEANUP_RETURN_ERROR("Server", "bind()", WSAGetLastError());
+    {
+        PRINT_ERROR_CALL_CLEANUP("Server", "bind()", WSAGetLastError());
+        return PROJECT_ERROR;
+    }
 
     // Binding - setup the TCP listening socket
     int returnValue = bind(listenSocket, (struct sockaddr*)&local, sizeof(local));
@@ -101,12 +104,13 @@ ReturnValue socketServerInitConnection() {
     // No longer need server socket
     closesocket(listenSocket);
 
-    return SUCCESS;
+    return PROJECT_SUCCESS;
 
 cleanup:
     closesocket(listenSocket);
     listenSocket = INVALID_SOCKET;
-    PRINT_ERROR_CALL_CLEANUP_RETURN_ERROR("Server", "listen()", returnValue);
+    PRINT_ERROR_CALL_CLEANUP("Server", "listen()", returnValue);
+    return PROJECT_ERROR;
 }
 
 ReturnValue socketServerCloseConnection() {
@@ -114,37 +118,30 @@ ReturnValue socketServerCloseConnection() {
 
     // Shutdown the send half of the connection since no more data will be sent
     int returnValue = shutdown(clientSocket, SD_SEND);
+    closesocket(clientSocket);
     if (returnValue == SOCKET_ERROR)
     {
-        closesocket(clientSocket);
-        PRINT_ERROR_CALL_CLEANUP_RETURN_ERROR("Server", "shutdown()", returnValue);
+        PRINT_ERROR_CALL_CLEANUP("Server", "shutdown()", returnValue);
+        return PROJECT_ERROR;
     }
 
-    // cleanup
-    closesocket(clientSocket);
     WSACleanup();
-
-    return SUCCESS;
+    return PROJECT_SUCCESS;
 }
 
 char *socketListen() {
     CHECK_INVALID_SOCKET_RETURN_ERROR(clientSocket);
-
     char buf[MAX_MSG_LENGTH] = {0};
-    int returnValue = 0;
 
-
-    returnValue = recv(clientSocket, buf, MAX_MSG_LENGTH, 0);
+    // Receive msg
+    int returnValue = recv(clientSocket, buf, MAX_MSG_LENGTH, 0);
     if (returnValue == SOCKET_ERROR || returnValue == 0)
-        goto cleanup;
+    {
+        closesocket(clientSocket);
+        PRINT_ERROR_CALL_CLEANUP_RETURN_NULL("Server", "recv()", returnValue);
+    }
 
-    char *msg = fromBufferToAllocatedMsg(buf);
-    CHECK_NULL_GOTO_CLEANUP(msg);
-    return msg;
-
-cleanup:
-    closesocket(clientSocket);
-    PRINT_ERROR_CALL_CLEANUP_RETURN_NULL("Server", "recv()", returnValue);
+    return fromBufferToAllocatedMsg(buf);
 }
 
 ReturnValue socketSend(const char *msg) {
@@ -153,24 +150,27 @@ ReturnValue socketSend(const char *msg) {
 
     int returnValue = send(clientSocket, msg, (int)strlen(msg), 0);
     if (returnValue == SOCKET_ERROR)
-        goto cleanup;
+    {
+        closesocket(clientSocket);
+        PRINT_ERROR_CALL_CLEANUP("Server", "send()", returnValue);
+        return PROJECT_ERROR;
+    }
 
-    return SUCCESS;
-
-cleanup:
-    closesocket(clientSocket);
-    PRINT_ERROR_CALL_CLEANUP_RETURN_ERROR("Server", "send()", returnValue);
+    return PROJECT_SUCCESS;
 }
 
 ReturnValue socketClientInitConnection() {
     ReturnValue result = initWinSock();
-//    CHECK_ERROR_RETURN_ERROR(result);
+    CHECK_ERROR_RETURN_ERROR(result);
 
     // Get host
     struct hostent *hp;
     hp = gethostbyname(DEFAULT_SERVER_NAME);
     if (hp == NULL)
-        PRINT_ERROR_CALL_CLEANUP_RETURN_ERROR("Client", "gethostbyname()", WSAGetLastError());
+    {
+        PRINT_ERROR_CALL_CLEANUP("Client", "gethostbyname()", WSAGetLastError());
+        return PROJECT_ERROR;
+    }
 
     // Copy the resolved information into the sockaddr_in structure
     struct sockaddr_in server;
@@ -182,48 +182,50 @@ ReturnValue socketClientInitConnection() {
     // Create the connection socket
     connectionSocket = socket(DEFAULT_ADDRESS_FAMILY, DEFAULT_SOCKET_TYPE, DEFAULT_PROTOCOL);
     if (connectionSocket == INVALID_SOCKET )
-        PRINT_ERROR_CALL_CLEANUP_RETURN_ERROR("Client", "socket()", WSAGetLastError());
+    {
+        PRINT_ERROR_CALL_CLEANUP("Client", "socket()", WSAGetLastError());
+        return PROJECT_ERROR;
+    }
 
     // Connect to server
     int connectionResult = connect(connectionSocket, (struct sockaddr*)&server, sizeof(server));
     if (connectionResult == SOCKET_ERROR)
-        goto cleanup;
+    {
+        closesocket(connectionSocket);
+        PRINT_ERROR_CALL_CLEANUP("Client", "connect()", WSAGetLastError());
+        return PROJECT_ERROR;
+    }
 
-    return SUCCESS;
-
-cleanup:
-    closesocket(connectionSocket);
-    PRINT_ERROR_CALL_CLEANUP_RETURN_ERROR("Client", "connect()", WSAGetLastError());
+    return PROJECT_SUCCESS;
 }
 
 ReturnValue socketClientCloseConnection() {
     CHECK_INVALID_SOCKET_RETURN_ERROR(connectionSocket);
     closesocket(connectionSocket);
     WSACleanup();
-    return SUCCESS;
+    return PROJECT_SUCCESS;
 }
 
-char *socketClientSend(const char *msg)
-{
+char *socketClientSend(const char *msg) {
     CHECK_NULL_RETURN_NULL(msg);
     CHECK_INVALID_SOCKET_RETURN_ERROR(connectionSocket);
 
     // Send msg to server
-    int result = send(connectionSocket, msg, (int)strlen(msg), 0);
+    int result = send(connectionSocket, msg, (int) strlen(msg), 0);
     if (result == SOCKET_ERROR)
+    {
+        closesocket(connectionSocket);
         PRINT_ERROR_CALL_CLEANUP_RETURN_NULL("Client", "send()", WSAGetLastError());
+    }
 
     // Wait for a reply from the server
     char buf[MAX_MSG_LENGTH] = {0};
     result = recv(connectionSocket, buf, MAX_MSG_LENGTH, 0);
     if (result == SOCKET_ERROR || result == 0)
-        goto cleanup;
+    {
+        closesocket(connectionSocket);
+        PRINT_ERROR_CALL_CLEANUP_RETURN_NULL("Client", "recv()", WSAGetLastError());
+    }
 
-    char *reply = fromBufferToAllocatedMsg(buf);
-    CHECK_NULL_GOTO_CLEANUP(reply);
-    return reply;
-
-cleanup:
-    closesocket(connectionSocket);
-    PRINT_ERROR_CALL_CLEANUP_RETURN_NULL("Client", "recv()", WSAGetLastError());
+    return fromBufferToAllocatedMsg(buf);
 }

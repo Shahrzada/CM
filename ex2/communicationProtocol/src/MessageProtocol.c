@@ -55,7 +55,7 @@ ReturnValue MPServerSend(char *msg)
 {
     CHECK_NULL_RETURN_ERROR(serverCMethod);
     if (!messageValidateFormat(msg))
-        return ERROR;
+        return PROJECT_ERROR;
     return serverCMethod->sendFunction(msg);
 }
 
@@ -75,8 +75,8 @@ void MPServerSendSuccessOrFailure(ReturnValue result)
 {
     switch (result)
     {
-        case SUCCESS: MPServerSend(SERVER_SUCCESS_MSG); break;
-        case ERROR: MPServerSend(SERVER_FAILURE_MSG); break;
+        case PROJECT_SUCCESS: MPServerSend(SERVER_SUCCESS_MSG); break;
+        case PROJECT_ERROR: MPServerSend(SERVER_FAILURE_MSG); break;
         default: PRINT_ERROR_MSG_AND_FUNCTION_NAME("MPServerSendSuccessOrFailure", "Bad result value"); break;
     }
 }

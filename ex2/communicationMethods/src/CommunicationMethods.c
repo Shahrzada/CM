@@ -23,7 +23,7 @@ static ReturnValue initServerCMethod(ServerCommunicationMethod *serverCMethod,
     serverCMethod->listenFunction = listenFunction;
     serverCMethod->sendFunction = sendFunction;
 
-    return SUCCESS;
+    return PROJECT_SUCCESS;
 }
 
 static ReturnValue initClientCMethod(ClientCommunicationMethod *clientCMethod,
@@ -40,7 +40,7 @@ static ReturnValue initClientCMethod(ClientCommunicationMethod *clientCMethod,
     clientCMethod->clientCloseConnectionFunction = clientCloseConnectionFunction;
     clientCMethod->sendFunction = sendFunction;
 
-    return SUCCESS;
+    return PROJECT_SUCCESS;
 }
 
 // ------------------------------ functions -----------------------------
@@ -50,7 +50,7 @@ ServerCommunicationMethod *serverCMethodSet(CommunicationMethodCode cMethod)
     ServerCommunicationMethod *serverCMethod = (ServerCommunicationMethod *) malloc(sizeof(ServerCommunicationMethod));
     CHECK_NULL_RETURN_NULL(serverCMethod);
 
-    ReturnValue result = ERROR;
+    ReturnValue result = PROJECT_ERROR;
     switch (cMethod)
     {
         case FILE_METHOD: result = initServerCMethod(serverCMethod, fileServerInitConnection, fileServerCloseConnection,
@@ -74,7 +74,7 @@ ClientCommunicationMethod *clientCMethodSet(CommunicationMethodCode cMethod)
     ClientCommunicationMethod *clientCMethod = (ClientCommunicationMethod *) malloc(sizeof(ClientCommunicationMethod));
     CHECK_NULL_RETURN_NULL(clientCMethod);
 
-    ReturnValue result = ERROR;
+    ReturnValue result = PROJECT_ERROR;
     switch (cMethod)
     {
         case FILE_METHOD: result = initClientCMethod(clientCMethod, fileClientInitConnection, fileClientCloseConnection,

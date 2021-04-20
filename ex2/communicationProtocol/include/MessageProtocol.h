@@ -23,7 +23,7 @@
  * method code, allocating/using the static ServerCommunicationMethod object that holds
  * all relevant function pointers
  *
- * @return SUCCESS if connection was established, ERROR ow.
+ * @return PROJECT_SUCCESS if connection was established, PROJECT_ERROR ow.
  */
 ReturnValue MPServerInitConnection(CommunicationMethodCode cMethodCode);
 
@@ -31,7 +31,7 @@ ReturnValue MPServerInitConnection(CommunicationMethodCode cMethodCode);
  * @brief closes the server connection using the static ServerCommunicationMethod,
  * and frees it.
  *
- * @return SUCCESS if connection was closed, ERROR ow.
+ * @return PROJECT_SUCCESS if connection was closed, PROJECT_ERROR ow.
  */
 ReturnValue MPServerCloseConnection();
 
@@ -40,7 +40,7 @@ ReturnValue MPServerCloseConnection();
  * method code, allocating/using the static ClientCommunicationMethod object that holds
  * all relevant function pointers
  *
- * @return SUCCESS if connection was established, ERROR ow.
+ * @return PROJECT_SUCCESS if connection was established, PROJECT_ERROR ow.
  */
 ReturnValue MPClientInitConnection(CommunicationMethodCode cMethodCode);
 
@@ -48,7 +48,7 @@ ReturnValue MPClientInitConnection(CommunicationMethodCode cMethodCode);
  * @brief closes the client connection using the static ClientCommunicationMethod,
  * and frees it.
  *
- * @return SUCCESS if connection was closed, ERROR ow.
+ * @return PROJECT_SUCCESS if connection was closed, PROJECT_ERROR ow.
  */
 ReturnValue MPClientCloseConnection();
 
@@ -62,12 +62,12 @@ char *MPServerListen();
 /**
  * @brief send the msg using the static ServerCommunicationMethod object
  *
- * @return SUCCESS if succeeded, ERROR ow.
+ * @return PROJECT_SUCCESS if succeeded, PROJECT_ERROR ow.
  */
 ReturnValue MPServerSend(char *msg);
 
 /**
- * @brief send the formatted SUCCESS or FAILURE server msg according
+ * @brief send the formatted PROJECT_SUCCESS or FAILURE server msg according
  * to the input result value.
  */
 void MPServerSendSuccessOrFailure(ReturnValue result);
