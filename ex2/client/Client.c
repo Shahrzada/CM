@@ -4,6 +4,10 @@
 #include "Client.h"
 #include "../communicationProtocol/include/MessageProtocol.h"
 
+// -------------------------- macros -------------------------
+
+#define CLIENT_CONST_FILE_NAME "pitz"
+
 // ------------------------------ private functions -----------------------------
 
 static ReturnValue clientGetFile(char *reply)
@@ -11,20 +15,48 @@ static ReturnValue clientGetFile(char *reply)
     // TODO create a file instead
     printf("Client is receiving a file:\n");
 
-    char *followingReply = reply;
-    Command currentCommand = GET_FILE;
-    int counter = 0;
+    // first msg is always the file's title
+    char *fileTitle = messageGetContents(reply);
+    FILE *pFile = fopen(fileTitle, FILE_WRITE_BINARY_MODE);
+    if (pFile == NULL)
+    {
+        PRINT_ERROR_MSG_AND_FUNCTION_NAME("clientGetFile", "Couldn't open the file");
+        return PROJECT_ERROR;
+    }
+
+    char *followingReply = MPClientReceive();
+    char *contents = NULL;
+    Command currentCommand = messageGetCommand(followingReply);
+    unsigned int counter = 0, totalBytesToBeWritten = 0, totalBytesWritten = 0;
     while (currentCommand == GET_FILE)
     {
         counter++;
+
         // TODO write to a file instead
         printf("[%d]: %s\n", counter, followingReply);
+        contents = messageGetContents(followingReply);
+        if (contents == NULL)
+        {
+            fclose(pFile);
+            return PROJECT_ERROR;
+        }
+        totalBytesToBeWritten = (unsigned int)strlen(contents);
+        totalBytesWritten = fwrite(contents, 1, totalBytesToBeWritten, pFile);
         free(followingReply);
+        if (totalBytesWritten != totalBytesToBeWritten)
+        {
+            fclose(pFile);
+            return PROJECT_ERROR;
+        }
+
+        // get next msg and its command
         followingReply = MPClientReceive();
-        //todo maybe check validity?
         currentCommand = messageGetCommand(followingReply);
     }
 
+    fclose(pFile);
+
+    // TODO: remove this
     printf("Client finished receiving a file of %d msgs with msg:\n", counter);
     printf("%s\n", followingReply);
     return PROJECT_SUCCESS;

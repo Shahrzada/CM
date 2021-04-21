@@ -24,10 +24,10 @@
 
 ReturnValue fileServerInitConnection();
 ReturnValue fileServerCloseConnection();
-
 char *fileListen();
 ReturnValue fileSend(const char *msg);
 
 ReturnValue fileClientInitConnection();
 ReturnValue fileClientCloseConnection();
 char *fileClientSend(const char *msg);
+char *fileClientReceive();

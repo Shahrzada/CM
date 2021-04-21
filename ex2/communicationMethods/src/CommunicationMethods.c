@@ -81,7 +81,7 @@ ClientCommunicationMethod *clientCMethodSet(CommunicationMethodCode cMethod)
     switch (cMethod)
     {
         case FILE_METHOD: result = initClientCMethod(clientCMethod, fileClientInitConnection, fileClientCloseConnection,
-                                                     fileClientSend, fileListen); break;
+                                                     fileClientSend, fileClientReceive); break;
         case SOCKET_METHOD: result = initClientCMethod(clientCMethod, socketClientInitConnection,
                                                        socketClientCloseConnection, socketClientSend, socketClientListen); break;
         /*case NEW_METHOD: result = initClientCMethod(relevant functions); break;*/

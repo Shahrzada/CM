@@ -7,7 +7,7 @@ ReturnValue sendSomeMsgs();
 
 int main(int argc, char const *argv[])
 {
-    ReturnValue result = clientInitialize(SOCKET_METHOD);
+    ReturnValue result = clientInitialize(FILE_METHOD);
     CHECK_ERROR_PRINT_AND_RETURN_ERROR(result, "clientInitialize");
 
     result = sendSomeMsgs();
@@ -19,20 +19,20 @@ int main(int argc, char const *argv[])
 ReturnValue sendSomeMsgs()
 {
     ReturnValue result = PROJECT_ERROR;
-//    result = sendAMsg(READ, "Heyo");
-//    CHECK_ERROR_RETURN_ERROR(result);
-//
-//    result = sendAMsg(WRITE, "BEBBBI            IIII");
-//    CHECK_ERROR_RETURN_ERROR(result);
-//
-//    result = sendAMsg(WRITE, "BEBBB   IIIII");
-//    CHECK_ERROR_RETURN_ERROR(result);
-//
-//    result = sendAMsg(READ, "BEBBBI1135411    IIII");
-//    CHECK_ERROR_RETURN_ERROR(result);
-
-    result = sendAMsg(GET_FILE, "schnitzel/pitzel.exe");
+    result = sendAMsg(READ, "Hey2222222o");
     CHECK_ERROR_RETURN_ERROR(result);
+
+    result = sendAMsg(WRITE, "BEBBBI   222         IIII");
+    CHECK_ERROR_RETURN_ERROR(result);
+//
+    result = sendAMsg(WRITE, "BEBBB   IIIII");
+    CHECK_ERROR_RETURN_ERROR(result);
+
+    result = sendAMsg(READ, "BEBBBI1135411222    IIII");
+    CHECK_ERROR_RETURN_ERROR(result);
+
+//    result = sendAMsg(GET_FILE, "schnitzel/pitzel.exe");
+//    CHECK_ERROR_RETURN_ERROR(result);
 
     result = sendAMsg(ABORT, "Goodbye");
     CHECK_ERROR_RETURN_ERROR(result);

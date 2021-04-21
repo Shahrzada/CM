@@ -3,12 +3,13 @@
 
 #include <unistd.h>
 
-#include "Server.h"
-#include "../communicationProtocol/include/MessageProtocol.h"
+#include "server/Server.h"
+#include "communicationProtocol/include/MessageProtocol.h"
 
 // -------------------------- macros -------------------------
 
 #define GET_FILE_PATH "C:\\Users\\ADMIN\\CLionProjects\\bebi\\ex2\\nitz.txt"
+#define GET_FILE_TITLE "nitz.txt"
 
 // ------------------------------ private functions -----------------------------
 
@@ -54,22 +55,40 @@ static void serverWrite(const char *msg)
     MPServerSendSuccessOrFailure(PROJECT_SUCCESS);
 }
 
+static ReturnValue sendFileTitle(char *msg)
+{
+    CHECK_NULL_RETURN_ERROR(msg);
+
+    char *fileTitleMsg = messageSet(SERVER, GET_FILE, GET_FILE_TITLE);
+    CHECK_NULL_RETURN_ERROR(fileTitleMsg);
+
+    ReturnValue result = MPServerSend(fileTitleMsg);
+    free(fileTitleMsg);
+    return result;
+}
+
 static void serverSendFile(char *msg)
 {
     CHECK_NULL_RETURN(msg);
 //    char *filePath = messageGetContents(msg);
 //    CHECK_NULL_RETURN(filePath);
+
     // const location atm
     char *filePath = GET_FILE_PATH;
-    FILE *pFile = fopen(filePath, FILE_READ_BINARY_MODE);
-    if (pFile == NULL)
-    {
-        PRINT_ERROR_MSG_AND_FUNCTION_NAME("serverSendFile", "Couldn't open the file");
-        return;
-    }
-
     char *fileMsg = NULL;
+    FILE *pFile = NULL;
     ReturnValue result = PROJECT_ERROR;
+
+    // open the file to be sent
+    pFile = fopen(filePath, FILE_READ_BINARY_MODE);
+    CHECK_NULL_GOTO_CLEANUP(pFile);
+
+    // first msg is always the file's title
+    result = sendFileTitle(msg);
+    CHECK_ERROR_GOTO_CLEANUP(result);
+    sleep(1);
+
+    // then, send the file itself using multiple msgs (if needed)
     while (true)
     {
         fileMsg = serverLoadFileIntoMsgFormat(pFile);
@@ -77,6 +96,7 @@ static void serverSendFile(char *msg)
         result = MPServerSend(fileMsg);
         CHECK_ERROR_GOTO_CLEANUP(result);
         free(fileMsg);
+        sleep(1);
     }
 
 cleanup:
