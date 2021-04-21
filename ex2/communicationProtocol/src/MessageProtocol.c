@@ -45,6 +45,12 @@ ReturnValue MPClientCloseConnection()
     return result;
 }
 
+char *MPClientReceive()
+{
+    CHECK_NULL_RETURN_NULL(clientCMethod);
+    return clientCMethod->clientReceiveFunction();
+}
+
 char *MPServerListen()
 {
     CHECK_NULL_RETURN_NULL(serverCMethod);

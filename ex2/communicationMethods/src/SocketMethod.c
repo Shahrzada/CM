@@ -14,8 +14,6 @@
 #define DEFAULT_PROTOCOL IPPROTO_TCP
 #define MAXIMUM_ALLOWED_CONNECTIONS 1
 
-#define MAX_MSG_LENGTH 512
-
 // -------------------------- macros -------------------------
 
 #define PRINT_ERROR_CALL_CLEANUP(role, functionName, returnValue) do { \
@@ -142,6 +140,22 @@ char *socketListen() {
     {
         CLOSE_SOCKET(clientSocket);
         PRINT_ERROR_CALL_CLEANUP_RETURN_NULL("Server", "recv()", returnValue);
+    }
+
+    return fromBufferToAllocatedMsg(buf);
+}
+
+char *socketClientListen() {
+    if (connectionSocket == INVALID_SOCKET)
+        return NULL;
+    char buf[MAX_MSG_LENGTH] = {0};
+
+    // Receive msg
+    int returnValue = recv(connectionSocket, buf, MAX_MSG_LENGTH, 0);
+    if (returnValue == SOCKET_ERROR || returnValue == 0)
+    {
+        CLOSE_SOCKET(connectionSocket);
+        PRINT_ERROR_CALL_CLEANUP_RETURN_NULL("Client", "recv()", returnValue);
     }
 
     return fromBufferToAllocatedMsg(buf);

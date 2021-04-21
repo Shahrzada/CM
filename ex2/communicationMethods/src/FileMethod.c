@@ -10,7 +10,6 @@
 #define COMMUNICATION_FILE_NAME "bebi.txt"
 #define INIT_FILE_SUCCESS_MSG "[Server]: Created the file successfully.\n"
 #define CLOSED_FILE_SUCCESS_MSG "[Server]: Closed the file successfully.\n"
-#define MAX_LINE_LENGTH 257
 
 // -------------------------- macros -------------------------
 
@@ -33,9 +32,9 @@ static char *fileGetMessage(FILE *pFile)
     CHECK_NULL_RETURN_NULL(pFile);
 
     // get the last line in the file
-    char buf[MAX_LINE_LENGTH];
+    char buf[MAX_MSG_LENGTH];
     while(!feof(pFile))
-        fgets(buf, MAX_LINE_LENGTH, pFile);
+        fgets(buf, MAX_MSG_LENGTH, pFile);
 
     // ignore the '\n'
     buf[strlen(buf) - EOL_CHAR_SIZE] = NULL_CHAR;

@@ -24,6 +24,7 @@
 
 ReturnValue fileServerInitConnection();
 ReturnValue fileServerCloseConnection();
+
 char *fileListen();
 ReturnValue fileSend(const char *msg);
 

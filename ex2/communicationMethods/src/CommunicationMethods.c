@@ -29,16 +29,19 @@ static ReturnValue initServerCMethod(ServerCommunicationMethod *serverCMethod,
 static ReturnValue initClientCMethod(ClientCommunicationMethod *clientCMethod,
                               client_init_connection_function_t *clientInitConnectionFunction,
                               client_close_connection_function_t *clientCloseConnectionFunction,
-                              client_send_function_t *sendFunction)
+                              client_send_function_t *sendFunction,
+                              client_receive_function_t *clientReceiveFunction)
 {
     CHECK_NULL_RETURN_ERROR(clientCMethod);
     CHECK_NULL_RETURN_ERROR(clientInitConnectionFunction);
     CHECK_NULL_RETURN_ERROR(clientCloseConnectionFunction);
     CHECK_NULL_RETURN_ERROR(sendFunction);
+    CHECK_NULL_RETURN_ERROR(clientReceiveFunction);
 
     clientCMethod->clientInitConnectionFunction = clientInitConnectionFunction;
     clientCMethod->clientCloseConnectionFunction = clientCloseConnectionFunction;
     clientCMethod->sendFunction = sendFunction;
+    clientCMethod->clientReceiveFunction = clientReceiveFunction;
 
     return PROJECT_SUCCESS;
 }
@@ -78,9 +81,9 @@ ClientCommunicationMethod *clientCMethodSet(CommunicationMethodCode cMethod)
     switch (cMethod)
     {
         case FILE_METHOD: result = initClientCMethod(clientCMethod, fileClientInitConnection, fileClientCloseConnection,
-                                                     fileClientSend); break;
+                                                     fileClientSend, fileListen); break;
         case SOCKET_METHOD: result = initClientCMethod(clientCMethod, socketClientInitConnection,
-                                                       socketClientCloseConnection, socketClientSend); break;
+                                                       socketClientCloseConnection, socketClientSend, socketClientListen); break;
         /*case NEW_METHOD: result = initClientCMethod(relevant functions); break;*/
         default: PRINT_ERROR_MSG_AND_FUNCTION_NAME("clientCMethodSet", "Bad cMethod"); break;
     }

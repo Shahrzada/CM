@@ -30,5 +30,6 @@ ReturnValue socketSend(const char *msg);
 ReturnValue socketClientInitConnection();
 ReturnValue socketClientCloseConnection();
 char *socketClientSend(const char *msg);
+char *socketClientListen();
 
 

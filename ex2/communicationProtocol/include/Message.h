@@ -19,6 +19,8 @@
 
 // -------------------------- macros -------------------------
 
+#define MSG_FORMAT_LENGTH 4
+
 #define SERVER_SUCCESS_MSG "0,3,PROJECT_SUCCESS"
 #define SERVER_FAILURE_MSG "0,3,FAILURE"
 
@@ -65,7 +67,7 @@ Command messageGetCommand(const char *msg);
  *
  * @return the relevant contents if msg is valid, NULL ow.
  */
-const char *messageGetContents(const char *msg);
+char *messageGetContents(char *msg);
 
 /**
  * @brief returns the total chars in contents

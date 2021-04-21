@@ -6,15 +6,46 @@
 
 // ------------------------------ private functions -----------------------------
 
+static ReturnValue clientGetFile(char *reply)
+{
+    // TODO create a file instead
+    printf("Client is receiving a file:\n");
+
+    char *followingReply = reply;
+    Command currentCommand = GET_FILE;
+    int counter = 0;
+    while (currentCommand == GET_FILE)
+    {
+        counter++;
+        // TODO write to a file instead
+        printf("[%d]: %s\n", counter, followingReply);
+        free(followingReply);
+        followingReply = MPClientReceive();
+        //todo maybe check validity?
+        currentCommand = messageGetCommand(followingReply);
+    }
+
+    printf("Client finished receiving a file of %d msgs with msg:\n", counter);
+    printf("%s\n", followingReply);
+    return PROJECT_SUCCESS;
+}
+
+
 static ReturnValue handleReply(char *reply)
 {
     if (!messageValidateFormat(reply))
         return PROJECT_ERROR;
 
-    // SHAH: there's nothing I check atm
-    const char *pointerToMsg = messageGetContents(reply);
-    printf("Client received reply: %s.\n", pointerToMsg);
+    Command currentCommand = messageGetCommand(reply);
 
+    // SHAH: there's nothing much I check atm
+    if (currentCommand == GET_FILE)
+        clientGetFile(reply);
+    else
+    {
+        const char *pointerToMsg = messageGetContents(reply);
+        printf("Client received reply: %s.\n", pointerToMsg);
+    }
     return PROJECT_SUCCESS;
 }
 

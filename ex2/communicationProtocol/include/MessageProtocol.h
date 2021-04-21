@@ -78,3 +78,5 @@ void MPServerSendSuccessOrFailure(ReturnValue result);
  * @return the reply msg from the server if succeeded, NULL ow.
  */
 char *MPClientSend(const char *msg);
+
+char *MPClientReceive();

@@ -40,6 +40,7 @@ typedef ReturnValue (server_send_function_t)(const char *);
 typedef ReturnValue (client_init_connection_function_t)();
 typedef ReturnValue (client_close_connection_function_t)();
 typedef char * (client_send_function_t)(const char *);
+typedef char * (client_receive_function_t)();
 
 /**
  * The ServerCommunicationMethod holds pointers to the relevant
@@ -60,6 +61,7 @@ typedef struct {
     client_init_connection_function_t *clientInitConnectionFunction;
     client_close_connection_function_t *clientCloseConnectionFunction;
     client_send_function_t *sendFunction;
+    client_receive_function_t *clientReceiveFunction;
 } ClientCommunicationMethod;
 
 // ------------------------------ functions -----------------------------

@@ -5,7 +5,6 @@
 
 // -------------------------- macros -------------------------
 
-#define MSG_FORMAT_LENGTH 4
 #define MSG_FORMAT_SENDER_POSITION 0
 #define MSG_FORMAT_COMMAND_POSITION 2
 
@@ -19,7 +18,7 @@ static bool messageValidateSender(Sender sender)
 static bool messageValidateCommand(Command command)
 {
     return (command == READ || command == WRITE
-    || command == ABORT || command == REPLY);
+    || command == ABORT || command == REPLY || command == GET_FILE);
 }
 
 // ------------------------------ functions -----------------------------
@@ -84,11 +83,11 @@ Command messageGetCommand(const char *msg)
     return msg[MSG_FORMAT_COMMAND_POSITION] - ZERO_CHAR;
 }
 
-const char *messageGetContents(const char *msg)
+char *messageGetContents(char *msg)
 {
     if (!messageValidateFormat(msg))
         return NULL;
-    const char *pMsg = msg;
+    char *pMsg = msg;
     return pMsg + MSG_FORMAT_LENGTH;
 }
 

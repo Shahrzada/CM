@@ -19,6 +19,7 @@ typedef enum {
     EMPTY_COMMAND = -1,
     READ = 0,
     WRITE,
+    GET_FILE,
     ABORT,
     REPLY,
 } Command;
@@ -45,9 +46,12 @@ typedef enum {
 #define EOL_CHAR_SIZE 1
 
 #define FILE_READ_MODE "r"
+#define FILE_READ_BINARY_MODE "rb"
 #define FILE_WRITE_UPDATE_MODE "w+"
 #define FILE_APPEND_MODE "a"
 #define FILE_APPEND_AND_READ_MODE "a+"
+
+#define MAX_MSG_LENGTH 513
 
 // -------------------------- macro functions -------------------------
 
