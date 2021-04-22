@@ -37,7 +37,7 @@ ReturnValue clientInitialize(CommunicationMethodCode cMethod);
  *
  * @return PROJECT_SUCCESS if connection was closed, PROJECT_ERROR ow.
  */
-ReturnValue clientClose();
+ReturnValue clientClose(ReturnValue result);
 
 
 /**

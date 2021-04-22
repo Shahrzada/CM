@@ -36,9 +36,17 @@ ReturnValue MPClientInitConnection(CommunicationMethodCode cMethodCode)
     return clientCMethod->clientInitConnectionFunction();
 }
 
-ReturnValue MPClientCloseConnection()
+ReturnValue MPClientCloseConnection(bool errorFlag)
 {
     CHECK_NULL_RETURN_ERROR(clientCMethod);
+
+    if (errorFlag)
+    {
+        char *abortMsg = messageSet(CLIENT, ABORT, "");
+        // if it is null we want to free and close anyways, don't care about return at this point
+        clientCMethod->sendFunction(abortMsg);
+    }
+
     ReturnValue result = clientCMethod->clientCloseConnectionFunction();
     free(clientCMethod);
     clientCMethod = NULL;
@@ -48,13 +56,29 @@ ReturnValue MPClientCloseConnection()
 char *MPClientReceive()
 {
     CHECK_NULL_RETURN_NULL(clientCMethod);
-    return clientCMethod->clientReceiveFunction();
+    char * msg = clientCMethod->clientReceiveFunction();
+    if (msg != NULL)
+        printf("Got the msg: %s\n", msg);
+    else
+        printf("Got NULL msg.\n");
+
+    return msg;
+//    return clientCMethod->clientReceiveFunction();
 }
 
 char *MPServerListen()
 {
     CHECK_NULL_RETURN_NULL(serverCMethod);
-    return serverCMethod->listenFunction();
+
+    char * msg = serverCMethod->listenFunction();
+    if (msg != NULL)
+        printf("Got the msg: %s\n", msg);
+    else
+        printf("Got NULL msg.\n");
+
+    return msg;
+
+//    return serverCMethod->listenFunction();
 }
 
 ReturnValue MPServerSend(char *msg)
@@ -73,8 +97,16 @@ char *MPClientSend(const char *msg)
     if (!messageValidateFormat(msg))
         return NULL;
 
-    // use the communication method to send the msg
-    return clientCMethod->sendFunction(msg);
+
+    char * reply = clientCMethod->sendFunction(msg);
+    if (reply != NULL)
+        printf("Got the msg: %s\n", reply);
+    else
+        printf("Got NULL msg.\n");
+
+    return reply;
+
+//    return clientCMethod->sendFunction(msg);
 }
 
 void MPServerSendSuccessOrFailure(ReturnValue result)

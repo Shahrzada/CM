@@ -35,6 +35,7 @@ typedef enum {
 // -------------------------- macros -------------------------
 
 #define EOL_CHAR_ASCII_DEC_VALUE 10
+#define EOT_CHAR_ASCII_DEC_VALUE 4
 #define NULL_CHAR '\0'
 #define NEWLINE_CHAR '\n'
 #define EOL_CHAR '\n'
@@ -42,8 +43,10 @@ typedef enum {
 #define COMMA_CHAR ','
 #define ZERO_CHAR '0'
 
+#define CHAR_SIZE 1
 #define NULL_CHAR_SIZE 1
 #define EOL_CHAR_SIZE 1
+#define EOT_CHAR_SIZE 1
 
 #define FILE_READ_MODE "r"
 #define FILE_READ_BINARY_MODE "rb"

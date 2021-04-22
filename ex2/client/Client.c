@@ -1,6 +1,7 @@
 
 // ------------------------------ includes ------------------------------
 
+#include <unistd.h>
 #include "Client.h"
 #include "../communicationProtocol/include/MessageProtocol.h"
 
@@ -27,16 +28,13 @@ static ReturnValue clientGetFile(char *reply)
     char *followingReply = MPClientReceive();
     char *contents = NULL;
     Command currentCommand = messageGetCommand(followingReply);
-    unsigned int counter = 0, totalBytesToBeWritten = 0, totalBytesWritten = 0;
+    unsigned int totalBytesToBeWritten = 0, totalBytesWritten = 0;
     while (currentCommand == GET_FILE)
     {
-        counter++;
-
-        // TODO write to a file instead
-        printf("[%d]: %s\n", counter, followingReply);
         contents = messageGetContents(followingReply);
         if (contents == NULL)
         {
+            printf("[CLIENT-FILE]: Error with contents");
             fclose(pFile);
             return PROJECT_ERROR;
         }
@@ -45,6 +43,7 @@ static ReturnValue clientGetFile(char *reply)
         free(followingReply);
         if (totalBytesWritten != totalBytesToBeWritten)
         {
+            printf("[CLIENT-FILE]: Error with writing to file");
             fclose(pFile);
             return PROJECT_ERROR;
         }
@@ -56,9 +55,12 @@ static ReturnValue clientGetFile(char *reply)
 
     fclose(pFile);
 
-    // TODO: remove this
-    printf("Client finished receiving a file of %d msgs with msg:\n", counter);
-    printf("%s\n", followingReply);
+    if (followingReply == NULL)
+    {
+        PRINT_ERROR_MSG_AND_FUNCTION_NAME("clientGetFile", "Something went wrong with receiving the file");
+        return PROJECT_ERROR;
+    }
+
     return PROJECT_SUCCESS;
 }
 
@@ -88,9 +90,10 @@ ReturnValue clientInitialize(CommunicationMethodCode cMethod)
     return MPClientInitConnection(cMethod);
 }
 
-ReturnValue clientClose()
+ReturnValue clientClose(ReturnValue result)
 {
-    return MPClientCloseConnection();
+    bool errorFlag = (result == PROJECT_ERROR) ? true:false;
+    return MPClientCloseConnection(errorFlag);
 }
 
 ReturnValue clientSendCommand(Command commandType, char *contents)

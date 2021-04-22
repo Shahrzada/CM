@@ -67,11 +67,10 @@ static unsigned int copyMsgIntoCStringAndReturnItsLength(FILE *pFile, char *buf)
     unsigned int msgLength = 0;
     int ch = 0;
 
-    // TODO handle in msg EOLs
     while (msgLength < MAX_MSG_LENGTH)
     {
         ch = fgetc(pFile);
-        if (ch == EOF || ch == EOL_CHAR)
+        if (ch == EOF || ch == EOT_CHAR_ASCII_DEC_VALUE)
             return msgLength;
         buf[msgLength] = (char)ch;
         msgLength++;
@@ -80,7 +79,7 @@ static unsigned int copyMsgIntoCStringAndReturnItsLength(FILE *pFile, char *buf)
 }
 
 static char *fileGetMessage(FILE *pFile) {
-    // get msg from previous position to first EOF/EOL
+    // get msg from previous position to first EOF/EOT
     pFile = getToLastKnownPosition(pFile);
     char buf[MAX_MSG_LENGTH];
     unsigned int msgLength = copyMsgIntoCStringAndReturnItsLength(pFile, buf);
@@ -94,7 +93,7 @@ static char *fileGetMessage(FILE *pFile) {
     memcpy(msg, buf, sizeof(char) * msgLength);
     msg[msgLength] = NULL_CHAR;
 
-    fileLatestCharPosition += msgLength + EOL_CHAR_SIZE;
+    fileLatestCharPosition += msgLength + EOT_CHAR_SIZE;
     return msg;
 }
 
@@ -146,7 +145,10 @@ char *fileListen() {
         // if the current mtime is later than a prior mtime, the file has been modified
         stat(COMMUNICATION_FILE_NAME, &fileStat);
         if (fileLatestModified < fileStat.st_mtime)
+        {
+            sleep(1);
             return fileReceive();
+        }
         sleep(1);
     }
 }
@@ -162,13 +164,14 @@ ReturnValue fileSend(const char *msg) {
     int writingResult = fputs(msg, pFile);
     CHECK_NEGATIVE_PRINT_WRITE_ERROR_GOTO_CLEANUP(writingResult);
 
-    // add EOL to differentiate msgs
-    writingResult = fputs(EOL_STRING, pFile);
+    // add EOT to differentiate msgs
+    char buf[2]= {EOT_CHAR_ASCII_DEC_VALUE};
+    writingResult = fputs(buf, pFile);
     CHECK_NEGATIVE_PRINT_WRITE_ERROR_GOTO_CLEANUP(writingResult);
 
-    updateLatestModified();
     fclose(pFile);
-    fileLatestCharPosition += strlen(msg) + EOL_CHAR_SIZE;
+    updateLatestModified();
+    fileLatestCharPosition += strlen(msg) + EOT_CHAR_SIZE;
     return PROJECT_SUCCESS;
 
 cleanup:
@@ -202,7 +205,6 @@ char *fileClientSend(const char *msg) {
     CHECK_ERROR_RETURN_NULL(result);
 
     // wait for server reply
-    sleep(1);
     char *reply = fileListen();
     return reply;
 }

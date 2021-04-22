@@ -18,7 +18,7 @@ static char *serverLoadFileIntoMsgFormat(FILE *pFile)
     CHECK_NULL_RETURN_NULL(pFile);
 
     // get max bytes of file
-    int maxMsgLength = MAX_MSG_LENGTH - MSG_FORMAT_LENGTH;
+    int maxMsgLength = MAX_MSG_LENGTH - MSG_FORMAT_LENGTH + NULL_CHAR_SIZE;
     char buf[maxMsgLength];
     char *fileMsg = fgets(buf, maxMsgLength - NULL_CHAR_SIZE, pFile);
     if (fileMsg == NULL)
@@ -86,7 +86,6 @@ static void serverSendFile(char *msg)
     // first msg is always the file's title
     result = sendFileTitle(msg);
     CHECK_ERROR_GOTO_CLEANUP(result);
-    sleep(1);
 
     // then, send the file itself using multiple msgs (if needed)
     while (true)
@@ -96,7 +95,6 @@ static void serverSendFile(char *msg)
         result = MPServerSend(fileMsg);
         CHECK_ERROR_GOTO_CLEANUP(result);
         free(fileMsg);
-        sleep(1);
     }
 
 cleanup:
@@ -114,7 +112,6 @@ static void serverAbort(char *msg)
         errorExitFlag = false;
     }
     MPServerSendSuccessOrFailure(PROJECT_SUCCESS);
-    sleep(1);
     serverClose(errorExitFlag);
 }
 

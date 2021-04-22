@@ -4,6 +4,7 @@
 #include "../include/SocketMethod.h"
 
 #include <winsock2.h>
+#include <unistd.h>
 
 // -------------------------- const definitions -------------------------
 
@@ -135,7 +136,7 @@ char *socketListen() {
     char buf[MAX_MSG_LENGTH] = {0};
 
     // Receive msg
-    int returnValue = recv(clientSocket, buf, MAX_MSG_LENGTH, 0);
+    int returnValue = recv(clientSocket, buf, MAX_MSG_LENGTH - NULL_CHAR_SIZE, 0);
     if (returnValue == SOCKET_ERROR || returnValue == 0)
     {
         CLOSE_SOCKET(clientSocket);
@@ -151,7 +152,7 @@ char *socketClientListen() {
     char buf[MAX_MSG_LENGTH] = {0};
 
     // Receive msg
-    int returnValue = recv(connectionSocket, buf, MAX_MSG_LENGTH, 0);
+    int returnValue = recv(connectionSocket, buf, MAX_MSG_LENGTH - NULL_CHAR_SIZE, 0);
     if (returnValue == SOCKET_ERROR || returnValue == 0)
     {
         CLOSE_SOCKET(connectionSocket);
@@ -166,6 +167,7 @@ ReturnValue socketSend(const char *msg) {
     if (clientSocket == INVALID_SOCKET)
         return PROJECT_ERROR;
 
+    sleep(1);
     int returnValue = send(clientSocket, msg, (int)strlen(msg), 0);
     if (returnValue == SOCKET_ERROR)
     {
@@ -240,7 +242,7 @@ char *socketClientSend(const char *msg) {
 
     // Wait for a reply from the server
     char buf[MAX_MSG_LENGTH] = {0};
-    result = recv(connectionSocket, buf, MAX_MSG_LENGTH, 0);
+    result = recv(connectionSocket, buf, MAX_MSG_LENGTH - NULL_CHAR_SIZE, 0);
     if (result == SOCKET_ERROR || result == 0)
     {
         CLOSE_SOCKET(connectionSocket);
