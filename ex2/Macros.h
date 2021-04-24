@@ -55,7 +55,7 @@ typedef enum {
 #define FILE_APPEND_MODE "a"
 #define FILE_APPEND_AND_READ_MODE "a+"
 
-#define MAX_MSG_LENGTH 513
+#define MAX_MSG_LENGTH 1025
 
 // -------------------------- macro functions -------------------------
 
@@ -71,6 +71,7 @@ typedef enum {
 #define CHECK_NON_ZERO_GOTO_CLEANUP(number) do {if ((number) != 0) goto cleanup;} while(0)
 
 #define CHECK_ZERO_RETURN_NULL(number) do {if ((number) == 0) return NULL;} while(0)
+#define CHECK_ZERO_GOTO_CLEANUP(number) do {if ((number) == 0) goto cleanup;} while(0)
 
 #define CHECK_ERROR_RETURN_ERROR(number) do {if ((number) == PROJECT_ERROR) return PROJECT_ERROR;} while(0)
 #define CHECK_ERROR_RETURN_NULL(number) do {if ((number) == PROJECT_ERROR) return NULL;} while(0)

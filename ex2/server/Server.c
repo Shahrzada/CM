@@ -14,18 +14,13 @@
 
 // ------------------------------ private functions -----------------------------
 
-static char *serverLoadFileIntoMsgFormat(FILE *pFile)
+static int serverLoadFileIntoBuffer(char *buf, int bufLength, FILE *pFile)
 {
-    CHECK_NULL_RETURN_NULL(pFile);
-    char *encodedMsg = (char *) malloc(MAX_MSG_LENGTH);
-    CHECK_NULL_RETURN_NULL(encodedMsg);
+    CHECK_NULL_RETURN_ZERO(buf);
+    CHECK_NULL_RETURN_ZERO(pFile);
 
-    // get max bytes of file
-    int maxMsgLength = (MAX_MSG_LENGTH/2) - MSG_FORMAT_LENGTH + NULL_CHAR_SIZE;
-    char buf[maxMsgLength];
-    int ch = 0;
-    int counter  = 0;
-    while (counter < maxMsgLength)
+    int ch = 0, counter  = 0;
+    while (counter < bufLength)
     {
         ch = fgetc(pFile);
         if (ch == EOF)
@@ -33,17 +28,37 @@ static char *serverLoadFileIntoMsgFormat(FILE *pFile)
         buf[counter] = (char)ch;
         counter++;
     }
+    return counter;
+}
+
+static char *serverLoadFileIntoMsgFormat(FILE *pFile)
+{
+    CHECK_NULL_RETURN_NULL(pFile);
+    char *encodedMsg = (char *) malloc(MAX_MSG_LENGTH);
+    CHECK_NULL_RETURN_NULL(encodedMsg);
+    char *msg = NULL;
+
+    // get max bytes of file, notice we read less than MAX_MSG_LENGTH due to encoding
+    int maxMsgLength = (MAX_MSG_LENGTH - 258) - MSG_FORMAT_LENGTH + NULL_CHAR_SIZE;
+    char buf[maxMsgLength];
+    int counter = serverLoadFileIntoBuffer(buf, maxMsgLength, pFile);
+
+    // reached EOF
     if (counter == 0)
-        return NULL;
+        goto cleanup;
+
+    // Encode so special chars won't ruin transmission
     if (Base64encode(encodedMsg, buf, counter) == 0)
     {
-        free(encodedMsg);
         printf("Error with encoding file...");
-        return NULL;
+        goto cleanup;
     }
 
-    // create the msg format for the contents
-    char *msg = messageSet(SERVER, GET_FILE, encodedMsg);
+    // create the msg format for the encoded contents
+    msg = messageSet(SERVER, GET_FILE, encodedMsg);
+
+cleanup:
+    free(encodedMsg);
     return msg;
 }
 
@@ -73,9 +88,10 @@ static void serverWrite(const char *msg)
     MPServerSendSuccessOrFailure(PROJECT_SUCCESS);
 }
 
-static ReturnValue sendFileTitle(char *msg)
+static ReturnValue sendFileTitle(const char *msg)
 {
     CHECK_NULL_RETURN_ERROR(msg);
+    // TODO extract file title from msg, we now use a const file
 
     char *fileTitleMsg = messageSet(SERVER, GET_FILE, GET_FILE_TITLE);
     CHECK_NULL_RETURN_ERROR(fileTitleMsg);
@@ -88,10 +104,7 @@ static ReturnValue sendFileTitle(char *msg)
 static void serverSendFile(char *msg)
 {
     CHECK_NULL_RETURN(msg);
-//    char *filePath = messageGetContents(msg);
-//    CHECK_NULL_RETURN(filePath);
-
-    // const location atm
+    // TODO we use a const file path atm, we should extract it from the msg
     char *filePath = GET_FILE_PATH;
     char *fileMsg = NULL;
     FILE *pFile = NULL;
@@ -101,11 +114,12 @@ static void serverSendFile(char *msg)
     pFile = fopen(filePath, FILE_READ_BINARY_MODE);
     CHECK_NULL_GOTO_CLEANUP(pFile);
 
-    // first msg is always the file's title
+    // first msg to send is always the file's title
     result = sendFileTitle(msg);
     CHECK_ERROR_GOTO_CLEANUP(result);
 
-    // then, send the file itself using multiple msgs (if needed)
+    // then, send the file itself (using multiple msgs, if needed)
+    int counter = 0;
     while (true)
     {
         fileMsg = serverLoadFileIntoMsgFormat(pFile);
@@ -113,33 +127,36 @@ static void serverSendFile(char *msg)
         result = MPServerSend(fileMsg);
         CHECK_ERROR_GOTO_CLEANUP(result);
         free(fileMsg);
+        fileMsg = NULL;
+        counter++;
+        printf("\nSo far sent %d data file msgs.\n", counter);
     }
 
 cleanup:
-    free(fileMsg);
     fclose(pFile);
+    free(fileMsg);
     MPServerSendSuccessOrFailure(result);
 }
 
 static void serverAbort(char *msg)
 {
-    int errorExitFlag = true;
-    if (msg != NULL)
-    {
-        free(msg);
-        errorExitFlag = false;
-    }
-    MPServerSendSuccessOrFailure(PROJECT_SUCCESS);
+    bool errorExitFlag = (msg == NULL);
+    ReturnValue result = (msg == NULL) ? PROJECT_ERROR : PROJECT_SUCCESS;
+
+    free(msg);
+    MPServerSendSuccessOrFailure(result);
     serverClose(errorExitFlag);
 }
 
 static void serverHandleMessage(char *msg)
 {
     if (!messageValidateFormat(msg))
+    {
         PRINT_ERROR_MSG_AND_FUNCTION_NAME("serverHandleMessage", "Bad msg format");
+        return;
+    }
 
     Command currentCommand = messageGetCommand(msg);
-
     switch (currentCommand) {
         case READ: serverRead(); break;
         case WRITE:  serverWrite(msg); break;

@@ -86,6 +86,8 @@ ReturnValue MPServerSend(char *msg)
     CHECK_NULL_RETURN_ERROR(serverCMethod);
     if (!messageValidateFormat(msg))
         return PROJECT_ERROR;
+
+    printf("Sent the msg: %s\n", msg);
     return serverCMethod->sendFunction(msg);
 }
 

@@ -12,10 +12,62 @@
 
 // ------------------------------ private functions -----------------------------
 
+static ReturnValue clientHandleFileDataStream(FILE *pFile)
+{
+    CHECK_NULL_RETURN_ERROR(pFile);
+
+    char *currentFileData = NULL, *encodedData = NULL;
+    void *decodedData = NULL;
+    Command currentCommand = EMPTY_COMMAND;
+    unsigned int totalBytesToBeWritten = 0, totalBytesWritten = 0;
+    ReturnValue result = PROJECT_ERROR;
+
+    printf("Incoming file data:\n");
+
+    while (true)
+    {
+        // get the msg
+        currentFileData = MPClientReceive();
+        CHECK_NULL_RETURN_ERROR(currentFileData);
+
+        // make sure we are still getting file data
+        currentCommand = messageGetCommand(currentFileData);
+        if (currentCommand != GET_FILE)
+            break;
+
+        // extract the encoded data
+        encodedData = messageGetContents(currentFileData);
+        CHECK_NULL_GOTO_CLEANUP(encodedData);
+
+        // decode the data
+        decodedData = (char *) malloc(sizeof(char) * MAX_MSG_LENGTH);
+        CHECK_NULL_GOTO_CLEANUP(decodedData);
+        totalBytesToBeWritten = Base64decode(decodedData, encodedData);
+        CHECK_ZERO_GOTO_CLEANUP(totalBytesToBeWritten);
+
+        // Write data to local file
+        totalBytesWritten = fwrite(decodedData, 1, totalBytesToBeWritten, pFile);
+        if (totalBytesWritten != totalBytesToBeWritten)
+            goto cleanup;
+
+        // free for other possible incoming data
+        free(currentFileData);
+        currentFileData = NULL;
+        free(decodedData);
+        decodedData = NULL;
+    }
+
+    result = PROJECT_SUCCESS;
+
+cleanup:
+    free(currentFileData);
+    free(decodedData);
+    return result;
+}
+
 static ReturnValue clientGetFile(char *reply)
 {
     CHECK_NULL_RETURN_ERROR(reply);
-    // TODO create a file instead
     printf("Client is receiving a file:\n");
 
     // first msg is always the file's title
@@ -23,6 +75,7 @@ static ReturnValue clientGetFile(char *reply)
     CHECK_NULL_RETURN_ERROR(fileTitle);
     printf("%s\n", fileTitle);
 
+    // Create and open the file
     FILE *pFile = fopen(fileTitle, FILE_WRITE_BINARY_MODE);
     if (pFile == NULL)
     {
@@ -30,60 +83,11 @@ static ReturnValue clientGetFile(char *reply)
         return PROJECT_ERROR;
     }
 
-    char *followingReply = MPClientReceive();
-    CHECK_NULL_RETURN_ERROR(followingReply);
-    printf("Got the msg: %s\n", followingReply);
-
-    char *contents = NULL;
-    Command currentCommand = messageGetCommand(followingReply);
-    unsigned int totalBytesToBeWritten = 0, totalBytesWritten = 0;
-    while (currentCommand == GET_FILE)
-    {
-        contents = messageGetContents(followingReply);
-        if (contents == NULL || strlen(contents) == 0)
-        {
-            printf("[CLIENT-FILE]: Error with contents...\n");
-            free(followingReply);
-            fclose(pFile);
-            return PROJECT_ERROR;
-        }
-
-        char* decodedMsg = (char *) malloc(MAX_MSG_LENGTH);
-        //TODO CHECK NON NULL
-
-        totalBytesToBeWritten = Base64decode(decodedMsg, contents);
-        free(followingReply);
-        if (totalBytesToBeWritten == 0)
-        {
-            printf("[CLIENT-FILE]: Error with decoding...\n");
-            free(decodedMsg);
-            fclose(pFile);
-            return PROJECT_ERROR;
-        }
-
-        totalBytesWritten = fwrite(decodedMsg, 1, totalBytesToBeWritten, pFile);
-        free(decodedMsg);
-        if (totalBytesWritten != totalBytesToBeWritten)
-        {
-            printf("[CLIENT-FILE]: Error with writing to file\n");
-            fclose(pFile);
-            return PROJECT_ERROR;
-        }
-
-        // get next msg and its command
-        followingReply = MPClientReceive();
-        currentCommand = messageGetCommand(followingReply);
-    }
+    // Write the incoming data file
+    ReturnValue result = clientHandleFileDataStream(pFile);
 
     fclose(pFile);
-
-    if (followingReply == NULL)
-    {
-        PRINT_ERROR_MSG_AND_FUNCTION_NAME("clientGetFile", "Something went wrong with receiving the file");
-        return PROJECT_ERROR;
-    }
-
-    return PROJECT_SUCCESS;
+    return result;
 }
 
 
@@ -94,7 +98,7 @@ static ReturnValue handleReply(char *reply)
 
     Command currentCommand = messageGetCommand(reply);
 
-    // SHAH: there's nothing much I check atm
+    // TODO we do not validate the reply atm, only handle file downloading
     if (currentCommand == GET_FILE)
         clientGetFile(reply);
     else
