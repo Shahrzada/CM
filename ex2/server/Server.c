@@ -2,30 +2,48 @@
 // ------------------------------ includes ------------------------------
 
 #include <unistd.h>
+#include <utils/base64.h>
 
 #include "server/Server.h"
 #include "communicationProtocol/include/MessageProtocol.h"
 
 // -------------------------- macros -------------------------
 
-#define GET_FILE_PATH "C:\\Users\\ADMIN\\CLionProjects\\bebi\\ex2\\nitz.txt"
-#define GET_FILE_TITLE "nitz.txt"
+#define GET_FILE_PATH "C:\\Users\\ADMIN\\CLionProjects\\bebi\\ex2\\test.png"
+#define GET_FILE_TITLE "test.png"
 
 // ------------------------------ private functions -----------------------------
 
 static char *serverLoadFileIntoMsgFormat(FILE *pFile)
 {
     CHECK_NULL_RETURN_NULL(pFile);
+    char *encodedMsg = (char *) malloc(MAX_MSG_LENGTH);
+    CHECK_NULL_RETURN_NULL(encodedMsg);
 
     // get max bytes of file
-    int maxMsgLength = MAX_MSG_LENGTH - MSG_FORMAT_LENGTH + NULL_CHAR_SIZE;
+    int maxMsgLength = (MAX_MSG_LENGTH/2) - MSG_FORMAT_LENGTH + NULL_CHAR_SIZE;
     char buf[maxMsgLength];
-    char *fileMsg = fgets(buf, maxMsgLength - NULL_CHAR_SIZE, pFile);
-    if (fileMsg == NULL)
+    int ch = 0;
+    int counter  = 0;
+    while (counter < maxMsgLength)
+    {
+        ch = fgetc(pFile);
+        if (ch == EOF)
+            break;
+        buf[counter] = (char)ch;
+        counter++;
+    }
+    if (counter == 0)
         return NULL;
+    if (Base64encode(encodedMsg, buf, counter) == 0)
+    {
+        free(encodedMsg);
+        printf("Error with encoding file...");
+        return NULL;
+    }
 
-    // create the msg format for the content
-    char *msg = messageSet(SERVER, GET_FILE, buf);
+    // create the msg format for the contents
+    char *msg = messageSet(SERVER, GET_FILE, encodedMsg);
     return msg;
 }
 

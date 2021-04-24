@@ -2,22 +2,27 @@
 // ------------------------------ includes ------------------------------
 
 #include <unistd.h>
+#include <utils/base64.h>
 #include "Client.h"
 #include "../communicationProtocol/include/MessageProtocol.h"
 
 // -------------------------- macros -------------------------
 
-#define CLIENT_CONST_FILE_NAME "pitz"
+#define CLIENT_CONST_FILE_NAME "test"
 
 // ------------------------------ private functions -----------------------------
 
 static ReturnValue clientGetFile(char *reply)
 {
+    CHECK_NULL_RETURN_ERROR(reply);
     // TODO create a file instead
     printf("Client is receiving a file:\n");
 
     // first msg is always the file's title
     char *fileTitle = messageGetContents(reply);
+    CHECK_NULL_RETURN_ERROR(fileTitle);
+    printf("%s\n", fileTitle);
+
     FILE *pFile = fopen(fileTitle, FILE_WRITE_BINARY_MODE);
     if (pFile == NULL)
     {
@@ -26,24 +31,41 @@ static ReturnValue clientGetFile(char *reply)
     }
 
     char *followingReply = MPClientReceive();
+    CHECK_NULL_RETURN_ERROR(followingReply);
+    printf("Got the msg: %s\n", followingReply);
+
     char *contents = NULL;
     Command currentCommand = messageGetCommand(followingReply);
     unsigned int totalBytesToBeWritten = 0, totalBytesWritten = 0;
     while (currentCommand == GET_FILE)
     {
         contents = messageGetContents(followingReply);
-        if (contents == NULL)
+        if (contents == NULL || strlen(contents) == 0)
         {
-            printf("[CLIENT-FILE]: Error with contents");
+            printf("[CLIENT-FILE]: Error with contents...\n");
+            free(followingReply);
             fclose(pFile);
             return PROJECT_ERROR;
         }
-        totalBytesToBeWritten = (unsigned int)strlen(contents);
-        totalBytesWritten = fwrite(contents, 1, totalBytesToBeWritten, pFile);
+
+        char* decodedMsg = (char *) malloc(MAX_MSG_LENGTH);
+        //TODO CHECK NON NULL
+
+        totalBytesToBeWritten = Base64decode(decodedMsg, contents);
         free(followingReply);
+        if (totalBytesToBeWritten == 0)
+        {
+            printf("[CLIENT-FILE]: Error with decoding...\n");
+            free(decodedMsg);
+            fclose(pFile);
+            return PROJECT_ERROR;
+        }
+
+        totalBytesWritten = fwrite(decodedMsg, 1, totalBytesToBeWritten, pFile);
+        free(decodedMsg);
         if (totalBytesWritten != totalBytesToBeWritten)
         {
-            printf("[CLIENT-FILE]: Error with writing to file");
+            printf("[CLIENT-FILE]: Error with writing to file\n");
             fclose(pFile);
             return PROJECT_ERROR;
         }

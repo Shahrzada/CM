@@ -20,17 +20,17 @@ ReturnValue sendSomeMsgs()
 {
     ReturnValue result = PROJECT_ERROR;
 
-    result = sendAMsg(READ, "Hey2222222o");
-    CHECK_ERROR_RETURN_ERROR(result);
-
-    result = sendAMsg(WRITE, "BEBBBI   222         IIII");
-    CHECK_ERROR_RETURN_ERROR(result);
-
-    result = sendAMsg(WRITE, "BEBBB   IIIII");
-    CHECK_ERROR_RETURN_ERROR(result);
-
-    result = sendAMsg(READ, "BEBBBI1135411222  \n  IIII");
-    CHECK_ERROR_RETURN_ERROR(result);
+//    result = sendAMsg(READ, "Hey2222222o");
+//    CHECK_ERROR_RETURN_ERROR(result);
+//
+//    result = sendAMsg(WRITE, "BEBBBI   222         IIII");
+//    CHECK_ERROR_RETURN_ERROR(result);
+//
+//    result = sendAMsg(WRITE, "BEBBB   IIIII");
+//    CHECK_ERROR_RETURN_ERROR(result);
+//
+//    result = sendAMsg(READ, "BEBBBI1135411222  \n  IIII");
+//    CHECK_ERROR_RETURN_ERROR(result);
 
     result = sendAMsg(GET_FILE, "schnitzel/pitzel.exe");
     CHECK_ERROR_RETURN_ERROR(result);
