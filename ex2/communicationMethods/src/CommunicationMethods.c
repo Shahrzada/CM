@@ -85,7 +85,7 @@ ClientCommunicationMethod *clientCMethodSet(CommunicationMethodCode cMethod)
                                                      fileClientSend, fileClientReceive); break;
         case SOCKET_METHOD: result = initClientCMethod(clientCMethod, socketClientInitConnection,
                                                        socketClientCloseConnection, socketClientSend,
-                                                       socketClientListen); break;
+                                                       socketClientReceive); break;
         /*case NEW_METHOD: result = initClientCMethod(relevant functions); break;*/
         default: PRINT_ERROR_MSG_AND_FUNCTION_NAME("clientCMethodSet", "Bad cMethod"); break;
     }

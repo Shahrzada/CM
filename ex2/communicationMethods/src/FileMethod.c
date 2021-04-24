@@ -26,7 +26,7 @@
 // ------------------------------ private functions -----------------------------
 
 static time_t fileLatestModified = 0;
-unsigned int fileLatestCharPosition = 0;
+static unsigned int fileLatestCharPosition = 0;
 
 // ------------------------------ private functions -----------------------------
 
@@ -180,7 +180,7 @@ cleanup:
 }
 
 ReturnValue fileClientInitConnection() {
-    // open the file for appending, just to check the file is okay really
+    // open the file for appending
     FILE * pFile;
     pFile = fopen(COMMUNICATION_FILE_NAME,FILE_APPEND_MODE);
     if (pFile == NULL)
@@ -188,6 +188,7 @@ ReturnValue fileClientInitConnection() {
         PRINT_ERROR_MSG_AND_FUNCTION_NAME("fileClientInitConnection", "Failed to open the file");
         return PROJECT_ERROR;
     }
+
     fclose(pFile);
     updateLatestModified();
     return PROJECT_SUCCESS;

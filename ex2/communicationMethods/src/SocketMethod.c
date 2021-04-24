@@ -52,7 +52,7 @@ static ReturnValue initWinSock() {
     return PROJECT_SUCCESS;
 }
 
-static char *fromBufferToAllocatedMsg(char * buf) {
+static char *fromBufferToAllocatedMsg(char *buf) {
     CHECK_NULL_RETURN_NULL(buf);
 
     // allocate memory for the msg
@@ -65,6 +65,22 @@ static char *fromBufferToAllocatedMsg(char * buf) {
     msg[msgLength - 1] = NULL_CHAR;
 
     return msg;
+}
+
+static char *socketListenGivenSocket(SOCKET socket) {
+    if (socket == INVALID_SOCKET)
+        return NULL;
+    char buf[MAX_MSG_LENGTH] = {0};
+
+    // Receive msg
+    int returnValue = recv(socket, buf, MAX_MSG_LENGTH - NULL_CHAR_SIZE, 0);
+    if (returnValue == SOCKET_ERROR || returnValue == 0)
+    {
+        CLOSE_SOCKET(socket);
+        PRINT_ERROR_CALL_CLEANUP_RETURN_NULL("Server", "recv()", returnValue);
+    }
+
+    return fromBufferToAllocatedMsg(buf);
 }
 
 // ------------------------------ functions -----------------------------
@@ -102,7 +118,7 @@ ReturnValue socketServerInitConnection() {
     if (clientSocket == INVALID_SOCKET)
         goto cleanup;
 
-    // No longer need server socket
+    // No longer need server socket, because we have 1 client
     CLOSE_SOCKET(listenSocket);
 
     return PROJECT_SUCCESS;
@@ -130,39 +146,13 @@ ReturnValue socketServerCloseConnection() {
     return PROJECT_SUCCESS;
 }
 
-char *socketListen() {
-    if (clientSocket == INVALID_SOCKET)
-        return NULL;
-    char buf[MAX_MSG_LENGTH] = {0};
-
-    // Receive msg
-    int returnValue = recv(clientSocket, buf, MAX_MSG_LENGTH - NULL_CHAR_SIZE, 0);
-    if (returnValue == SOCKET_ERROR || returnValue == 0)
-    {
-        CLOSE_SOCKET(clientSocket);
-        PRINT_ERROR_CALL_CLEANUP_RETURN_NULL("Server", "recv()", returnValue);
-    }
-
-    return fromBufferToAllocatedMsg(buf);
+char *socketListen()
+{
+    return socketListenGivenSocket(clientSocket);
 }
 
-char *socketClientListen() {
-    if (connectionSocket == INVALID_SOCKET)
-        return NULL;
-    char buf[MAX_MSG_LENGTH] = {0};
-
-    // Receive msg
-    int returnValue = recv(connectionSocket, buf, MAX_MSG_LENGTH - NULL_CHAR_SIZE, 0);
-    if (returnValue == SOCKET_ERROR || returnValue == 0)
-    {
-        CLOSE_SOCKET(connectionSocket);
-        PRINT_ERROR_CALL_CLEANUP_RETURN_NULL("Client", "recv()", returnValue);
-    }
-
-    return fromBufferToAllocatedMsg(buf);
-}
-
-ReturnValue socketSend(const char *msg) {
+ReturnValue socketSend(const char *msg)
+{
     CHECK_NULL_RETURN_ERROR(msg);
     if (clientSocket == INVALID_SOCKET)
         return PROJECT_ERROR;
@@ -250,4 +240,9 @@ char *socketClientSend(const char *msg) {
     }
 
     return fromBufferToAllocatedMsg(buf);
+}
+
+char *socketClientReceive()
+{
+    return socketListenGivenSocket(connectionSocket);
 }

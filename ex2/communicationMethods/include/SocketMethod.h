@@ -4,7 +4,7 @@
  * @brief The socket communicationMethods method implementation.
  *
  *
- * @section created by using microsoft docs:
+ * @section created by using microsoft docs (with c related corrections):
  * https://docs.microsoft.com/en-us/windows/win32/winsock
  *
  *
@@ -30,6 +30,6 @@ ReturnValue socketSend(const char *msg);
 ReturnValue socketClientInitConnection();
 ReturnValue socketClientCloseConnection();
 char *socketClientSend(const char *msg);
-char *socketClientListen();
+char *socketClientReceive();
 
 
