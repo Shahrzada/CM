@@ -9,8 +9,8 @@
 
 // -------------------------- macros -------------------------
 
-#define GET_FILE_PATH "C:\\Users\\ADMIN\\CLionProjects\\bebi\\ex2\\nitz.txt"
-#define GET_FILE_TITLE "nitz.txt"
+#define GET_FILE_PATH "C:\\Users\\ADMIN\\CLionProjects\\bebi\\ex2\\test.png"
+#define GET_FILE_TITLE "test.png"
 
 // ------------------------------ private functions -----------------------------
 
