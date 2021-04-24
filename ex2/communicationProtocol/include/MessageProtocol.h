@@ -79,4 +79,9 @@ void MPServerSendSuccessOrFailure(ReturnValue result);
  */
 char *MPClientSend(const char *msg);
 
+/**
+ * @brief get the earliest unread msg from the server
+ *
+ * @return the msg from the server if succeeded, NULL ow.
+ */
 char *MPClientReceive();

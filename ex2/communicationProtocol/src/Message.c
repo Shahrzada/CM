@@ -90,16 +90,3 @@ char *messageGetContents(char *msg)
     char *pMsg = msg;
     return pMsg + MSG_FORMAT_LENGTH;
 }
-
-unsigned int messageGetContentsLength(const char *msg)
-{
-    if (!messageValidateFormat(msg))
-        return 0;
-
-    unsigned int length = strlen(msg) - MSG_FORMAT_LENGTH;
-
-    if (length < 0)
-        return 0;
-
-    return length;
-}

@@ -4,6 +4,7 @@
 #include "../include/CommunicationMethods.h"
 #include "../include/FileMethod.h"
 #include "../include/SocketMethod.h"
+//#include "../include/NewMethod.h"
 
 // ------------------------------ private functions -----------------------------
 
@@ -83,7 +84,8 @@ ClientCommunicationMethod *clientCMethodSet(CommunicationMethodCode cMethod)
         case FILE_METHOD: result = initClientCMethod(clientCMethod, fileClientInitConnection, fileClientCloseConnection,
                                                      fileClientSend, fileClientReceive); break;
         case SOCKET_METHOD: result = initClientCMethod(clientCMethod, socketClientInitConnection,
-                                                       socketClientCloseConnection, socketClientSend, socketClientListen); break;
+                                                       socketClientCloseConnection, socketClientSend,
+                                                       socketClientListen); break;
         /*case NEW_METHOD: result = initClientCMethod(relevant functions); break;*/
         default: PRINT_ERROR_MSG_AND_FUNCTION_NAME("clientCMethodSet", "Bad cMethod"); break;
     }

@@ -68,8 +68,3 @@ Command messageGetCommand(const char *msg);
  * @return the relevant contents if msg is valid, NULL ow.
  */
 char *messageGetContents(char *msg);
-
-/**
- * @brief returns the total chars in contents
- */
-unsigned int messageGetContentsLength(const char *msg);
