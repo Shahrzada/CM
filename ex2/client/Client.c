@@ -1,14 +1,9 @@
 
 // ------------------------------ includes ------------------------------
 
-#include <unistd.h>
-#include <utils/base64.h>
+#include "../utils/base64.h"
 #include "Client.h"
 #include "../communicationProtocol/include/MessageProtocol.h"
-
-// -------------------------- macros -------------------------
-
-#define CLIENT_CONST_FILE_NAME "test"
 
 // ------------------------------ private functions -----------------------------
 
@@ -68,12 +63,11 @@ cleanup:
 static ReturnValue clientGetFile(char *reply)
 {
     CHECK_NULL_RETURN_ERROR(reply);
-    printf("Client is receiving a file:\n");
 
     // first msg is always the file's title
     char *fileTitle = messageGetContents(reply);
     CHECK_NULL_RETURN_ERROR(fileTitle);
-    printf("%s\n", fileTitle);
+    printf("Client is receiving a file with title: %s\n", fileTitle);
 
     // Create and open the file
     FILE *pFile = fopen(fileTitle, FILE_WRITE_BINARY_MODE);
@@ -83,22 +77,20 @@ static ReturnValue clientGetFile(char *reply)
         return PROJECT_ERROR;
     }
 
-    // Write the incoming data file
+    // Write the incoming file data
     ReturnValue result = clientHandleFileDataStream(pFile);
 
     fclose(pFile);
     return result;
 }
 
-
 static ReturnValue handleReply(char *reply)
 {
     if (!messageValidateFormat(reply))
         return PROJECT_ERROR;
 
-    Command currentCommand = messageGetCommand(reply);
-
     // TODO we do not validate the reply atm, only handle file downloading
+    Command currentCommand = messageGetCommand(reply);
     if (currentCommand == GET_FILE)
         clientGetFile(reply);
     else
@@ -118,8 +110,7 @@ ReturnValue clientInitialize(CommunicationMethodCode cMethod)
 
 ReturnValue clientClose(ReturnValue result)
 {
-    bool errorFlag = (result == PROJECT_ERROR) ? true:false;
-    return MPClientCloseConnection(errorFlag);
+    return MPClientCloseConnection(result);
 }
 
 ReturnValue clientSendCommand(Command commandType, char *contents)

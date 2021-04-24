@@ -2,15 +2,15 @@
 // ------------------------------ includes ------------------------------
 
 #include <unistd.h>
-#include <utils/base64.h>
+#include "../utils/base64.h"
 
 #include "server/Server.h"
 #include "communicationProtocol/include/MessageProtocol.h"
 
 // -------------------------- macros -------------------------
 
-#define GET_FILE_PATH "C:\\Users\\ADMIN\\CLionProjects\\bebi\\ex2\\test.png"
-#define GET_FILE_TITLE "test.png"
+#define GET_FILE_PATH "C:\\Users\\ADMIN\\CLionProjects\\bebi\\ex2\\nitz.txt"
+#define GET_FILE_TITLE "nitz.txt"
 
 // ------------------------------ private functions -----------------------------
 
@@ -39,7 +39,7 @@ static char *serverLoadFileIntoMsgFormat(FILE *pFile)
     char *msg = NULL;
 
     // get max bytes of file, notice we read less than MAX_MSG_LENGTH due to encoding
-    int maxMsgLength = (MAX_MSG_LENGTH - 258) - MSG_FORMAT_LENGTH + NULL_CHAR_SIZE;
+    int maxMsgLength = MAX_FILE_MSG_LENGTH - MSG_FORMAT_LENGTH + NULL_CHAR_SIZE;
     char buf[maxMsgLength];
     int counter = serverLoadFileIntoBuffer(buf, maxMsgLength, pFile);
 
@@ -47,7 +47,7 @@ static char *serverLoadFileIntoMsgFormat(FILE *pFile)
     if (counter == 0)
         goto cleanup;
 
-    // Encode so special chars won't ruin transmission
+    // Encode le msg
     if (Base64encode(encodedMsg, buf, counter) == 0)
     {
         printf("Error with encoding file...");
@@ -119,17 +119,16 @@ static void serverSendFile(char *msg)
     CHECK_ERROR_GOTO_CLEANUP(result);
 
     // then, send the file itself (using multiple msgs, if needed)
-    int counter = 0;
     while (true)
     {
         fileMsg = serverLoadFileIntoMsgFormat(pFile);
         CHECK_NULL_GOTO_CLEANUP(fileMsg);
+
         result = MPServerSend(fileMsg);
         CHECK_ERROR_GOTO_CLEANUP(result);
+
         free(fileMsg);
         fileMsg = NULL;
-        counter++;
-        printf("\nSo far sent %d data file msgs.\n", counter);
     }
 
 cleanup:
@@ -141,7 +140,7 @@ cleanup:
 static void serverAbort(char *msg)
 {
     bool errorExitFlag = (msg == NULL);
-    ReturnValue result = (msg == NULL) ? PROJECT_ERROR : PROJECT_SUCCESS;
+    ReturnValue result = (errorExitFlag) ? PROJECT_ERROR : PROJECT_SUCCESS;
 
     free(msg);
     MPServerSendSuccessOrFailure(result);

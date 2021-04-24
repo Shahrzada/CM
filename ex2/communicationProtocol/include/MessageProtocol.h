@@ -50,7 +50,7 @@ ReturnValue MPClientInitConnection(CommunicationMethodCode cMethodCode);
  *
  * @return PROJECT_SUCCESS if connection was closed, PROJECT_ERROR ow.
  */
-ReturnValue MPClientCloseConnection(bool errorFlag);
+ReturnValue MPClientCloseConnection(ReturnValue result);
 
 /**
  * @brief listens to new msgs using the static ServerCommunicationMethod object

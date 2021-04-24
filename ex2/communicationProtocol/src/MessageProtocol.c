@@ -36,9 +36,10 @@ ReturnValue MPClientInitConnection(CommunicationMethodCode cMethodCode)
     return clientCMethod->clientInitConnectionFunction();
 }
 
-ReturnValue MPClientCloseConnection(bool errorFlag)
+ReturnValue MPClientCloseConnection(ReturnValue result)
 {
     CHECK_NULL_RETURN_ERROR(clientCMethod);
+    bool errorFlag = (result == PROJECT_ERROR) ? true:false;
 
     if (errorFlag)
     {
@@ -47,10 +48,10 @@ ReturnValue MPClientCloseConnection(bool errorFlag)
         clientCMethod->sendFunction(abortMsg);
     }
 
-    ReturnValue result = clientCMethod->clientCloseConnectionFunction();
+    ReturnValue connectionResult = clientCMethod->clientCloseConnectionFunction();
     free(clientCMethod);
     clientCMethod = NULL;
-    return result;
+    return connectionResult;
 }
 
 char *MPClientReceive()

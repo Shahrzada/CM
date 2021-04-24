@@ -33,7 +33,7 @@
 ReturnValue clientInitialize(CommunicationMethodCode cMethod);
 
 /**
- * @brief closes the client connection
+ * @brief closes the client connection, result indicated whether an error caused aborting
  *
  * @return PROJECT_SUCCESS if connection was closed, PROJECT_ERROR ow.
  */
