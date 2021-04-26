@@ -27,18 +27,24 @@ char *messageSet(Sender sender, Command commandType, char *contents)
 {
     CHECK_NULL_RETURN_NULL(contents);
 
+    // CR: never use str function with giving it a limit
+    // CR: why not just use size_t?
     int contentsLength = (int)strlen(contents);
     int msgLength = MSG_FORMAT_LENGTH + contentsLength + NULL_CHAR_SIZE;
 
     char *msg = (char *) malloc(sizeof(char) * msgLength);
     CHECK_NULL_RETURN_NULL(msg);
 
+    // CR: this is why you should use structs, the message format is hidden inside messageSet
     // msg starts at [sender][,][command][,], for example "1,0," is for a client sending read command
+    // CR: sender + ZERO_CHAR you be a macro
+    // CR: Someone one day will curse you if there will be more than 10 commands
     char msgPrefix[MSG_FORMAT_LENGTH] = {(char)(sender + ZERO_CHAR), COMMA_CHAR,
                                          (char)(commandType + ZERO_CHAR), COMMA_CHAR};
     strncpy(msg, msgPrefix, MSG_FORMAT_LENGTH);
 
     // adding the content
+    // CR: why the two lines?
     char *pOutput = msg;
     pOutput += MSG_FORMAT_LENGTH;
     strncpy(pOutput, contents, contentsLength);
@@ -59,7 +65,7 @@ bool messageValidateFormat(const char *msg) {
     unsigned int msgLength = strlen(msg);
     if (msgLength < MSG_FORMAT_LENGTH)
         return false;
-
+    // CR: you should use structs to do this kind of parsing
     if (!messageValidateSender(msg[MSG_FORMAT_SENDER_POSITION] - ZERO_CHAR))
         return false;
 
@@ -87,6 +93,6 @@ char *messageGetContents(char *msg)
 {
     if (!messageValidateFormat(msg))
         return NULL;
-    char *pMsg = msg;
+    char *pMsg = msg; // cr: Why does this variable exist?
     return pMsg + MSG_FORMAT_LENGTH;
 }

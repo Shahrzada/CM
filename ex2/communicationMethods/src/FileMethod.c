@@ -6,7 +6,7 @@
 #include "../include/FileMethod.h"
 
 // -------------------------- const definitions -------------------------
-
+// CR: This and the entire configuration for the server be in a single file.
 #define COMMUNICATION_FILE_NAME "bebi.txt"
 
 // -------------------------- macros -------------------------
@@ -30,7 +30,7 @@ static unsigned int fileLatestCharPosition = 0;
 
 // ------------------------------ private functions -----------------------------
 
-static ReturnValue updateLatestModified()
+static ReturnValue updateLatestModified() // CR: Nice! I love this idea...
 {
     // stat helps us checking for new msgs without opening it (using file info)
     struct stat fileStat;
@@ -43,7 +43,7 @@ static ReturnValue updateLatestModified()
     fileLatestModified = fileStat.st_mtime;
     return PROJECT_SUCCESS;
 }
-
+// CR: naming is a bit weird in this case.
 static FILE *getToLastKnownPosition(FILE *pFile) {
     CHECK_NULL_RETURN_NULL(pFile);
 
@@ -51,6 +51,7 @@ static FILE *getToLastKnownPosition(FILE *pFile) {
         return pFile;
 
     unsigned int counter = 0;
+    // CR: there must be a better way to do this... use seek
     while (fgetc(pFile) != EOF)
     {
         if (counter == fileLatestCharPosition - 1)
@@ -81,6 +82,7 @@ static unsigned int copyMsgIntoCStringAndReturnItsLength(FILE *pFile, char *buf)
 static char *fileGetMessage(FILE *pFile) {
     // get msg from previous position to first EOF/EOT
     pFile = getToLastKnownPosition(pFile);
+    // CR: what if pFile is NULL?
     char buf[MAX_MSG_LENGTH];
     unsigned int msgLength = copyMsgIntoCStringAndReturnItsLength(pFile, buf);
     CHECK_ZERO_RETURN_NULL(msgLength);
@@ -141,7 +143,8 @@ char *fileListen() {
     }
 
     while (true)
-    {
+    {   // CR: not really liking the never ending file, its really nice for debugging
+        //     but it keeps a log of the entire connection for what?
         // if the current mtime is later than a prior mtime, the file has been modified
         stat(COMMUNICATION_FILE_NAME, &fileStat);
         if (fileLatestModified < fileStat.st_mtime)
@@ -165,6 +168,8 @@ ReturnValue fileSend(const char *msg) {
     CHECK_NEGATIVE_PRINT_WRITE_ERROR_GOTO_CLEANUP(writingResult);
 
     // add EOT to differentiate msgs
+    // CR: this is kind of a problem and it shouldn't really be here
+    //     each sending method should be agnostic to the data
     char buf[2]= {EOT_CHAR_ASCII_DEC_VALUE};
     writingResult = fputs(buf, pFile);
     CHECK_NEGATIVE_PRINT_WRITE_ERROR_GOTO_CLEANUP(writingResult);
@@ -210,6 +215,6 @@ char *fileClientSend(const char *msg) {
     return reply;
 }
 
-char *fileClientReceive() {
+char *fileClientReceive() { // CR: why does this function exist?
     return fileReceive();
 }

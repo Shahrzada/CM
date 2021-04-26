@@ -8,7 +8,7 @@
 
 // -------------------------- const definitions -------------------------
 
-#define DEFAULT_SERVER_NAME "127.0.0.1"
+#define DEFAULT_SERVER_NAME "127.0.0.1" // CR: Client and server should have different defines?
 #define DEFAULT_PORT 5656
 #define DEFAULT_ADDRESS_FAMILY AF_INET // IPv4
 #define DEFAULT_SOCKET_TYPE SOCK_STREAM
@@ -27,7 +27,7 @@
            WSACleanup(); \
            return NULL; \
            } while(0)
-
+// CR: When closing a socket you should call shutdown
 #define CLOSE_SOCKET(socket) do { \
            closesocket((socket)); \
            (socket) = INVALID_SOCKET; \
@@ -56,6 +56,7 @@ static char *fromBufferToAllocatedMsg(char *buf) {
     CHECK_NULL_RETURN_NULL(buf);
 
     // allocate memory for the msg
+    // CR: same as messageSet
     unsigned int msgLength = strlen(buf) + NULL_CHAR_SIZE;
     char *msg = (char *) malloc(sizeof(char) * msgLength);
     CHECK_NULL_RETURN_NULL(msg);
@@ -73,6 +74,7 @@ static char *socketListenGivenSocket(SOCKET socket) {
     char buf[MAX_MSG_LENGTH] = {0};
 
     // Receive msg
+    // CR: a bit code duplication, what about socketClientSend?
     int returnValue = recv(socket, buf, MAX_MSG_LENGTH - NULL_CHAR_SIZE, 0);
     if (returnValue == SOCKET_ERROR || returnValue == 0)
     {
@@ -158,6 +160,8 @@ ReturnValue socketSend(const char *msg)
         return PROJECT_ERROR;
 
     sleep(1);
+    // CR: ???????????
+    // CR: same as socketClientSend...
     int returnValue = send(clientSocket, msg, (int)strlen(msg), 0);
     if (returnValue == SOCKET_ERROR)
     {
@@ -223,6 +227,7 @@ char *socketClientSend(const char *msg) {
         return NULL;
 
     // Send msg to server
+    // CR: same as recv below
     int result = send(connectionSocket, msg, (int) strlen(msg), 0);
     if (result == SOCKET_ERROR)
     {
@@ -232,6 +237,8 @@ char *socketClientSend(const char *msg) {
 
     // Wait for a reply from the server
     char buf[MAX_MSG_LENGTH] = {0};
+    // CR: did you read recv return value?
+    // CR: flags magic
     result = recv(connectionSocket, buf, MAX_MSG_LENGTH - NULL_CHAR_SIZE, 0);
     if (result == SOCKET_ERROR || result == 0)
     {

@@ -57,6 +57,7 @@ ServerCommunicationMethod *serverCMethodSet(CommunicationMethodCode cMethod)
     ReturnValue result = PROJECT_ERROR;
     switch (cMethod)
     {
+        // CR: there is no need to write everything here in a single line...
         case FILE_METHOD: result = initServerCMethod(serverCMethod, fileServerInitConnection, fileServerCloseConnection,
                               fileListen, fileSend); break;
         case SOCKET_METHOD: result = initServerCMethod(serverCMethod, socketServerInitConnection,

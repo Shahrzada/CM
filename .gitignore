@@ -6,6 +6,8 @@
 # Node artifact files
 node_modules/
 dist/
+ex2/cmake-build-debug/*
+cmake-build-debug/*
 
 # Compiled Java class files
 *.class

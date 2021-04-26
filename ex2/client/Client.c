@@ -121,6 +121,7 @@ ReturnValue clientSendCommand(Command commandType, char *contents)
         return PROJECT_ERROR;
 
     // send the message and wait to handle its reply
+    // CR: if this fails why continue to handle reply?
     char *reply = MPClientSend(msg);
     ReturnValue result = handleReply(reply);
 

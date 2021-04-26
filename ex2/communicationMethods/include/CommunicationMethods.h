@@ -19,7 +19,7 @@
  ********************************************************************************/
 
 // ------------------------------ includes ------------------------------
-
+// CR: You should just feed the include directory for the compiler instead of giving a relative path like this
 #include "../../Macros.h"
 
 // -------------------------- const definitions -------------------------
@@ -52,6 +52,7 @@ typedef struct {
     listen_function_t *listenFunction;
     server_send_function_t *sendFunction;
 } ServerCommunicationMethod;
+// CR: Try to stick to the naming convetion. typedef should be name snake_case and not CamelCase
 
 /**
  * The ClientCommunicationMethod holds pointers to the relevant
@@ -63,7 +64,7 @@ typedef struct {
     client_send_function_t *sendFunction;
     client_receive_function_t *clientReceiveFunction;
 } ClientCommunicationMethod;
-
+// CR: same as the above
 // ------------------------------ functions -----------------------------
 
 /**
