@@ -30,8 +30,8 @@
  */
 typedef ReturnValue (server_init_connection_function_t)();
 typedef ReturnValue (server_close_connection_function_t)();
-typedef char * (listen_function_t)();
-typedef ReturnValue (server_send_function_t)(const char *);
+typedef unsigned int (listen_function_t)(char *);
+typedef ReturnValue (server_send_function_t)(const char *, unsigned int);
 
 /**
  * These are the client virtual functions every communication method must
@@ -39,8 +39,8 @@ typedef ReturnValue (server_send_function_t)(const char *);
  */
 typedef ReturnValue (client_init_connection_function_t)();
 typedef ReturnValue (client_close_connection_function_t)();
-typedef char * (client_send_function_t)(const char *);
-typedef char * (client_receive_function_t)();
+typedef unsigned int (client_send_function_t)(const char *, unsigned int, char *);
+typedef unsigned int (client_receive_function_t)(char *);
 
 /**
  * The server_communication_method holds pointers to the relevant

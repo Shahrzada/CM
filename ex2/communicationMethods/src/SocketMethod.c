@@ -30,6 +30,12 @@
            return NULL; \
            } while(0)
 
+#define PRINT_ERROR_CALL_CLEANUP_RETURN_ZERO(role, functionName, returnValue) do { \
+           fprintf(stderr,"%s: %s failed with error %d\n", role, functionName, returnValue); \
+           WSACleanup(); \
+           return 0; \
+           } while(0)
+
 #define CLOSE_SOCKET(socket) do { \
            closesocket((socket)); \
            (socket) = INVALID_SOCKET; \
@@ -42,7 +48,9 @@
 
 #define CHECK_INVALID_SOCKET_RETURN_NULL(socket) do {if ((socket) == INVALID_SOCKET) return NULL;} while(0)
 #define CHECK_INVALID_SOCKET_RETURN_ERROR(socket) do {if ((socket) == INVALID_SOCKET) return PROJECT_ERROR;} while(0)
+#define CHECK_INVALID_SOCKET_RETURN_ZERO(socket) do {if ((socket) == INVALID_SOCKET) return 0;} while(0)
 #define CHECK_INVALID_SOCKET_GOTO_CLEANUP(socket) do {if ((socket) == INVALID_SOCKET) goto cleanup;} while(0)
+
 #define CHECK_SOCKET_ERROR_GOTO_CLEANUP(result) do {if ((result) == SOCKET_ERROR) goto cleanup;} while(0)
 
 // ------------------------------ global variables -----------------------------
@@ -79,34 +87,34 @@ static char *fromBufferToAllocatedMsg(char *buf) {
     return msg;
 }
 
-static char *socketReceive(SOCKET socket) {
-    CHECK_INVALID_SOCKET_RETURN_NULL(socket);
-    char buf[MAX_MSG_LENGTH] = {0};
+static unsigned int socketReceive(SOCKET socket, char *buffer)
+{
+    CHECK_INVALID_SOCKET_RETURN_ZERO(socket);
+    CHECK_NULL_RETURN_ZERO(buffer);
 
-    // TODO make sure to validate the length of the incoming msg
-    int returnValue = recv(socket, buf, MAX_MSG_LENGTH - NULL_CHAR_SIZE, 0);
-    if (returnValue == SOCKET_ERROR || returnValue == 0)
+    // TODO make sure to validate the length of the incoming msg: look for the null char!
+    // Notice: if the msg is larger than the buffer, the buffer is filled and recv generates an error
+    unsigned int totalBytesReceived = recv(socket, buffer, MAX_MSG_LENGTH - NULL_CHAR_SIZE, 0);
+    if (totalBytesReceived == SOCKET_ERROR || totalBytesReceived == 0)
     {
         SHUTDOWN_AND_CLOSE_SOCKET(socket);
-        PRINT_ERROR_CALL_CLEANUP_RETURN_NULL("Server", "recv()", returnValue);
+        PRINT_ERROR_CALL_CLEANUP_RETURN_ZERO("Server", "recv()", totalBytesReceived);
     }
-
-    return fromBufferToAllocatedMsg(buf);
+    return totalBytesReceived;
 }
 
-static ReturnValue socketSend(const char *msg, SOCKET socket)
+static ReturnValue socketSend(const char *msg, unsigned int msgLength, SOCKET socket)
 {
     CHECK_NULL_RETURN_ERROR(msg);
     CHECK_INVALID_SOCKET_RETURN_ERROR(socket);
 
-    int returnValue = send(socket, msg, (int)strlen(msg), 0);
+    int returnValue = send(socket, msg, (int)msgLength, 0);
     if (returnValue == SOCKET_ERROR)
     {
         SHUTDOWN_AND_CLOSE_SOCKET(clientSocket);
         PRINT_ERROR_CALL_CLEANUP("Server/Client", "send()", returnValue);
         return PROJECT_ERROR;
     }
-
     return PROJECT_SUCCESS;
 }
 
@@ -166,20 +174,21 @@ ReturnValue socketServerCloseConnection()
     return socketCloseConnection(clientSocket);
 }
 
-char *socketListen()
+unsigned int socketListen(char *buffer)
 {
-    CHECK_INVALID_SOCKET_RETURN_NULL(clientSocket);
-    return socketReceive(clientSocket);
+    CHECK_INVALID_SOCKET_RETURN_ZERO(clientSocket);
+    CHECK_NULL_RETURN_ZERO(buffer);
+    return socketReceive(clientSocket, buffer);
 }
 
-ReturnValue socketServerSend(const char *msg)
+ReturnValue socketServerSend(const char *msg, unsigned int msgLength)
 {
     CHECK_NULL_RETURN_ERROR(msg);
     CHECK_INVALID_SOCKET_RETURN_ERROR(clientSocket);
 
     sleep(1); // TODO REMOVE THIS
 
-    return socketSend(msg, clientSocket);
+    return socketSend(msg, msgLength, clientSocket);
 }
 
 ReturnValue socketClientInitConnection() {
@@ -228,25 +237,26 @@ ReturnValue socketClientCloseConnection()
     return socketCloseConnection(connectionSocket);
 }
 
-char *socketClientSend(const char *msg)
+unsigned int socketClientSend(const char *msg, unsigned int msgLength, char *buffer)
 {
-    CHECK_NULL_RETURN_NULL(msg);
-    CHECK_INVALID_SOCKET_RETURN_NULL(connectionSocket);
+    CHECK_INVALID_SOCKET_RETURN_ZERO(connectionSocket);
+    CHECK_NULL_RETURN_ZERO(msg);
+    CHECK_NULL_RETURN_ZERO(buffer);
 
     // Send msg to server
-    ReturnValue result = socketSend(msg, connectionSocket);
+    ReturnValue result = socketSend(msg, msgLength, connectionSocket);
     if (result == PROJECT_ERROR)
     {
         SHUTDOWN_AND_CLOSE_SOCKET(connectionSocket);
-        PRINT_ERROR_CALL_CLEANUP_RETURN_NULL("Client", "send()", WSAGetLastError());
+        PRINT_ERROR_CALL_CLEANUP_RETURN_ZERO("Client", "send()", WSAGetLastError());
     }
 
     // wait for a reply
-    return socketReceive(connectionSocket);
+    return socketReceive(connectionSocket, buffer);
 }
 
-char *socketClientReceive()
+unsigned int socketClientReceive(char *buffer)
 {
-    CHECK_INVALID_SOCKET_RETURN_NULL(connectionSocket);
-    return socketReceive(connectionSocket);
+    CHECK_INVALID_SOCKET_RETURN_ZERO(connectionSocket);
+    return socketReceive(connectionSocket, buffer);
 }

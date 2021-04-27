@@ -55,7 +55,7 @@ static Message *serverLoadFileIntoMsgFormat(FILE *pFile) {
     return NULL;
 }
 
-static void serverClose(bool errorExitFlag) {
+_Noreturn static void serverClose(bool errorExitFlag) {
     MPServerCloseConnection();
 
     if (errorExitFlag)

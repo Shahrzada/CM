@@ -24,12 +24,12 @@
 
 ReturnValue socketServerInitConnection();
 ReturnValue socketServerCloseConnection();
-char *socketListen();
-ReturnValue socketServerSend(const char *msg);
+unsigned int socketListen(char *buffer);
+ReturnValue socketServerSend(const char *msg, unsigned int msgLength);
 
 ReturnValue socketClientInitConnection();
 ReturnValue socketClientCloseConnection();
-char *socketClientSend(const char *msg);
-char *socketClientReceive();
+unsigned int socketClientSend(const char *msg, unsigned int msgLength, char *buffer);
+unsigned int socketClientReceive(char *buffer);
 
 

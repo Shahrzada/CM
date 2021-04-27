@@ -48,25 +48,20 @@ static char *MPMessageIntoEncodedString(Message *msg)
 static Message *MPDecodeStringIntoMsg(char *encodedMsg)
 {
     CHECK_NULL_RETURN_NULL(encodedMsg);
+    Message *msg = NULL;
 
     // decode the data
-    char *decodedMsg = (char *) malloc(sizeof(char) * MAX_MSG_LENGTH);
-    CHECK_NULL_RETURN_NULL(decodedMsg);
-
+    char decodedMsg[MAX_MSG_LENGTH];
     unsigned int msgLength = Base64decode(decodedMsg, encodedMsg);
     if (msgLength == 0)
         goto cleanup;
 
     // create the msg object
-    Message *msg = messageFromCString(decodedMsg, msgLength);
+    msg = messageFromCString(decodedMsg, msgLength);
     CHECK_NULL_GOTO_CLEANUP(msg);
 
-    free(decodedMsg);
-    return msg;
-
     cleanup:
-    free(decodedMsg);
-    return NULL;
+    return msg;
 }
 
 static Message *MPDecodeAndPrint(char *encodedMsg, bool isServer)
@@ -75,7 +70,6 @@ static Message *MPDecodeAndPrint(char *encodedMsg, bool isServer)
 
     // decode it and create a msg object for the client
     Message *msg = MPDecodeStringIntoMsg(encodedMsg);
-    free(encodedMsg);
     MSG_CHECK_VALID_RETURN_NULL(msg);
 
     if (isServer)
@@ -123,8 +117,9 @@ Message *MPServerListen()
 {
     CHECK_NULL_RETURN_NULL(serverCMethod);
 
-    char *encodedMsg = serverCMethod->listenFunction();
-    if (encodedMsg == NULL)
+    char encodedMsg[MAX_MSG_LENGTH];
+    unsigned int encodedMsgLength = serverCMethod->listenFunction(encodedMsg);
+    if (encodedMsgLength == 0)
         return NULL;
 
     // decode it and create a msg object for the client
@@ -141,7 +136,17 @@ ReturnValue MPServerSend(Message *msg)
     char *encodedMsg = MPPrintAndEncode(msg, true);
     CHECK_NULL_RETURN_ERROR(encodedMsg);
 
-    return serverCMethod->sendFunction(encodedMsg);
+    unsigned int encodedMsgLength = strnlen(encodedMsg, MAX_MSG_LENGTH);
+    if (encodedMsgLength == MAX_MSG_LENGTH)
+    {
+        free(encodedMsg);
+        printf("\nError in MPClientSend: Encoded msg is too big...\n");
+        return PROJECT_ERROR;
+    }
+
+    ReturnValue result = serverCMethod->sendFunction(encodedMsg, encodedMsgLength);
+    free(encodedMsg);
+    return result;
 }
 
 
@@ -194,10 +199,20 @@ Message *MPClientSend(Message *msg)
     char *encodedMsg = MPPrintAndEncode(msg, false);
     CHECK_NULL_RETURN_NULL(encodedMsg);
 
+    unsigned int encodedMsgLength = strnlen(encodedMsg, MAX_MSG_LENGTH);
+    if (encodedMsgLength == MAX_MSG_LENGTH)
+    {
+        free(encodedMsg);
+        printf("\nError in MPClientSend: Encoded msg is too big...\n");
+        return NULL;
+    }
+
     // wait for a reply
-    char *encodedReply = clientCMethod->sendFunction(encodedMsg);
+    char encodedReply[MAX_MSG_LENGTH];
+    unsigned int encodedReplyLength = clientCMethod->sendFunction(encodedMsg, encodedMsgLength, encodedReply);
     free(encodedMsg);
-    CHECK_NULL_RETURN_NULL(encodedReply);
+    if (encodedReplyLength == 0)
+        return NULL;
 
     // decode it and create a msg object for the client
     return MPDecodeAndPrint(encodedReply, false);
@@ -206,8 +221,9 @@ Message *MPClientSend(Message *msg)
 Message *MPClientReceive()
 {
     CHECK_NULL_RETURN_NULL(clientCMethod);
-    char *encodedMsg = clientCMethod->clientReceiveFunction();
-    if (encodedMsg == NULL)
+    char encodedMsg[MAX_MSG_LENGTH];
+    unsigned int encodedMsgLength = clientCMethod->clientReceiveFunction(encodedMsg);
+    if (encodedMsgLength == 0)
         return NULL;
 
     // decode it and create a msg object for the client
