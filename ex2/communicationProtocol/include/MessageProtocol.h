@@ -57,14 +57,14 @@ ReturnValue MPClientCloseConnection(ReturnValue result);
  *
  * @return a new msg if valid, NULL ow.
  */
-char *MPServerListen();
+Message *MPServerListen();
 
 /**
  * @brief send the msg using the static server_communication_method object
  *
  * @return PROJECT_SUCCESS if succeeded, PROJECT_ERROR ow.
  */
-ReturnValue MPServerSend(char *msg);
+ReturnValue MPServerSend(Message *msg);
 
 /**
  * @brief send the formatted PROJECT_SUCCESS or FAILURE server msg according
@@ -77,11 +77,11 @@ void MPServerSendSuccessOrFailure(ReturnValue result);
  *
  * @return the reply msg from the server if succeeded, NULL ow.
  */
-char *MPClientSend(const char *msg);
+Message *MPClientSend(Message *msg);
 
 /**
  * @brief get the earliest unread msg from the server
  *
  * @return the msg from the server if succeeded, NULL ow.
  */
-char *MPClientReceive();
+Message *MPClientReceive();

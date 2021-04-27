@@ -19,7 +19,12 @@
 
 // -------------------------- const definitions -------------------------
 
-struct _Message;
+struct _Message {
+    Sender sender;
+    Command command;
+    unsigned int contentsLength;
+    char * contents;
+};
 typedef struct _Message Message;
 
 // -------------------------- macros -------------------------
@@ -29,6 +34,11 @@ typedef struct _Message Message;
 #define SERVER_SUCCESS_MSG "0,3,PROJECT_SUCCESS"
 #define SERVER_FAILURE_MSG "0,3,FAILURE"
 
+#define PRINT_MSG(msg) do {printf("[%d][%d][%d]:%s\n", (msg)->sender, (msg)->command, (msg)->contentsLength, (msg)->contents);} while(0)
+#define MSG_CHECK_VALID_RETURN_NULL(msg) do {if (!messageValidateFormat(msg)) return NULL;} while(0)
+#define MSG_CHECK_VALID_RETURN_ERROR(msg) do {if (!messageValidateFormat(msg)) return PROJECT_ERROR;} while(0)
+#define MSG_CHECK_VALID_GOTO_CLEANUP(msg) do {if (!messageValidateFormat(msg)) goto cleanup;} while(0)
+
 // ------------------------------ functions -----------------------------
 
 /**
@@ -37,45 +47,40 @@ typedef struct _Message Message;
  *
  * @return the formatted msg as a char* if succeeded, NULL ow.
  */
-char * messageSet(Sender sender, Command commandType, char *contents);
 
-Message *messageSetT(Sender sender, Command command, unsigned int contentsLength, char *contents);
+Message *messageSet(Sender sender, Command command, unsigned int contentsLength, char *contents);
 void messageFree(Message *msg);
-bool messageValidateFormatT(Message *msg);
+bool messageValidateFormat(Message *msg);
 char *messageToCString(Message *msg, unsigned int *msgStrLength);
 Message *messageFromCString(const char *msgStr, unsigned int msgLength);
-
-/**
- * @brief calls the messageSet with the empty sender, command and string.
- *
- * @return the formatted msg as a char* if succeeded, NULL ow.
- */
-char *messageSetEmpty();
 
 /**
  * @brief checks for NULL and validates the prefix is according to the format
  *
  * @return true if the msg is formatted correctly, false ow.
  */
-bool messageValidateFormat(const char *msg);
 
 /**
  * @brief extracts the sender from the msg according the format
  *
  * @return the relevant sender if msg is valid, EMPTY_SENDER ow.
  */
-Sender messageGetSender(const char *msg);
+Sender messageGetSender(Message *msg);
 
 /**
  * @brief extracts the command from the msg according the format
  *
  * @return the relevant command if msg is valid, EMPTY_COMMAND ow.
  */
-Command messageGetCommand(const char *msg);
+Command messageGetCommand(Message *msg);
 
 /**
  * @brief extracts the contents from the msg according the format
  *
  * @return the relevant contents if msg is valid, NULL ow.
  */
-char *messageGetContents(char *msg);
+char *messageGetContents(Message *msg);
+
+unsigned int messageGetContentsLength(Message *msg);
+
+

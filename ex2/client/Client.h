@@ -45,4 +45,4 @@ ReturnValue clientClose(ReturnValue result);
  *
  * @return PROJECT_SUCCESS if the msg was sent and the reply was PROJECT_SUCCESS, PROJECT_ERROR ow.
  */
-ReturnValue clientSendCommand(Command commandType, char *contents);
+ReturnValue clientSendCommand(Command commandType, unsigned int contentsLength, char *contents);

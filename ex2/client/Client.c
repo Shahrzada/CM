@@ -11,9 +11,8 @@ static ReturnValue clientHandleFileDataStream(FILE *pFile)
 {
     CHECK_NULL_RETURN_ERROR(pFile);
 
-    char *currentFileData = NULL, *encodedData = NULL;
-    void *decodedData = NULL;
-    Command currentCommand = EMPTY_COMMAND;
+    Message *currentFileDataMsg = NULL;
+    void *fileData = NULL;
     unsigned int totalBytesToBeWritten = 0, totalBytesWritten = 0;
     ReturnValue result = PROJECT_ERROR;
 
@@ -22,47 +21,39 @@ static ReturnValue clientHandleFileDataStream(FILE *pFile)
     while (true)
     {
         // get the msg
-        currentFileData = MPClientReceive();
-        CHECK_NULL_RETURN_ERROR(currentFileData);
+        currentFileDataMsg = MPClientReceive();
+        MSG_CHECK_VALID_GOTO_CLEANUP(currentFileDataMsg);
 
         // make sure we are still getting file data
-        currentCommand = messageGetCommand(currentFileData);
-        if (currentCommand != GET_FILE)
+        if (messageGetCommand(currentFileDataMsg) != GET_FILE)
             break;
 
-        // extract the encoded data
-        encodedData = messageGetContents(currentFileData);
-        CHECK_NULL_GOTO_CLEANUP(encodedData);
-
-        // decode the data
-        decodedData = (char *) malloc(sizeof(char) * MAX_MSG_LENGTH);
-        CHECK_NULL_GOTO_CLEANUP(decodedData);
-        totalBytesToBeWritten = Base64decode(decodedData, encodedData);
-        CHECK_ZERO_GOTO_CLEANUP(totalBytesToBeWritten);
-
         // Write data to local file
-        totalBytesWritten = fwrite(decodedData, 1, totalBytesToBeWritten, pFile);
+        fileData = messageGetContents(currentFileDataMsg);
+        totalBytesToBeWritten = messageGetContentsLength(currentFileDataMsg);
+        if (totalBytesToBeWritten == 0 || fileData == NULL)
+            goto cleanup;
+
+        totalBytesWritten = fwrite(fileData, 1, totalBytesToBeWritten, pFile);
         if (totalBytesWritten != totalBytesToBeWritten)
             goto cleanup;
 
         // free for other possible incoming data
-        free(currentFileData);
-        currentFileData = NULL;
-        free(decodedData);
-        decodedData = NULL;
+        messageFree(currentFileDataMsg);
+        currentFileDataMsg = NULL;
     }
 
     result = PROJECT_SUCCESS;
 
 cleanup:
-    free(currentFileData);
-    free(decodedData);
+    free(currentFileDataMsg);
     return result;
 }
 
-static ReturnValue clientGetFile(char *reply)
+static ReturnValue clientGetFile(Message *reply)
 {
-    CHECK_NULL_RETURN_ERROR(reply);
+    if (!messageValidateFormat(reply))
+        return PROJECT_ERROR;
 
     // first msg is always the file's title
     char *fileTitle = messageGetContents(reply);
@@ -84,20 +75,15 @@ static ReturnValue clientGetFile(char *reply)
     return result;
 }
 
-static ReturnValue handleReply(char *reply)
+static ReturnValue handleReply(Message *reply)
 {
     if (!messageValidateFormat(reply))
         return PROJECT_ERROR;
 
     // TODO we do not validate the reply atm, only handle file downloading
-    Command currentCommand = messageGetCommand(reply);
-    if (currentCommand == GET_FILE)
+    if (messageGetCommand(reply) == GET_FILE)
         clientGetFile(reply);
-    else
-    {
-        const char *pointerToMsg = messageGetContents(reply);
-        printf("Client received reply: %s.\n", pointerToMsg);
-    }
+
     return PROJECT_SUCCESS;
 }
 
@@ -113,22 +99,22 @@ ReturnValue clientClose(ReturnValue result)
     return MPClientCloseConnection(result);
 }
 
-ReturnValue clientSendCommand(Command commandType, char *contents)
+ReturnValue clientSendCommand(Command commandType, unsigned int contentsLength, char *contents)
 {
     CHECK_NULL_RETURN_ERROR(contents);
     ReturnValue result = PROJECT_ERROR;
 
-    char *msg = messageSet(CLIENT, commandType, contents);
+    Message *msg = messageSet(CLIENT, commandType, contentsLength, contents);
     if (!messageValidateFormat(msg))
         return PROJECT_ERROR;
 
     // send the message and wait to handle its reply
-    char *reply = MPClientSend(msg);
+    Message *reply = MPClientSend(msg);
     CHECK_NULL_GOTO_CLEANUP(reply);
     result = handleReply(reply);
 
 cleanup:
-    free(msg);
-    free(reply);
+    messageFree(msg);
+    messageFree(reply);
     return result;
 }
