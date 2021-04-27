@@ -1,13 +1,13 @@
 
 // ------------------------------ includes ------------------------------
 
-#include "../include/MessageProtocol.h"
-#include "../../communicationMethods/include/CommunicationMethods.h"
+#include "MessageProtocol.h"
+#include "CommunicationMethods.h"
 
 // ------------------------------ global variables ------------------------------
 
-static ServerCommunicationMethod *serverCMethod = NULL;
-static ClientCommunicationMethod *clientCMethod = NULL;
+static server_communication_method *serverCMethod = NULL;
+static client_communication_method *clientCMethod = NULL;
 
 // ------------------------------ functions -----------------------------
 

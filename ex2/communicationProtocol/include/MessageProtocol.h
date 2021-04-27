@@ -20,7 +20,7 @@
 // ------------------------------ functions -----------------------------
 /**
  * @brief initializes the server connection according to the communication
- * method code, allocating/using the static ServerCommunicationMethod object that holds
+ * method code, allocating/using the static server_communication_method object that holds
  * all relevant function pointers
  *
  * @return PROJECT_SUCCESS if connection was established, PROJECT_ERROR ow.
@@ -28,7 +28,7 @@
 ReturnValue MPServerInitConnection(CommunicationMethodCode cMethodCode);
 
 /**
- * @brief closes the server connection using the static ServerCommunicationMethod,
+ * @brief closes the server connection using the static server_communication_method,
  * and frees it.
  *
  * @return PROJECT_SUCCESS if connection was closed, PROJECT_ERROR ow.
@@ -37,7 +37,7 @@ ReturnValue MPServerCloseConnection();
 
 /**
  * @brief initializes the client connection according to the communication
- * method code, allocating/using the static ClientCommunicationMethod object that holds
+ * method code, allocating/using the static client_communication_method object that holds
  * all relevant function pointers
  *
  * @return PROJECT_SUCCESS if connection was established, PROJECT_ERROR ow.
@@ -45,7 +45,7 @@ ReturnValue MPServerCloseConnection();
 ReturnValue MPClientInitConnection(CommunicationMethodCode cMethodCode);
 
 /**
- * @brief closes the client connection using the static ClientCommunicationMethod,
+ * @brief closes the client connection using the static client_communication_method,
  * and frees it.
  *
  * @return PROJECT_SUCCESS if connection was closed, PROJECT_ERROR ow.
@@ -53,14 +53,14 @@ ReturnValue MPClientInitConnection(CommunicationMethodCode cMethodCode);
 ReturnValue MPClientCloseConnection(ReturnValue result);
 
 /**
- * @brief listens to new msgs using the static ServerCommunicationMethod object
+ * @brief listens to new msgs using the static server_communication_method object
  *
  * @return a new msg if valid, NULL ow.
  */
 char *MPServerListen();
 
 /**
- * @brief send the msg using the static ServerCommunicationMethod object
+ * @brief send the msg using the static server_communication_method object
  *
  * @return PROJECT_SUCCESS if succeeded, PROJECT_ERROR ow.
  */
@@ -73,7 +73,7 @@ ReturnValue MPServerSend(char *msg);
 void MPServerSendSuccessOrFailure(ReturnValue result);
 
 /**
- * @brief send the msg using the static ClientCommunicationMethod object
+ * @brief send the msg using the static client_communication_method object
  *
  * @return the reply msg from the server if succeeded, NULL ow.
  */

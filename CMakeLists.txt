@@ -4,7 +4,9 @@ project(ex2)
 set(CMAKE_C_STANDARD 99)
 set(warnings "-Wall -Wextra -Werror")
 
-include_directories(ex2)
+include_directories(ex2 ex2/client ex2/server)
+include_directories(ex2/communicationMethods/include ex2/communicationProtocol/include)
+include_directories(ex2/utils)
 
 add_executable(ex2-server
         ex2/Macros.h

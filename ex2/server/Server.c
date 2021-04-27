@@ -1,17 +1,17 @@
 
 // ------------------------------ includes ------------------------------
 
-#include "../utils/base64.h"
 #include <unistd.h>
 
-#include "communicationProtocol/include/MessageProtocol.h"
 #include "server/Server.h"
+#include "MessageProtocol.h"
+#include "base64.h"
 
 // -------------------------- macros -------------------------
 
-#define GET_FILE_PATH                                                          \
-  "C:\\Users\\Logan\\Downloads\\bebi\\cmake-build-debug\\test.bin.exe"
-#define GET_FILE_TITLE "teexe"
+// TODO REMOVE THIS
+#define GET_FILE_PATH "C://Users//ADMIN//CLionProjects//bebi//ex2//test.png"
+#define GET_FILE_TITLE "test.png"
 
 // ------------------------------ private functions
 // -----------------------------

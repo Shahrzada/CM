@@ -1,7 +1,7 @@
 
 // ------------------------------ includes ------------------------------
 
-#include "../include/SocketMethod.h"
+#include "SocketMethod.h"
 
 #include <winsock2.h>
 #include <unistd.h>

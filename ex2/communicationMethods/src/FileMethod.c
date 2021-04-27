@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
-#include "../include/FileMethod.h"
+#include "FileMethod.h"
 
 // -------------------------- const definitions -------------------------
 // CR: This and the entire configuration for the server be in a single file.

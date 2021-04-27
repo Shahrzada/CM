@@ -1,9 +1,9 @@
 
 // ------------------------------ includes ------------------------------
 
-#include "../utils/base64.h"
 #include "Client.h"
-#include "../communicationProtocol/include/MessageProtocol.h"
+#include "MessageProtocol.h"
+#include "base64.h"
 
 // ------------------------------ private functions -----------------------------
 
@@ -116,15 +116,18 @@ ReturnValue clientClose(ReturnValue result)
 ReturnValue clientSendCommand(Command commandType, char *contents)
 {
     CHECK_NULL_RETURN_ERROR(contents);
+    ReturnValue result = PROJECT_ERROR;
+
     char *msg = messageSet(CLIENT, commandType, contents);
     if (!messageValidateFormat(msg))
         return PROJECT_ERROR;
 
     // send the message and wait to handle its reply
-    // CR: if this fails why continue to handle reply?
     char *reply = MPClientSend(msg);
-    ReturnValue result = handleReply(reply);
+    CHECK_NULL_GOTO_CLEANUP(reply);
+    result = handleReply(reply);
 
+cleanup:
     free(msg);
     free(reply);
     return result;

@@ -20,7 +20,7 @@
 
 // ------------------------------ includes ------------------------------
 // CR: You should just feed the include directory for the compiler instead of giving a relative path like this
-#include "../../Macros.h"
+#include "Macros.h"
 
 // -------------------------- const definitions -------------------------
 
@@ -43,7 +43,7 @@ typedef char * (client_send_function_t)(const char *);
 typedef char * (client_receive_function_t)();
 
 /**
- * The ServerCommunicationMethod holds pointers to the relevant
+ * The server_communication_method holds pointers to the relevant
  * communication method functions.
  */
 typedef struct {
@@ -51,11 +51,10 @@ typedef struct {
     server_close_connection_function_t *serverCloseConnectionFunction;
     listen_function_t *listenFunction;
     server_send_function_t *sendFunction;
-} ServerCommunicationMethod;
-// CR: Try to stick to the naming convetion. typedef should be name snake_case and not CamelCase
+} server_communication_method;
 
 /**
- * The ClientCommunicationMethod holds pointers to the relevant
+ * The client_communication_method holds pointers to the relevant
  * communication method functions.
  */
 typedef struct {
@@ -63,22 +62,22 @@ typedef struct {
     client_close_connection_function_t *clientCloseConnectionFunction;
     client_send_function_t *sendFunction;
     client_receive_function_t *clientReceiveFunction;
-} ClientCommunicationMethod;
-// CR: same as the above
+} client_communication_method;
+
 // ------------------------------ functions -----------------------------
 
 /**
- * @brief allocates and sets the ServerCommunicationMethod with the relevant
+ * @brief allocates and sets the server_communication_method with the relevant
  * function pointers according the CommunicationMethodCode.
  *
- * @return the ServerCommunicationMethod if the cMethod is valid, NULL ow.
+ * @return the server_communication_method if the cMethod is valid, NULL ow.
  */
-ServerCommunicationMethod *serverCMethodSet(CommunicationMethodCode cMethod);
+server_communication_method *serverCMethodSet(CommunicationMethodCode cMethod);
 
 /**
- * @brief allocates and sets the ClientCommunicationMethod with the relevant
+ * @brief allocates and sets the client_communication_method with the relevant
  * function pointers according the CommunicationMethodCode.
  *
- * @return the ClientCommunicationMethod if the cMethod is valid, NULL ow.
+ * @return the client_communication_method if the cMethod is valid, NULL ow.
  */
-ClientCommunicationMethod *clientCMethodSet(CommunicationMethodCode cMethod);
+client_communication_method *clientCMethodSet(CommunicationMethodCode cMethod);
