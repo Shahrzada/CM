@@ -59,7 +59,7 @@ cleanup:
 
 char *MPClientReceive()
 {
-    CHECK_NULL_RETURN_NULL(clientCMethod); // CR: GOOD!
+    CHECK_NULL_RETURN_NULL(clientCMethod);
     char * msg = clientCMethod->clientReceiveFunction();
 
     if (msg != NULL)

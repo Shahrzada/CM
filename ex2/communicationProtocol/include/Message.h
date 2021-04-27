@@ -17,6 +17,11 @@
 
 #include "Macros.h"
 
+// -------------------------- const definitions -------------------------
+
+struct _Message;
+typedef struct _Message Message;
+
 // -------------------------- macros -------------------------
 
 #define MSG_FORMAT_LENGTH 4
@@ -33,6 +38,12 @@
  * @return the formatted msg as a char* if succeeded, NULL ow.
  */
 char * messageSet(Sender sender, Command commandType, char *contents);
+
+Message *messageSetT(Sender sender, Command command, unsigned int contentsLength, char *contents);
+void messageFree(Message *msg);
+bool messageValidateFormatT(Message *msg);
+char *messageToCString(Message *msg, unsigned int *msgStrLength);
+Message *messageFromCString(const char *msgStr, unsigned int msgLength);
 
 /**
  * @brief calls the messageSet with the empty sender, command and string.

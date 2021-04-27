@@ -1,12 +1,39 @@
 
 // ------------------------------ includes ------------------------------
 
-#include "../include/Message.h"
+#include "Message.h"
 
 // -------------------------- macros -------------------------
 
 #define MSG_FORMAT_SENDER_POSITION 0
 #define MSG_FORMAT_COMMAND_POSITION 2
+
+// *3 for: sender, command and length
+#define GET_SIZE_OF_MSG_FORMAT(size) do {(size) = sizeof(unsigned int)*3 + NULL_CHAR_SIZE;} while(0)
+
+#define CHECK_MSG_NULL_RETURN_NULL(msg) do { \
+           CHECK_NULL_RETURN_NULL(msg); \
+           CHECK_NULL_RETURN_NULL((msg)->contents); \
+           } while(0)
+
+#define CHECK_MSG_NULL_RETURN_ERROR(msg) do { \
+           CHECK_NULL_RETURN_ERROR(msg); \
+           CHECK_NULL_RETURN_ERROR((msg)->contents); \
+           } while(0)
+
+#define CHECK_MSG_NULL_RETURN_ZERO(msg) do { \
+           CHECK_NULL_RETURN_ZERO(msg); \
+           CHECK_NULL_RETURN_ZERO((msg)->contents); \
+           } while(0)
+
+// -------------------------- const definitions -------------------------
+
+struct _Message {
+    Sender sender;
+    Command command;
+    unsigned int contentsLength;
+    char * contents;
+};
 
 // ------------------------------ private functions -----------------------------
 
@@ -21,7 +48,120 @@ static bool messageValidateCommand(Command command)
     || command == ABORT || command == REPLY || command == GET_FILE);
 }
 
+// this is done dynamically because of sizeof(unsigned int)
+static bool messageValidateContentsLength(unsigned int contentsLength)
+{
+    size_t msgFormatSize = 0;
+    GET_SIZE_OF_MSG_FORMAT(msgFormatSize);
+    return (contentsLength < MAX_MSG_LENGTH - msgFormatSize);
+}
+
 // ------------------------------ functions -----------------------------
+
+
+Message *messageSetT(Sender sender, Command command, unsigned int contentsLength, char *contents)
+{
+    CHECK_NULL_RETURN_NULL(contents);
+    if (!messageValidateCommand(command)|| !messageValidateSender(sender)
+        || !messageValidateContentsLength(contentsLength))
+        return NULL;
+
+    Message *msg = NULL;
+    char *msgContents = NULL;
+
+    msg = (Message *) malloc(sizeof(Message));
+    CHECK_NULL_GOTO_CLEANUP(msg);
+
+    msgContents = (char *) malloc(sizeof(char) * (contentsLength + NULL_CHAR_SIZE));
+    CHECK_NULL_GOTO_CLEANUP(msgContents);
+    strncpy(msgContents, contents, contentsLength);
+    msgContents[contentsLength] = NULL_CHAR;
+
+    msg->sender = sender;
+    msg->command = command;
+    msg->contentsLength = contentsLength;
+    msg->contents = msgContents;
+
+    return msg;
+
+cleanup:
+    free(msg);
+    free(msgContents);
+    return NULL;
+
+}
+
+void messageFree(Message *msg)
+{
+    if (msg == NULL)
+        return;
+
+    if (msg->contents != NULL)
+        free(msg->contents);
+
+    free(msg);
+}
+
+bool messageValidateFormatT(Message *msg)
+{
+    CHECK_MSG_NULL_RETURN_NULL(msg);
+    return (messageValidateSender(msg->sender)
+            && messageValidateCommand(msg->command)
+            && messageValidateContentsLength(msg->contentsLength));
+}
+
+char *messageToCString(Message *msg, unsigned int *msgStrLength)
+{
+    CHECK_MSG_NULL_RETURN_ZERO(msg);
+    if (!messageValidateFormatT(msg))
+        return 0;
+
+    size_t msgLength = sizeof(Message) + msg->contentsLength;
+    char *msgStr = (char *) malloc(sizeof(char) * (msgLength + NULL_CHAR_SIZE));
+    CHECK_NULL_RETURN_ZERO(msgStr);
+
+    memcpy(msgStr, msg, sizeof(Message));
+    memcpy(msgStr + sizeof(Message), msg->contents, msg->contentsLength);
+    // TODO add a validating element - compare
+
+    Message *msg1 = (Message *) malloc(msgLength);
+    memcpy(msg1, msgStr, msgLength);
+
+    msgStr[msgLength] = NULL_CHAR;
+    *msgStrLength = msgLength;
+    return msgStr;
+}
+
+Message *messageFromCString(const char *msgStr, unsigned int msgLength)
+{
+    CHECK_NULL_RETURN_NULL(msgStr);
+
+    // copy data
+    Message *msg = (Message *) malloc(sizeof(Message));
+    CHECK_NULL_RETURN_NULL(msg);
+    memcpy(msg, msgStr, sizeof(Message));
+
+    // update contents pointer
+    unsigned int contentsLength = msgLength - sizeof(Message);
+    char *contents = (char *) malloc(contentsLength + NULL_CHAR_SIZE);
+    if (contents == NULL)
+    {
+        free(msg);
+        return NULL;
+    }
+
+    memcpy(contents, msgStr + sizeof(Message), contentsLength);
+    contents[contentsLength] = NULL_CHAR;
+    msg->contents = contents;
+
+    if (!messageValidateFormatT(msg))
+    {
+        free(msg);
+        free(contents);
+        return NULL;
+    }
+    return msg;
+}
 
 char *messageSet(Sender sender, Command commandType, char *contents)
 {
@@ -73,6 +213,27 @@ bool messageValidateFormat(const char *msg) {
         return false;
 
     return true;
+}
+
+Sender messageGetSender(Message *msg)
+{
+    if (!messageValidateFormatT(msg))
+        return EMPTY_SENDER;
+    return msg->sender;
+}
+
+Command messageGetCommand(Message *msg)
+{
+    if (!messageValidateFormatT(msg))
+        return EMPTY_COMMAND;
+    return msg->command;
+}
+
+char *messageGetContents(Message *msg)
+{
+    if (!messageValidateFormatT(msg))
+        return NULL;
+    return msg->contents;
 }
 
 Sender messageGetSender(const char *msg)
