@@ -7,7 +7,7 @@ ReturnValue sendSomeMsgs();
 
 int main(int argc, char const *argv[])
 {
-    ReturnValue result = clientInitialize(FILE_METHOD);
+    ReturnValue result = clientInitialize(SOCKET_METHOD);
     CHECK_ERROR_PRINT_AND_RETURN_ERROR(result, "clientInitialize");
 
     result = sendSomeMsgs();
@@ -32,8 +32,8 @@ ReturnValue sendSomeMsgs()
     result = sendAMsg(READ, "BEBBBI1135411222  \n  IIII");
     CHECK_ERROR_RETURN_ERROR(result);
 
-    result = sendAMsg(GET_FILE, "schnitzel/pitzel.exe");
-    CHECK_ERROR_RETURN_ERROR(result);
+//    result = sendAMsg(GET_FILE, "schnitzel/pitzel.exe");
+//    CHECK_ERROR_RETURN_ERROR(result);
 
     result = sendAMsg(ABORT, "Goodbye");
     CHECK_ERROR_RETURN_ERROR(result);

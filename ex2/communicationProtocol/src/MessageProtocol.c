@@ -39,17 +39,19 @@ ReturnValue MPClientInitConnection(CommunicationMethodCode cMethodCode)
 ReturnValue MPClientCloseConnection(ReturnValue result)
 {
     CHECK_NULL_RETURN_ERROR(clientCMethod);
-    bool errorFlag = (result == PROJECT_ERROR) ? true:false; // CR: lol
+    ReturnValue connectionResult = PROJECT_ERROR;
 
-    if (errorFlag)
+    if (result == PROJECT_ERROR)
     {
         // send the server an ABORT msg
         char *abortMsg = messageSet(CLIENT, ABORT, "");
-        // CR: What if abortMsg is null?
+        CHECK_NULL_GOTO_CLEANUP(abortMsg);
         clientCMethod->sendFunction(abortMsg);
+        free(abortMsg);
     }
 
-    ReturnValue connectionResult = clientCMethod->clientCloseConnectionFunction();
+cleanup:
+    connectionResult = clientCMethod->clientCloseConnectionFunction();
     free(clientCMethod);
     clientCMethod = NULL;
     return connectionResult;

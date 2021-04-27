@@ -19,7 +19,7 @@
  ********************************************************************************/
 
 // ------------------------------ includes ------------------------------
-// CR: You should just feed the include directory for the compiler instead of giving a relative path like this
+
 #include "Macros.h"
 
 // -------------------------- const definitions -------------------------

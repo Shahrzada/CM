@@ -25,9 +25,7 @@ static int serverLoadFileIntoBuffer(char *buf, int bufLength, FILE *pFile) {
     ch = fgetc(pFile);
     if (ch == EOF)
       break;
-    // CR: unite these two lines
-    buf[counter] = (char)ch;
-    counter++;
+    buf[counter++] = (char)ch;
   }
   return counter;
 }
@@ -186,6 +184,6 @@ _Noreturn void serverListen() {
 
     serverHandleMessage(incomingMsg);
     free(incomingMsg);
-    sleep(1); // CR: ???
+    sleep(1);
   }
 }

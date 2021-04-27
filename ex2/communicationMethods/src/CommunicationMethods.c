@@ -63,7 +63,7 @@ server_communication_method *serverCMethodSet(CommunicationMethodCode cMethod)
             break;
         case SOCKET_METHOD:
             result = initServerCMethod(serverCMethod, socketServerInitConnection,
-                                       socketServerCloseConnection, socketListen, socketSend);
+                                       socketServerCloseConnection, socketListen, socketServerSend);
             break;
         /**case NEW_METHOD:
          * result = initServerCMethod(relevant functions);

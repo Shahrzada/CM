@@ -25,7 +25,7 @@
 ReturnValue socketServerInitConnection();
 ReturnValue socketServerCloseConnection();
 char *socketListen();
-ReturnValue socketSend(const char *msg);
+ReturnValue socketServerSend(const char *msg);
 
 ReturnValue socketClientInitConnection();
 ReturnValue socketClientCloseConnection();

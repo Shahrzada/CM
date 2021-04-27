@@ -30,7 +30,7 @@ static unsigned int fileLatestCharPosition = 0;
 
 // ------------------------------ private functions -----------------------------
 
-static ReturnValue updateLatestModified() // CR: Nice! I love this idea...
+static ReturnValue updateLatestModified()
 {
     // stat helps us checking for new msgs without opening it (using file info)
     struct stat fileStat;
@@ -80,9 +80,10 @@ static unsigned int copyMsgIntoCStringAndReturnItsLength(FILE *pFile, char *buf)
 }
 
 static char *fileGetMessage(FILE *pFile) {
+    CHECK_NULL_RETURN_NULL(pFile);
+
     // get msg from previous position to first EOF/EOT
     pFile = getToLastKnownPosition(pFile);
-    // CR: what if pFile is NULL?
     char buf[MAX_MSG_LENGTH];
     unsigned int msgLength = copyMsgIntoCStringAndReturnItsLength(pFile, buf);
     CHECK_ZERO_RETURN_NULL(msgLength);
