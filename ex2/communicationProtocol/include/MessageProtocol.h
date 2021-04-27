@@ -36,23 +36,6 @@ ReturnValue MPServerInitConnection(CommunicationMethodCode cMethodCode);
 ReturnValue MPServerCloseConnection();
 
 /**
- * @brief initializes the client connection according to the communication
- * method code, allocating/using the static client_communication_method object that holds
- * all relevant function pointers
- *
- * @return PROJECT_SUCCESS if connection was established, PROJECT_ERROR ow.
- */
-ReturnValue MPClientInitConnection(CommunicationMethodCode cMethodCode);
-
-/**
- * @brief closes the client connection using the static client_communication_method,
- * and frees it.
- *
- * @return PROJECT_SUCCESS if connection was closed, PROJECT_ERROR ow.
- */
-ReturnValue MPClientCloseConnection(ReturnValue result);
-
-/**
  * @brief listens to new msgs using the static server_communication_method object
  *
  * @return a new msg if valid, NULL ow.
@@ -71,6 +54,23 @@ ReturnValue MPServerSend(Message *msg);
  * to the input result value.
  */
 void MPServerSendSuccessOrFailure(ReturnValue result);
+
+/**
+ * @brief initializes the client connection according to the communication
+ * method code, allocating/using the static client_communication_method object that holds
+ * all relevant function pointers
+ *
+ * @return PROJECT_SUCCESS if connection was established, PROJECT_ERROR ow.
+ */
+ReturnValue MPClientInitConnection(CommunicationMethodCode cMethodCode);
+
+/**
+ * @brief closes the client connection using the static client_communication_method,
+ * and frees it.
+ *
+ * @return PROJECT_SUCCESS if connection was closed, PROJECT_ERROR ow.
+ */
+ReturnValue MPClientCloseConnection(ReturnValue result);
 
 /**
  * @brief send the msg using the static client_communication_method object

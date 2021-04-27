@@ -5,6 +5,12 @@
 #include "MessageProtocol.h"
 #include "CommunicationMethods.h"
 
+// ------------------------------ macros ------------------------------
+
+#define MP_SUCCESS_MSG "Success"
+#define MP_FAILURE_MSG "Failure"
+#define MP_SUCCESS_FAILURE_MSG_LENGTH 7
+
 // ------------------------------ global variables ------------------------------
 
 static server_communication_method *serverCMethod = NULL;
@@ -12,7 +18,7 @@ static client_communication_method *clientCMethod = NULL;
 
 // ------------------------------ private functions -----------------------------
 
-static char *MPMessageToEncodedBytes(Message *msg)
+static char *MPMessageIntoEncodedString(Message *msg)
 {
     MSG_CHECK_VALID_RETURN_NULL(msg);
 
@@ -39,7 +45,7 @@ static char *MPMessageToEncodedBytes(Message *msg)
     return encodedMsg;
 }
 
-static Message *MPEncodedBytesToMsg(char *encodedMsg)
+static Message *MPDecodeStringIntoMsg(char *encodedMsg)
 {
     CHECK_NULL_RETURN_NULL(encodedMsg);
 
@@ -63,6 +69,37 @@ static Message *MPEncodedBytesToMsg(char *encodedMsg)
     return NULL;
 }
 
+static Message *MPDecodeAndPrint(char *encodedMsg, bool isServer)
+{
+    CHECK_NULL_RETURN_NULL(encodedMsg);
+
+    // decode it and create a msg object for the client
+    Message *msg = MPDecodeStringIntoMsg(encodedMsg);
+    free(encodedMsg);
+    MSG_CHECK_VALID_RETURN_NULL(msg);
+
+    if (isServer)
+        printf("\nServer received:\n");
+    else
+        printf("\nClient received:\n");
+    PRINT_MSG(msg);
+
+    return msg;
+}
+
+static char *MPPrintAndEncode(Message *msg, bool isServer)
+{
+    CHECK_NULL_RETURN_NULL(msg);
+
+    if (isServer)
+        printf("\nServer is sending:\n");
+    else
+        printf("\nClient is sending:\n");
+    PRINT_MSG(msg);
+
+    return MPMessageIntoEncodedString(msg);
+}
+
 // ------------------------------ functions -----------------------------
 
 ReturnValue MPServerInitConnection(CommunicationMethodCode cMethodCode)
@@ -82,6 +119,42 @@ ReturnValue MPServerCloseConnection()
     return result;
 }
 
+Message *MPServerListen()
+{
+    CHECK_NULL_RETURN_NULL(serverCMethod);
+
+    char *encodedMsg = serverCMethod->listenFunction();
+    if (encodedMsg == NULL)
+        return NULL;
+
+    // decode it and create a msg object for the client
+    return MPDecodeAndPrint(encodedMsg, true);
+}
+
+ReturnValue MPServerSend(Message *msg)
+{
+    CHECK_NULL_RETURN_ERROR(serverCMethod);
+    if (!messageValidateFormat(msg))
+        return PROJECT_ERROR;
+
+    // encode the msg and send it
+    char *encodedMsg = MPPrintAndEncode(msg, true);
+    CHECK_NULL_RETURN_ERROR(encodedMsg);
+
+    return serverCMethod->sendFunction(encodedMsg);
+}
+
+
+void MPServerSendSuccessOrFailure(ReturnValue result)
+{
+    Message *msg = messageSet(SERVER,
+                              REPLY,
+                              MP_SUCCESS_FAILURE_MSG_LENGTH,
+                              (result == PROJECT_SUCCESS) ? MP_SUCCESS_MSG : MP_FAILURE_MSG);
+    MPServerSend(msg);
+    free(msg);
+}
+
 ReturnValue MPClientInitConnection(CommunicationMethodCode cMethodCode)
 {
     if (clientCMethod == NULL)
@@ -99,64 +172,16 @@ ReturnValue MPClientCloseConnection(ReturnValue result)
     {
         Message *msg = messageSet(CLIENT, ABORT, 0, "");
         MSG_CHECK_VALID_GOTO_CLEANUP(msg);
-        MPClientSend(msg);
+        Message *reply = MPClientSend(msg);
         free(msg);
+        free(reply);
     }
 
-cleanup:
+    cleanup:
     connectionResult = clientCMethod->clientCloseConnectionFunction();
     free(clientCMethod);
     clientCMethod = NULL;
     return connectionResult;
-}
-
-Message *MPClientReceive()
-{
-    CHECK_NULL_RETURN_NULL(clientCMethod);
-    char *encodedMsg = clientCMethod->clientReceiveFunction();
-
-    if (encodedMsg == NULL)
-        return NULL;
-
-    // decode it and create a msg object for the client
-    Message *msg = MPEncodedBytesToMsg(encodedMsg);
-    free(encodedMsg);
-    MSG_CHECK_VALID_RETURN_NULL(msg);
-
-    printf("Client received:\n");
-    PRINT_MSG(msg);
-    return msg;
-}
-
-Message *MPServerListen()
-{
-    CHECK_NULL_RETURN_NULL(serverCMethod);
-
-    char *encodedMsg = serverCMethod->listenFunction();
-    if (encodedMsg == NULL)
-        return NULL;
-
-    // decode it and create a msg object for the client
-    Message *msg = MPEncodedBytesToMsg(encodedMsg);
-    free(encodedMsg);
-    CHECK_NULL_RETURN_NULL(msg);
-
-    printf("Client received:\n");
-    PRINT_MSG(msg);
-    return msg;
-}
-
-ReturnValue MPServerSend(Message *msg)
-{
-    CHECK_NULL_RETURN_ERROR(serverCMethod);
-    if (!messageValidateFormat(msg))
-        return PROJECT_ERROR;
-
-    printf("Server is sending:\n");
-    PRINT_MSG(msg);
-
-    char *encodedMsg = MPMessageToEncodedBytes(msg);
-    return serverCMethod->sendFunction(encodedMsg);
 }
 
 Message *MPClientSend(Message *msg)
@@ -165,33 +190,26 @@ Message *MPClientSend(Message *msg)
     if (!messageValidateFormat(msg))
         return NULL;
 
-    printf("Client is sending:\n");
-    PRINT_MSG(msg);
-
     // encode the msg and send it
-    char *encodedMsg = MPMessageToEncodedBytes(msg);
+    char *encodedMsg = MPPrintAndEncode(msg, false);
     CHECK_NULL_RETURN_NULL(encodedMsg);
 
-    // wait for the encoded reply
+    // wait for a reply
     char *encodedReply = clientCMethod->sendFunction(encodedMsg);
     free(encodedMsg);
     CHECK_NULL_RETURN_NULL(encodedReply);
 
     // decode it and create a msg object for the client
-    Message *reply = MPEncodedBytesToMsg(encodedReply);
-    free(encodedReply);
-    CHECK_NULL_RETURN_NULL(reply);
-
-    printf("Client received:\n");
-    PRINT_MSG(reply);
-    return reply;
+    return MPDecodeAndPrint(encodedReply, false);
 }
 
-void MPServerSendSuccessOrFailure(ReturnValue result)
+Message *MPClientReceive()
 {
+    CHECK_NULL_RETURN_NULL(clientCMethod);
+    char *encodedMsg = clientCMethod->clientReceiveFunction();
+    if (encodedMsg == NULL)
+        return NULL;
 
-    char *contents = (result == PROJECT_SUCCESS) ? "SUCCESS" : "FAILURE";
-    Message *msg = messageSet(SERVER, REPLY, 7, contents);
-    MPServerSend(msg);
-    free(msg);
+    // decode it and create a msg object for the client
+    return MPDecodeAndPrint(encodedMsg, false);
 }
