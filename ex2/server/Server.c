@@ -124,6 +124,8 @@ static void serverSendFile(Message *msg) {
 
         messageFree(fileMsg);
         fileMsg = NULL;
+
+        sleep(1); // TODO make sure if this is needed
     }
 
     cleanup:

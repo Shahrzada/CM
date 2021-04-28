@@ -103,7 +103,7 @@ char *messageToCString(Message *msg, unsigned int *msgStrLength)
     Message *msg1 = (Message *) malloc(msgLength);
     memcpy(msg1, msgStr, msgLength);
 
-    msgStr[msgLength] = NULL_CHAR;
+    msgStr[msgLength] = EOL_CHAR;
     *msgStrLength = msgLength;
     return msgStr;
 }

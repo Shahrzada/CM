@@ -5,7 +5,7 @@ ReturnValue sendSomeMsgs();
 
 int main(int argc, char const *argv[])
 {
-    ReturnValue result = clientInitialize(SOCKET_METHOD);
+    ReturnValue result = clientInitialize(FILE_METHOD);
     CHECK_ERROR_PRINT_AND_RETURN_ERROR(result, "clientInitialize");
 
     result = sendSomeMsgs();

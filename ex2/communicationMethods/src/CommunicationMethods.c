@@ -59,9 +59,9 @@ server_communication_method *serverCMethodSet(CommunicationMethodCode cMethod)
     {
         case FILE_METHOD:
             result = initServerCMethod(serverCMethod, fileServerInitConnection,
-                                       fileServerCloseConnection,fileListen, fileSend);
+                                       fileServerCloseConnection,fileServerListen, fileServerSend);
             break;
-        case SOCKET_METHOD:
+        case SOCKET_METHOD: // TODO change  socketListen to socketServerListen
             result = initServerCMethod(serverCMethod, socketServerInitConnection,
                                        socketServerCloseConnection, socketListen, socketServerSend);
             break;

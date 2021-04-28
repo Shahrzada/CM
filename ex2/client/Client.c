@@ -80,7 +80,7 @@ static ReturnValue handleReply(Message *reply)
     if (!messageValidateFormat(reply))
         return PROJECT_ERROR;
 
-    // TODO we do not validate the reply atm, only handle file downloading
+    // we do not validate the reply atm, only handle file downloading
     if (messageGetCommand(reply) == GET_FILE)
         clientGetFile(reply);
 

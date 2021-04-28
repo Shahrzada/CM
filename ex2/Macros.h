@@ -42,6 +42,7 @@ typedef enum {
 
 #define EOT_CHAR_ASCII_DEC_VALUE 4
 #define NULL_CHAR '\0'
+#define EOL_CHAR '\n'
 #define COMMA_CHAR ','
 #define ZERO_CHAR '0'
 
@@ -52,6 +53,7 @@ typedef enum {
 #define FILE_READ_BINARY_MODE "rb"
 #define FILE_WRITE_BINARY_MODE "wb"
 #define FILE_WRITE_UPDATE_MODE "w+"
+#define FILE_WRITE_MODE "w"
 #define FILE_APPEND_MODE "a"
 
 #define MAX_MSG_LENGTH 1025
@@ -71,6 +73,7 @@ typedef enum {
 
 #define CHECK_ERROR_RETURN_ERROR(number) do {if ((number) == PROJECT_ERROR) return PROJECT_ERROR;} while(0)
 #define CHECK_ERROR_RETURN_NULL(number) do {if ((number) == PROJECT_ERROR) return NULL;} while(0)
+#define CHECK_ERROR_RETURN_ZERO(number) do {if ((number) == PROJECT_ERROR) return 0;} while(0)
 #define CHECK_ERROR_GOTO_CLEANUP(number) do {if ((number) == PROJECT_ERROR) goto cleanup;} while(0)
 
 #define CHECK_ERROR_PRINT_AND_RETURN_ERROR(result, function) do { \

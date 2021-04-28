@@ -185,9 +185,6 @@ ReturnValue socketServerSend(const char *msg, unsigned int msgLength)
 {
     CHECK_NULL_RETURN_ERROR(msg);
     CHECK_INVALID_SOCKET_RETURN_ERROR(clientSocket);
-
-    sleep(1); // TODO REMOVE THIS
-
     return socketSend(msg, msgLength, clientSocket);
 }
 
