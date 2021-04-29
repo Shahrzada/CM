@@ -17,6 +17,10 @@ static char serverTempCommunicationFilePath[MAX_JSON_VALUE_LENGTH] = {0};
 static char clientCommunicationFilePath[MAX_JSON_VALUE_LENGTH] = {0};
 static char clientTempCommunicationFilePath[MAX_JSON_VALUE_LENGTH] = {0};
 
+static char serverLogCommunicationFilePath[MAX_JSON_VALUE_LENGTH] = {0};
+static char clientLogCommunicationFilePath[MAX_JSON_VALUE_LENGTH] = {0};
+
+
 static char *loadJSONStringFromFile(const char *configFilePath)
 {
     CHECK_NULL_RETURN_NULL(configFilePath);
@@ -85,6 +89,12 @@ static ReturnValue copyStringIntoPathHolders(const nx_json *json)
     result = copyStringIntoPathHolder(clientTempCommunicationFilePath, json, "clientTempCommunicationFilePath");
     CHECK_ERROR_RETURN_ERROR(result);
 
+    result = copyStringIntoPathHolder(serverLogCommunicationFilePath, json, "serverLogCommunicationFilePath");
+    CHECK_ERROR_RETURN_ERROR(result);
+
+    result = copyStringIntoPathHolder(clientLogCommunicationFilePath, json, "clientLogCommunicationFilePath");
+    CHECK_ERROR_RETURN_ERROR(result);
+
     return PROJECT_SUCCESS;
 }
 
@@ -124,37 +134,51 @@ CommunicationMethodCode getCommunicationMethodCode()
     return communicationMethodCode;
 }
 
-const char *getFileToTransferPath()
+char *getFileToTransferPath()
 {
     if (strnlen(fileToTransferPath, MAX_JSON_VALUE_LENGTH) == 0)
         return NULL;
     return fileToTransferPath;
 }
 
-const char *getServerCommunicationFilePath()
+char *getServerCommunicationFilePath()
 {
     if (strnlen(serverCommunicationFilePath, MAX_JSON_VALUE_LENGTH) == 0)
         return NULL;
     return serverCommunicationFilePath;
 }
 
-const char *getServerTempCommunicationFilePath()
+char *getServerTempCommunicationFilePath()
 {
     if (strnlen(serverTempCommunicationFilePath, MAX_JSON_VALUE_LENGTH) == 0)
         return NULL;
     return serverTempCommunicationFilePath;
 }
 
-const char *getClientCommunicationFilePath()
+char *getClientCommunicationFilePath()
 {
     if (strnlen(clientCommunicationFilePath, MAX_JSON_VALUE_LENGTH) == 0)
         return NULL;
     return clientCommunicationFilePath;
 }
 
-const char *getClientTempCommunicationFilePath()
+char *getClientTempCommunicationFilePath()
 {
     if (strnlen(clientTempCommunicationFilePath, MAX_JSON_VALUE_LENGTH) == 0)
         return NULL;
     return clientTempCommunicationFilePath;
+}
+
+char *getServerLogCommunicationFilePath()
+{
+    if (strnlen(serverLogCommunicationFilePath, MAX_JSON_VALUE_LENGTH) == 0)
+        return NULL;
+    return serverLogCommunicationFilePath;
+}
+
+char *getClientLogCommunicationFilePath()
+{
+    if (strnlen(clientLogCommunicationFilePath, MAX_JSON_VALUE_LENGTH) == 0)
+        return NULL;
+    return clientLogCommunicationFilePath;
 }

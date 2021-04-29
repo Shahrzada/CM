@@ -2,6 +2,7 @@
 // ------------------------------ includes ------------------------------
 
 #include <utils/include/base64.h>
+#include <config.h>
 #include "MessageProtocol.h"
 #include "CommunicationMethods.h"
 
@@ -9,14 +10,51 @@
 
 #define MP_SUCCESS_MSG "Success"
 #define MP_FAILURE_MSG "Failure"
-#define MP_SUCCESS_FAILURE_MSG_LENGTH 7
+#define MP_SUCCESS_FAILURE_MSG_LENGTH 7 //TODO CHANGE THIS
 
 // ------------------------------ global variables ------------------------------
+
+static bool isServer = false;
 
 static server_communication_method *serverCMethod = NULL;
 static client_communication_method *clientCMethod = NULL;
 
 // ------------------------------ private functions -----------------------------
+
+static ReturnValue MPWriteToLog(Message *msg)
+{
+    CHECK_NULL_RETURN_ERROR(msg);
+    ReturnValue result = PROJECT_ERROR;
+
+    // Get log file path
+    char *logPath = NULL;
+    if (isServer)
+        logPath = getServerLogCommunicationFilePath();
+    else
+        logPath = getClientLogCommunicationFilePath();
+    CHECK_NULL_RETURN_ERROR(logPath);
+
+    // Open log file for appending
+    FILE *pFile = fopen(logPath, FILE_APPEND_MODE);
+    CHECK_NULL_RETURN_ERROR(pFile);
+
+    // Get a formatted string
+    char buffer[MAX_MSG_LENGTH + MSG_PRINT_FORMAT_LENGTH] = {0};
+    result = messageToPrintCString(msg, buffer);
+    CHECK_ERROR_GOTO_CLEANUP(result);
+    size_t bufferSize = strnlen(buffer, MSG_PRINT_FORMAT_LENGTH);
+
+    // Write to log
+    size_t totalBytesWritten = fwrite(buffer, 1, bufferSize, pFile);
+    if (totalBytesWritten != bufferSize)
+        goto cleanup;
+
+    result = PROJECT_SUCCESS;
+
+    cleanup:
+    fclose(pFile);
+    return result;
+}
 
 static char *MPMessageIntoEncodedString(Message *msg)
 {
@@ -63,7 +101,7 @@ static Message *MPDecodeStringIntoMsg(char *encodedMsg)
     return msg;
 }
 
-static Message *MPDecodeAndPrint(char *encodedMsg, bool isServer)
+static Message *MPDecodeAndPrint(char *encodedMsg)
 {
     CHECK_NULL_RETURN_NULL(encodedMsg);
 
@@ -77,10 +115,12 @@ static Message *MPDecodeAndPrint(char *encodedMsg, bool isServer)
         printf("\nClient received:\n");
     PRINT_MSG(msg);
 
+    MPWriteToLog(msg);
+
     return msg;
 }
 
-static char *MPPrintAndEncode(Message *msg, bool isServer)
+static char *MPPrintAndEncode(Message *msg)
 {
     CHECK_NULL_RETURN_NULL(msg);
 
@@ -90,6 +130,8 @@ static char *MPPrintAndEncode(Message *msg, bool isServer)
         printf("\nClient is sending:\n");
     PRINT_MSG(msg);
 
+    MPWriteToLog(msg);
+
     return MPMessageIntoEncodedString(msg);
 }
 
@@ -97,6 +139,7 @@ static char *MPPrintAndEncode(Message *msg, bool isServer)
 
 ReturnValue MPServerInitConnection(CommunicationMethodCode cMethodCode)
 {
+    isServer = true;
     if (serverCMethod == NULL)
         serverCMethod = serverCMethodSet(cMethodCode);
     CHECK_NULL_RETURN_ERROR(serverCMethod);
@@ -122,17 +165,16 @@ Message *MPServerListen()
         return NULL;
 
     // decode it and create a msg object for the client
-    return MPDecodeAndPrint(encodedMsg, true);
+    return MPDecodeAndPrint(encodedMsg);
 }
 
 ReturnValue MPServerSend(Message *msg)
 {
     CHECK_NULL_RETURN_ERROR(serverCMethod);
-    if (!messageValidateFormat(msg))
-        return PROJECT_ERROR;
+    MSG_CHECK_VALID_RETURN_ERROR(msg);
 
     // encode the msg and send it
-    char *encodedMsg = MPPrintAndEncode(msg, true);
+    char *encodedMsg = MPPrintAndEncode(msg);
     CHECK_NULL_RETURN_ERROR(encodedMsg);
 
     unsigned int encodedMsgLength = strnlen(encodedMsg, MAX_MSG_LENGTH);
@@ -191,11 +233,10 @@ ReturnValue MPClientCloseConnection(ReturnValue result)
 Message *MPClientSend(Message *msg)
 {
     CHECK_NULL_RETURN_NULL(clientCMethod);
-    if (!messageValidateFormat(msg))
-        return NULL;
+    MSG_CHECK_VALID_RETURN_NULL(msg);
 
     // encode the msg and send it
-    char *encodedMsg = MPPrintAndEncode(msg, false);
+    char *encodedMsg = MPPrintAndEncode(msg);
     CHECK_NULL_RETURN_NULL(encodedMsg);
 
     unsigned int encodedMsgLength = strnlen(encodedMsg, MAX_MSG_LENGTH);
@@ -214,7 +255,7 @@ Message *MPClientSend(Message *msg)
         return NULL;
 
     // decode it and create a msg object for the client
-    return MPDecodeAndPrint(encodedReply, false);
+    return MPDecodeAndPrint(encodedReply);
 }
 
 Message *MPClientReceive()
@@ -226,5 +267,5 @@ Message *MPClientReceive()
         return NULL;
 
     // decode it and create a msg object for the client
-    return MPDecodeAndPrint(encodedMsg, false);
+    return MPDecodeAndPrint(encodedMsg);
 }

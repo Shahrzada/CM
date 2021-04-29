@@ -40,14 +40,14 @@ ReturnValue sendSomeMsgs()
 {
     ReturnValue result = PROJECT_ERROR;
 
-//    result = clientSendCommand(READ, 11, "Hey2222222o");
-//    CHECK_ERROR_RETURN_ERROR(result);
-//
-//    result = clientSendCommand(WRITE, 25, "BEBBBI   222         IIII");
-//    CHECK_ERROR_RETURN_ERROR(result);
-//
-//    result = clientSendCommand(READ, 26, "BEBBBI1135411222  \n  IIII");
-//    CHECK_ERROR_RETURN_ERROR(result);
+    result = clientSendCommand(READ, 11, "Hey2222222o");
+    CHECK_ERROR_RETURN_ERROR(result);
+
+    result = clientSendCommand(WRITE, 25, "BEBBBI   222         IIII");
+    CHECK_ERROR_RETURN_ERROR(result);
+
+    result = clientSendCommand(READ, 26, "BEBBBI1135411222  \n  IIII");
+    CHECK_ERROR_RETURN_ERROR(result);
 
     // send a file
     char *filePath = getFileToTransferPath();

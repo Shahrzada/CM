@@ -94,8 +94,8 @@ static unsigned int socketReceive(SOCKET socket, char *buffer)
 
     // TODO make sure to validate the length of the incoming msg: look for the null char!
     // Notice: if the msg is larger than the buffer, the buffer is filled and recv generates an error
-    unsigned int totalBytesReceived = recv(socket, buffer, MAX_MSG_LENGTH - NULL_CHAR_SIZE, 0);
-    if (totalBytesReceived == SOCKET_ERROR || totalBytesReceived == 0)
+    unsigned int totalBytesReceived = recv(socket, buffer, MAX_MSG_LENGTH, 0);
+    if (totalBytesReceived == SOCKET_ERROR || totalBytesReceived == 0 || totalBytesReceived == MAX_MSG_LENGTH)
     {
         SHUTDOWN_AND_CLOSE_SOCKET(socket);
         PRINT_ERROR_CALL_CLEANUP_RETURN_ZERO("Server", "recv()", totalBytesReceived);

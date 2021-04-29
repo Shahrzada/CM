@@ -58,8 +58,7 @@ cleanup:
 
 static ReturnValue clientGetFile(Message *reply)
 {
-    if (!messageValidateFormat(reply))
-        return PROJECT_ERROR;
+    MSG_CHECK_VALID_RETURN_ERROR(reply);
 
     // first msg is always the file's title
     char *fileTitle = messageGetContents(reply);
@@ -83,8 +82,7 @@ static ReturnValue clientGetFile(Message *reply)
 
 static ReturnValue handleReply(Message *reply)
 {
-    if (!messageValidateFormat(reply))
-        return PROJECT_ERROR;
+    MSG_CHECK_VALID_RETURN_ERROR(reply);
 
     // we do not validate the reply atm, only handle file downloading
     if (messageGetCommand(reply) == GET_FILE)
@@ -111,8 +109,7 @@ ReturnValue clientSendCommand(Command commandType, unsigned int contentsLength, 
     ReturnValue result = PROJECT_ERROR;
 
     Message *msg = messageSet(CLIENT, commandType, contentsLength, contents);
-    if (!messageValidateFormat(msg))
-        return PROJECT_ERROR;
+    MSG_CHECK_VALID_RETURN_ERROR(msg);
 
     // send the message and wait to handle its reply
     Message *reply = MPClientSend(msg);

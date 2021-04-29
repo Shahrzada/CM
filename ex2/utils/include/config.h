@@ -7,8 +7,10 @@
 ReturnValue initConfigurations(const char *configFilePath);
 
 CommunicationMethodCode getCommunicationMethodCode();
-const char *getFileToTransferPath();
-const char *getServerCommunicationFilePath();
-const char *getServerTempCommunicationFilePath();
-const char *getClientCommunicationFilePath();
-const char *getClientTempCommunicationFilePath();
+char *getFileToTransferPath();
+char *getServerCommunicationFilePath();
+char *getServerTempCommunicationFilePath();
+char *getClientCommunicationFilePath();
+char *getClientTempCommunicationFilePath();
+char *getServerLogCommunicationFilePath();
+char *getClientLogCommunicationFilePath();

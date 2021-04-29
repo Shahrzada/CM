@@ -1,6 +1,7 @@
 
 // ------------------------------ includes ------------------------------
 
+#include <time.h>
 #include "Message.h"
 
 // -------------------------- macros -------------------------
@@ -155,14 +156,26 @@ Command messageGetCommand(Message *msg)
 
 char *messageGetContents(Message *msg)
 {
-    if (!messageValidateFormat(msg))
-        return NULL;
+    MSG_CHECK_VALID_RETURN_NULL(msg);
     return msg->contents;
 }
 
 unsigned int messageGetContentsLength(Message *msg)
 {
-    if (!messageValidateFormat(msg))
-        return 0;
+    MSG_CHECK_VALID_RETURN_ZERO(msg);
     return msg->contentsLength;
+}
+
+ReturnValue messageToPrintCString(Message *msg, char *buffer)
+{
+    MSG_CHECK_VALID_RETURN_ERROR(msg);
+    CHECK_NULL_RETURN_ERROR(buffer);
+
+    sprintf(buffer, "[TIME=%lu]:[SENDER=%d][COMMAND=%d][LENGTH=%d]"
+                    "\n\t\t[MSG AS CSTRING=%s]\n",
+//                    "\n\t\t[The msg as hex string]:\t[%s]\n",
+                    (unsigned long)time(NULL), msg->sender, msg->command,
+                    msg->contentsLength, msg->contents);
+
+    return PROJECT_SUCCESS;
 }

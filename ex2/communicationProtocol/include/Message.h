@@ -30,6 +30,7 @@ typedef struct _Message Message;
 // -------------------------- macros -------------------------
 
 #define MSG_FORMAT_LENGTH 4
+#define MSG_PRINT_FORMAT_LENGTH 100
 
 #define SERVER_SUCCESS_MSG "0,3,PROJECT_SUCCESS"
 #define SERVER_FAILURE_MSG "0,3,FAILURE"
@@ -37,6 +38,7 @@ typedef struct _Message Message;
 #define PRINT_MSG(msg) do {printf("[%d][%d][%d]:%s\n", (msg)->sender, (msg)->command, (msg)->contentsLength, (msg)->contents);} while(0)
 #define MSG_CHECK_VALID_RETURN_NULL(msg) do {if (!messageValidateFormat(msg)) return NULL;} while(0)
 #define MSG_CHECK_VALID_RETURN_ERROR(msg) do {if (!messageValidateFormat(msg)) return PROJECT_ERROR;} while(0)
+#define MSG_CHECK_VALID_RETURN_ZERO(msg) do {if (!messageValidateFormat(msg)) return 0;} while(0)
 #define MSG_CHECK_VALID_GOTO_CLEANUP(msg) do {if (!messageValidateFormat(msg)) goto cleanup;} while(0)
 
 // ------------------------------ functions -----------------------------
@@ -82,5 +84,7 @@ Command messageGetCommand(Message *msg);
 char *messageGetContents(Message *msg);
 
 unsigned int messageGetContentsLength(Message *msg);
+
+ReturnValue messageToPrintCString(Message *msg, char *buffer);
 
 
