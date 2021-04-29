@@ -3,7 +3,7 @@
 
 #include "Client.h"
 #include "MessageProtocol.h"
-#include "base64.h"
+#include "utils/include/base64.h"
 
 // ------------------------------ private functions -----------------------------
 

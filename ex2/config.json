@@ -1,0 +1,8 @@
+{
+  "communicationMethodCode" : 1,
+  "fileToTransferPath" : "nitz.txt",
+  "serverCommunicationFilePath" : "server_bebi.txt",
+  "serverTempCommunicationFilePath" : "server_bebi_temp.txt",
+  "clientCommunicationFilePath" : "client_bebi.txt",
+  "clientTempCommunicationFilePath" : "client_bebi_temp.txt"
+}

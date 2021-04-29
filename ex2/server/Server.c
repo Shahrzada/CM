@@ -2,20 +2,14 @@
 // ------------------------------ includes ------------------------------
 
 #include <unistd.h>
+#include <config.h>
+#include <libgen.h>
 
-#include "server/Server.h"
+#include "Server.h"
 #include "MessageProtocol.h"
 #include "base64.h"
 
-// -------------------------- macros -------------------------
-
-// TODO REMOVE THIS
-#define GET_FILE_PATH "C://Users//ADMIN//CLionProjects//bebi//ex2//test.png"
-#define GET_FILE_TITLE "test.png"
-#define GET_FILE_TITLE_LENGTH 8
-
-// ------------------------------ private functions
-// -----------------------------
+// ------------------------------ private functions -----------------------------
 
 static int serverLoadFileIntoBuffer(char *buf, int bufLength, FILE *pFile) {
     CHECK_NULL_RETURN_ZERO(buf);
@@ -59,9 +53,9 @@ _Noreturn static void serverClose(bool errorExitFlag) {
     MPServerCloseConnection();
 
     if (errorExitFlag)
-        printf("An error occurred, closing...");
+        printf("\nAn error occurred, closing...\n");
     else
-        printf("Server got ABORT command, closing...");
+        printf("\nServer got ABORT command, closing...\n");
 
     exit(PROJECT_SUCCESS);
 }
@@ -79,13 +73,20 @@ static void serverWrite(Message *msg) {
 }
 
 static ReturnValue sendFileTitle(Message *msg) {
-    if (!messageValidateFormat(msg)) {
+    if (!messageValidateFormat(msg))
+    {
         PRINT_ERROR_MSG_AND_FUNCTION_NAME("sendFileTitle", "Bad msg format");
         return PROJECT_ERROR;
     }
 
-    // TODO extract file title from msg, we now use a const file
-    Message *fileTitleMsg = messageSet(SERVER, GET_FILE, GET_FILE_TITLE_LENGTH, GET_FILE_TITLE);
+    // Extract file title and extension from the msg
+    char *fileTitle = basename(msg->contents);
+    CHECK_NULL_RETURN_ERROR(fileTitle);
+    unsigned int fileTitleLength = strnlen(fileTitle, MAX_JSON_VALUE_LENGTH);
+    CHECK_ZERO_RETURN_ERROR(fileTitleLength);
+
+    // Create a msg out of the data
+    Message *fileTitleMsg = messageSet(SERVER, GET_FILE, fileTitleLength, fileTitle);
     CHECK_NULL_RETURN_ERROR(fileTitleMsg);
 
     ReturnValue result = MPServerSend(fileTitleMsg);
@@ -99,8 +100,7 @@ static void serverSendFile(Message *msg) {
         return;
     }
 
-    // TODO we use a const file path atm, we should extract it from the msg
-    char *filePath = GET_FILE_PATH;
+    char *filePath = msg->contents;
 
     Message *fileMsg = NULL;
     FILE *pFile = NULL;

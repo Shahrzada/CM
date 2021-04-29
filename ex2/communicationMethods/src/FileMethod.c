@@ -4,14 +4,7 @@
 #include <sys/stat.h>
 
 #include "FileMethod.h"
-
-// -------------------------- const definitions -------------------------
-// CR: This and the entire configuration for the server be in a single file.
-#define SERVER_COMMUNICATION_FILE_NAME "server_bebi.txt"
-#define CLIENT_COMMUNICATION_FILE_NAME "client_bebi.txt"
-#define SERVER_TEMP_COMMUNICATION_FILE_NAME "server_bebi_temp.txt"
-#define CLIENT_TEMP_COMMUNICATION_FILE_NAME "client_bebi_temp.txt"
-#define LOG_FILE_NAME "bebi_log.txt"
+#include "config.h"
 
 // -------------------------- macros -------------------------
 
@@ -34,32 +27,29 @@ static bool isServer = false;
 static size_t serverFileEmptySize = 0;
 static size_t clientFileEmptySize = 0;
 
+const char *fileServerCommunicationFilePath = NULL;
+const char *fileServerTempCommunicationFilePath = NULL;
+const char *fileClientCommunicationFilePath = NULL;
+const char *fileClientTempCommunicationFilePath = NULL;
+
 // ------------------------------ private functions -----------------------------
 
-//static ReturnValue updateLatestModified()
-//{
-//    // stat helps us checking for new msgs without opening it (using file info)
-//    struct stat fileStat;
-//    int result = 0;
-//
-//    if (isServer)
-//        result = stat(SERVER_COMMUNICATION_FILE_NAME, &fileStat);
-//    else
-//        result = stat(CLIENT_COMMUNICATION_FILE_NAME, &fileStat);
-//
-//    if (result != 0)
-//    {
-//        PRINT_ERROR_MSG_AND_FUNCTION_NAME("fileListen", "Couldn't check file stat");
-//        return PROJECT_ERROR;
-//    }
-//
-//    if (isServer)
-//        serverFileLatestModified = fileStat.st_mtime;
-//    else
-//        clientFileLatestModified = fileStat.st_mtime;
-//
-//    return PROJECT_SUCCESS;
-//}
+static ReturnValue initFilePaths()
+{
+    fileServerCommunicationFilePath = getServerCommunicationFilePath();
+    CHECK_NULL_RETURN_ERROR(fileServerCommunicationFilePath);
+
+    fileServerTempCommunicationFilePath = getServerTempCommunicationFilePath();
+    CHECK_NULL_RETURN_ERROR(fileServerTempCommunicationFilePath);
+
+    fileClientCommunicationFilePath = getClientCommunicationFilePath();
+    CHECK_NULL_RETURN_ERROR(fileClientCommunicationFilePath);
+
+    fileClientTempCommunicationFilePath = getClientTempCommunicationFilePath();
+    CHECK_NULL_RETURN_ERROR(fileClientTempCommunicationFilePath);
+
+    return PROJECT_SUCCESS;
+}
 
 static ReturnValue fileRemoveMsgFromFile(const char *fileName)
 {
@@ -71,9 +61,15 @@ static ReturnValue fileRemoveMsgFromFile(const char *fileName)
         return PROJECT_ERROR;
 
     if (isServer)
-        tempFile = fopen(SERVER_TEMP_COMMUNICATION_FILE_NAME, FILE_WRITE_UPDATE_MODE);
+    {
+        CHECK_NULL_RETURN_ERROR(fileServerTempCommunicationFilePath);
+        tempFile = fopen(fileServerTempCommunicationFilePath, FILE_WRITE_UPDATE_MODE);
+    }
     else
-        tempFile = fopen(CLIENT_TEMP_COMMUNICATION_FILE_NAME, FILE_WRITE_UPDATE_MODE);
+    {
+        CHECK_NULL_RETURN_ERROR(fileClientTempCommunicationFilePath);
+        tempFile = fopen(fileClientTempCommunicationFilePath, FILE_WRITE_UPDATE_MODE);
+    }
 
     if (tempFile == NULL)
     {
@@ -104,9 +100,15 @@ static ReturnValue fileRemoveMsgFromFile(const char *fileName)
 
     // And rename temp file as src
     if (isServer)
-        result = rename(SERVER_TEMP_COMMUNICATION_FILE_NAME, fileName);
+    {
+        CHECK_NULL_RETURN_ERROR(fileServerTempCommunicationFilePath);
+        result = rename(fileServerTempCommunicationFilePath, fileName);
+    }
     else
-        result = rename(CLIENT_TEMP_COMMUNICATION_FILE_NAME, fileName);
+    {
+        CHECK_NULL_RETURN_ERROR(fileClientTempCommunicationFilePath);
+        result = rename(fileClientTempCommunicationFilePath, fileName);
+    }
 
     return (result != 0) ? PROJECT_ERROR : PROJECT_SUCCESS;
 }
@@ -125,7 +127,7 @@ static unsigned int fileReceive(char *buffer, const char *fileName)
     }
 
     // get first msg
-    if (fgets (buffer, MAX_MSG_LENGTH, pFile) == NULL)
+    if (fgets(buffer, MAX_MSG_LENGTH, pFile) == NULL)
     {
         fclose(pFile);
         return 0;
@@ -158,12 +160,18 @@ static unsigned int fileListen(char *buffer, const char *fileName)
         if (isServer)
         {
             if (serverFileEmptySize < fileStat.st_size)
-                return fileReceive(buffer, SERVER_COMMUNICATION_FILE_NAME);
+            {
+                CHECK_NULL_RETURN_ERROR(fileServerCommunicationFilePath);
+                return fileReceive(buffer, fileServerCommunicationFilePath);
+            }
         }
         else
         {
             if (clientFileEmptySize < fileStat.st_size)
-                return fileReceive(buffer, CLIENT_COMMUNICATION_FILE_NAME);
+            {
+                CHECK_NULL_RETURN_ERROR(fileClientCommunicationFilePath);
+                return fileReceive(buffer, fileClientCommunicationFilePath);
+            }
         }
     }
 }
@@ -195,9 +203,15 @@ static ReturnValue fileSetEmptyFileSize()
     int result = -1;
 
     if (isServer)
-        result = stat(SERVER_COMMUNICATION_FILE_NAME, &fileStat);
+    {
+        CHECK_NULL_RETURN_ERROR(fileServerCommunicationFilePath);
+        result = stat(fileServerCommunicationFilePath, &fileStat);
+    }
     else
-        result = stat(CLIENT_COMMUNICATION_FILE_NAME, &fileStat);
+    {
+        CHECK_NULL_RETURN_ERROR(fileClientCommunicationFilePath);
+        result = stat(fileClientCommunicationFilePath, &fileStat);
+    }
 
     if (result != 0)
     {
@@ -217,9 +231,12 @@ static ReturnValue fileSetEmptyFileSize()
 ReturnValue fileServerInitConnection()
 {
     isServer = true;
+    ReturnValue result = initFilePaths();
+    CHECK_ERROR_RETURN_ERROR(result);
 
     // create the file for communicating
-    FILE *pFile = fopen(SERVER_COMMUNICATION_FILE_NAME,FILE_WRITE_UPDATE_MODE);
+    CHECK_NULL_RETURN_ERROR(fileServerCommunicationFilePath);
+    FILE *pFile = fopen(fileServerCommunicationFilePath, FILE_WRITE_UPDATE_MODE);
     if (pFile == NULL)
     {
         PRINT_ERROR_MSG_AND_FUNCTION_NAME("fileServerInitConnection", "Failed to open the file");
@@ -238,19 +255,25 @@ ReturnValue fileServerCloseConnection()
 unsigned int fileServerListen(char *buffer)
 {
     CHECK_NULL_RETURN_ZERO(buffer);
-    return fileListen(buffer, SERVER_COMMUNICATION_FILE_NAME);
+    CHECK_NULL_RETURN_ERROR(fileServerCommunicationFilePath);
+    return fileListen(buffer, fileServerCommunicationFilePath);
 }
 
 ReturnValue fileServerSend(const char *msg, unsigned int msgLength)
 {
     CHECK_NULL_RETURN_ERROR(msg);
-    return fileSend(msg, CLIENT_COMMUNICATION_FILE_NAME);
+    CHECK_NULL_RETURN_ERROR(fileClientCommunicationFilePath);
+    return fileSend(msg, fileClientCommunicationFilePath);
 }
 
 ReturnValue fileClientInitConnection()
 {
+    ReturnValue result = initFilePaths();
+    CHECK_ERROR_RETURN_ERROR(result);
+
     FILE *pFile;
-    pFile = fopen(CLIENT_COMMUNICATION_FILE_NAME, FILE_WRITE_UPDATE_MODE);
+    CHECK_NULL_RETURN_ERROR(fileClientCommunicationFilePath);
+    pFile = fopen(fileClientCommunicationFilePath, FILE_WRITE_UPDATE_MODE);
     if (pFile == NULL)
     {
         PRINT_ERROR_MSG_AND_FUNCTION_NAME("fileClientInitConnection", "Failed to open the file");
@@ -272,14 +295,17 @@ unsigned int fileClientSend(const char *msg, unsigned int msgLength, char *buffe
     CHECK_NULL_RETURN_ZERO(buffer);
 
     // send the msg
-    ReturnValue result = fileSend(msg, SERVER_COMMUNICATION_FILE_NAME);
+    CHECK_NULL_RETURN_ERROR(fileServerCommunicationFilePath);
+    ReturnValue result = fileSend(msg, fileServerCommunicationFilePath);
     CHECK_ERROR_RETURN_ZERO(result);
 
     // wait for server reply
-    return fileListen(buffer, CLIENT_COMMUNICATION_FILE_NAME);
+    CHECK_NULL_RETURN_ERROR(fileClientCommunicationFilePath);
+    return fileListen(buffer, fileClientCommunicationFilePath);
 }
 
 unsigned int fileClientReceive(char *buffer)
 {
-    return fileReceive(buffer, CLIENT_COMMUNICATION_FILE_NAME);
+    CHECK_NULL_RETURN_ERROR(fileClientCommunicationFilePath);
+    return fileReceive(buffer, fileClientCommunicationFilePath);
 }

@@ -11,7 +11,8 @@
 
 /* Communication methods */
 typedef enum {
-    SOCKET_METHOD = 0,
+    EMPTY_METHOD = -1,
+    SOCKET_METHOD,
     FILE_METHOD,
 } CommunicationMethodCode;
 
@@ -24,7 +25,7 @@ typedef enum {
 /* Command types */
 typedef enum {
     EMPTY_COMMAND = -1,
-    READ = 0,
+    READ,
     WRITE,
     GET_FILE,
     ABORT,
@@ -44,6 +45,7 @@ typedef enum {
 #define NULL_CHAR '\0'
 #define EOL_CHAR '\n'
 #define COMMA_CHAR ','
+#define DOT_CHAR '.'
 #define ZERO_CHAR '0'
 
 #define NULL_CHAR_SIZE 1
@@ -69,6 +71,7 @@ typedef enum {
 #define CHECK_NULL_GOTO_CLEANUP(pointer) do {if ((pointer) == NULL) goto cleanup;} while(0)
 
 #define CHECK_ZERO_RETURN_NULL(number) do {if ((number) == 0) return NULL;} while(0)
+#define CHECK_ZERO_RETURN_ERROR(number) do {if ((number) == 0) return PROJECT_ERROR;} while(0)
 #define CHECK_ZERO_GOTO_CLEANUP(number) do {if ((number) == 0) goto cleanup;} while(0)
 
 #define CHECK_ERROR_RETURN_ERROR(number) do {if ((number) == PROJECT_ERROR) return PROJECT_ERROR;} while(0)
