@@ -41,6 +41,8 @@ typedef enum {
 
 // -------------------------- macros -------------------------
 
+#define TOTAL_INPUT_PARAMETERS 2
+
 #define EOT_CHAR_ASCII_DEC_VALUE 4
 #define NULL_CHAR '\0'
 #define EOL_CHAR '\n'

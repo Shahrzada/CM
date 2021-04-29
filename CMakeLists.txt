@@ -16,8 +16,6 @@ add_executable(ex2-server
         ex2/utils/include/config.h
         ex2/utils/src/nxjson.c
         ex2/utils/include/nxjson.h
-        ex2/utils/src/fileUtils.c
-        ex2/utils/include/fileUtils.h
 
         ex2/communicationProtocol/src/Message.c
         ex2/communicationProtocol/include/Message.h
@@ -43,8 +41,6 @@ add_executable(ex2-client
         ex2/utils/include/config.h
         ex2/utils/src/nxjson.c
         ex2/utils/include/nxjson.h
-        ex2/utils/src/fileUtils.c
-        ex2/utils/include/fileUtils.h
 
         ex2/communicationProtocol/src/Message.c
         ex2/communicationProtocol/include/Message.h

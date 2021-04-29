@@ -29,7 +29,6 @@ static Message *serverLoadFileIntoMsgFormat(FILE *pFile) {
     CHECK_NULL_RETURN_NULL(pFile);
     Message *msg = (Message *) malloc(sizeof(Message));
     CHECK_NULL_RETURN_NULL(msg);
-//    char *contents = NULL;
 
     // Get max bytes of file (notice we read less than MAX_MSG_LENGTH due to encoding)
     int maxMsgLength = MAX_FILE_MSG_LENGTH - MSG_FORMAT_LENGTH + NULL_CHAR_SIZE;
@@ -40,20 +39,14 @@ static Message *serverLoadFileIntoMsgFormat(FILE *pFile) {
     if (counter == 0)
         goto cleanup;
 
-    // allocate memory for the contents
-//    contents = (char *) malloc(sizeof(char) * (counter + NULL_CHAR_SIZE));
-//    CHECK_NULL_GOTO_CLEANUP(contents);
-//    memcpy(contents, buffer, sizeof(char) * counter);
-
     // Create the msg format for the file data
-//    msg = messageSet(SERVER, GET_FILE, counter, contents);
     msg = messageSet(SERVER, GET_FILE, counter, buffer);
     CHECK_NULL_GOTO_CLEANUP(msg);
+
     return msg;
 
     cleanup:
     free(msg);
-//    free(contents);
     return NULL;
 }
 
@@ -116,32 +109,20 @@ static ReturnValue sendFileTitle(Message *msg) {
     return PROJECT_ERROR;
 }
 
-static void serverSendFile(Message *msg)
+static ReturnValue serverStreamFile(FILE *pFile)
 {
-    if (!messageValidateFormat(msg))
-    {
-        PRINT_ERROR_MSG_AND_FUNCTION_NAME("serverSendFile", "Bad msg format");
-        return;
-    }
-    char *filePath = msg->contents;
-
+    CHECK_NULL_RETURN_ERROR(pFile);
     Message *fileMsg = NULL;
-    FILE *pFile = NULL;
     ReturnValue result = PROJECT_ERROR;
 
-    // Open the file to be sent
-    pFile = fopen(filePath, FILE_READ_BINARY_MODE);
-    CHECK_NULL_GOTO_CLEANUP(pFile);
-
-    // First msg to send is always the file's title
-    result = sendFileTitle(msg);
-    CHECK_ERROR_GOTO_CLEANUP(result);
-
-    // Then, send the file itself (using multiple msgs, if needed)
     while (true)
     {
         fileMsg = serverLoadFileIntoMsgFormat(pFile);
-        CHECK_NULL_GOTO_CLEANUP(fileMsg);
+        if (fileMsg == NULL)
+        {
+            result = PROJECT_SUCCESS;
+            goto cleanup;
+        }
 
         result = MPServerSend(fileMsg);
         CHECK_ERROR_GOTO_CLEANUP(result);
@@ -159,27 +140,52 @@ static void serverSendFile(Message *msg)
             result = PROJECT_ERROR;
             goto cleanup;
         }
-
-        sleep(1); // TODO make sure if this is needed
     }
 
     cleanup:
-    fclose(pFile);
     messageFree(fileMsg);
+    return result;
+}
+
+static void serverSendFile(Message *msg)
+{
+    if (!messageValidateFormat(msg))
+    {
+        PRINT_ERROR_MSG_AND_FUNCTION_NAME("serverSendFile", "Bad msg format");
+        return;
+    }
+    char *filePath = msg->contents;
+
+    FILE *pFile = NULL;
+    ReturnValue result = PROJECT_ERROR;
+
+    // Open the file to be sent
+    pFile = fopen(filePath, FILE_READ_BINARY_MODE);
+    CHECK_NULL_GOTO_CLEANUP(pFile);
+
+    // First msg to send is always the file's title
+    result = sendFileTitle(msg);
+    CHECK_ERROR_GOTO_CLEANUP(result);
+
+    // Then, send the file itself (using multiple msgs, if needed)
+    result = serverStreamFile(pFile);
+
+    cleanup:
+    fclose(pFile);
     MPServerSendSuccessOrFailure(result);
 }
 
-static void serverAbort(Message *msg) {
+static void serverAbort(Message *msg)
+{
     bool errorExitFlag = (msg == NULL);
-    ReturnValue result = (errorExitFlag) ? PROJECT_ERROR : PROJECT_SUCCESS;
-
     messageFree(msg);
 
-    MPServerSendSuccessOrFailure(result);
+    MPServerSendSuccessOrFailure((errorExitFlag) ? PROJECT_ERROR : PROJECT_SUCCESS);
     serverClose(errorExitFlag);
 }
 
-static void serverHandleMessage(Message *msg) {
+static void serverHandleMessage(Message *msg)
+{
     if (!messageValidateFormat(msg)) {
         PRINT_ERROR_MSG_AND_FUNCTION_NAME("serverHandleMessage", "Bad msg format");
         return;
@@ -205,6 +211,17 @@ static void serverHandleMessage(Message *msg) {
     }
 }
 
+static void serverHandleError(Message *msg)
+{
+    printf("\n[ERROR]: Received bad msg:\n");
+    if (msg == NULL)
+    {
+        printf("Got null msg.\n");
+        serverClose(true);
+    }
+    PRINT_MSG(msg);
+}
+
 // ------------------------------ functions -----------------------------
 
 ReturnValue serverInitialize(CommunicationMethodCode cMethod) {
@@ -212,18 +229,16 @@ ReturnValue serverInitialize(CommunicationMethodCode cMethod) {
 }
 
 _Noreturn void serverListen() {
-    while (true) {
-        Message *incomingMsg = MPServerListen();
-        if (!messageValidateFormat(incomingMsg)) {
-            PRINT_ERROR_MSG_AND_FUNCTION_NAME("serverListen", "Bad msg format");
-            if (incomingMsg == NULL)
-                serverClose(true);
-            printf("Server got:\n");
-            PRINT_MSG(incomingMsg);
-        }
+    while (true)
+    {
+        Message *msg = MPServerListen();
 
-        serverHandleMessage(incomingMsg);
-        messageFree(incomingMsg);
+        if (!messageValidateFormat(msg))
+            serverHandleError(msg);
+
+        serverHandleMessage(msg);
+
+        messageFree(msg);
         sleep(1);
     }
 }

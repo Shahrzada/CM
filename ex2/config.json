@@ -1,5 +1,5 @@
 {
-  "communicationMethodCode" : 0,
+  "communicationMethodCode" : 1,
   "fileToTransferPath" : "C:\\Users\\ADMIN\\CLionProjects\\bebi\\ex2\\test.png",
   "serverCommunicationFilePath" : "server_bebi.txt",
   "serverTempCommunicationFilePath" : "server_bebi_temp.txt",
