@@ -50,7 +50,8 @@ Message *messageSet(Sender sender, Command command, unsigned int contentsLength,
 
     msgContents = (char *) malloc(sizeof(char) * (contentsLength + NULL_CHAR_SIZE));
     CHECK_NULL_GOTO_CLEANUP(msgContents);
-    strncpy(msgContents, contents, contentsLength);
+
+    memcpy(msgContents, contents, sizeof(char) * contentsLength);
     msgContents[contentsLength] = NULL_CHAR;
 
     msg->sender = sender;
@@ -88,9 +89,8 @@ bool messageValidateFormat(Message *msg)
 
 char *messageToCString(Message *msg, unsigned int *msgStrLength)
 {
-    CHECK_MSG_NULL_RETURN_ZERO(msg);
-    if (!messageValidateFormat(msg))
-        return 0;
+    MSG_CHECK_VALID_RETURN_NULL(msg);
+    CHECK_NULL_RETURN_NULL(msgStrLength);
 
     size_t msgLength = sizeof(Message) + msg->contentsLength;
     char *msgStr = (char *) malloc(sizeof(char) * (msgLength + NULL_CHAR_SIZE));
@@ -100,10 +100,8 @@ char *messageToCString(Message *msg, unsigned int *msgStrLength)
     memcpy(msgStr + sizeof(Message), msg->contents, msg->contentsLength);
     // TODO add a validating element - compare?
 
-    Message *msg1 = (Message *) malloc(msgLength);
-    memcpy(msg1, msgStr, msgLength);
-
     msgStr[msgLength] = EOL_CHAR;
+//    msgStr[msgLength] = NULL_CHAR; TODO TRY ME
     *msgStrLength = msgLength;
     return msgStr;
 }
@@ -112,12 +110,12 @@ Message *messageFromCString(const char *msgStr, unsigned int msgLength)
 {
     CHECK_NULL_RETURN_NULL(msgStr);
 
-    // copy data
+    // Copy Message data
     Message *msg = (Message *) malloc(sizeof(Message));
     CHECK_NULL_RETURN_NULL(msg);
     memcpy(msg, msgStr, sizeof(Message));
 
-    // update contents pointer
+    // Copy contents & update the pointer
     unsigned int contentsLength = msgLength - sizeof(Message);
     char *contents = (char *) malloc(contentsLength + NULL_CHAR_SIZE);
     if (contents == NULL)
@@ -130,12 +128,14 @@ Message *messageFromCString(const char *msgStr, unsigned int msgLength)
     contents[contentsLength] = NULL_CHAR;
     msg->contents = contents;
 
+    // Validate
     if (!messageValidateFormat(msg))
     {
         free(msg);
         free(contents);
         return NULL;
     }
+
     return msg;
 }
 

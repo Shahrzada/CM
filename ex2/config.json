@@ -1,6 +1,6 @@
 {
   "communicationMethodCode" : 1,
-  "fileToTransferPath" : "nitz.txt",
+  "fileToTransferPath" : "C:\\Users\\ADMIN\\CLionProjects\\bebi\\ex2\\test.png",
   "serverCommunicationFilePath" : "server_bebi.txt",
   "serverTempCommunicationFilePath" : "server_bebi_temp.txt",
   "clientCommunicationFilePath" : "client_bebi.txt",

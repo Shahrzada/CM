@@ -27,7 +27,6 @@ static char *MPMessageIntoEncodedString(Message *msg)
     char *msgStr = messageToCString(msg, &msgStrLength);
     CHECK_NULL_RETURN_NULL(msgStr);
 
-
     // Encode le msg
     char *encodedMsg = (char *) malloc(MAX_MSG_LENGTH);
     CHECK_NULL_RETURN_NULL(encodedMsg);

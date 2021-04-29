@@ -59,7 +59,7 @@ typedef enum {
 #define FILE_APPEND_MODE "a"
 
 #define MAX_MSG_LENGTH 1025
-#define MAX_FILE_MSG_LENGTH 767
+#define MAX_FILE_MSG_LENGTH 700
 
 // -------------------------- macro functions -------------------------
 

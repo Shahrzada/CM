@@ -15,18 +15,24 @@ static ReturnValue clientHandleFileDataStream(FILE *pFile)
     void *fileData = NULL;
     unsigned int totalBytesToBeWritten = 0, totalBytesWritten = 0;
     ReturnValue result = PROJECT_ERROR;
-
-    printf("Incoming file data:\n");
+    Message *msgSuccess = messageSet(CLIENT, GET_FILE, 7, "SUCCESS");
+    MSG_CHECK_VALID_GOTO_CLEANUP(msgSuccess);
 
     while (true)
     {
-        // get the msg
-        currentFileDataMsg = MPClientReceive();
+        // get the msg by replying with success first todo edit this
+        currentFileDataMsg = MPClientSend(msgSuccess);
         MSG_CHECK_VALID_GOTO_CLEANUP(currentFileDataMsg);
 
         // make sure we are still getting file data
         if (messageGetCommand(currentFileDataMsg) != GET_FILE)
             break;
+
+//        // todo delete this
+//        printf("\nSending...\n");
+//        for (int i = 0; i < currentFileDataMsg->contentsLength; i++)
+//            printf("%hhX", currentFileDataMsg->contents[i]);
+//        printf("\nTotal of  %d chars.\n", currentFileDataMsg->contentsLength);
 
         // Write data to local file
         fileData = messageGetContents(currentFileDataMsg);
@@ -38,14 +44,14 @@ static ReturnValue clientHandleFileDataStream(FILE *pFile)
         if (totalBytesWritten != totalBytesToBeWritten)
             goto cleanup;
 
-        // free for other possible incoming data
-        messageFree(currentFileDataMsg);
-        currentFileDataMsg = NULL;
+       messageFree(currentFileDataMsg);
+       currentFileDataMsg = NULL;
     }
 
     result = PROJECT_SUCCESS;
 
 cleanup:
+    free(msgSuccess);
     free(currentFileDataMsg);
     return result;
 }

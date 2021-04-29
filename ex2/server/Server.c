@@ -29,23 +29,31 @@ static Message *serverLoadFileIntoMsgFormat(FILE *pFile) {
     CHECK_NULL_RETURN_NULL(pFile);
     Message *msg = (Message *) malloc(sizeof(Message));
     CHECK_NULL_RETURN_NULL(msg);
+//    char *contents = NULL;
 
-    // get max bytes of file (notice we read less than MAX_MSG_LENGTH due to encoding)
+    // Get max bytes of file (notice we read less than MAX_MSG_LENGTH due to encoding)
     int maxMsgLength = MAX_FILE_MSG_LENGTH - MSG_FORMAT_LENGTH + NULL_CHAR_SIZE;
-    char buf[maxMsgLength];
-    int counter = serverLoadFileIntoBuffer(buf, maxMsgLength, pFile);
+    char buffer[maxMsgLength];
+    int counter = serverLoadFileIntoBuffer(buffer, maxMsgLength, pFile);
 
-    // reached EOF
+    // Reached EOF
     if (counter == 0)
         goto cleanup;
 
-    // create the msg format for the file data
-    msg = messageSet(SERVER, GET_FILE, counter, buf);
+    // allocate memory for the contents
+//    contents = (char *) malloc(sizeof(char) * (counter + NULL_CHAR_SIZE));
+//    CHECK_NULL_GOTO_CLEANUP(contents);
+//    memcpy(contents, buffer, sizeof(char) * counter);
+
+    // Create the msg format for the file data
+//    msg = messageSet(SERVER, GET_FILE, counter, contents);
+    msg = messageSet(SERVER, GET_FILE, counter, buffer);
     CHECK_NULL_GOTO_CLEANUP(msg);
     return msg;
 
     cleanup:
     free(msg);
+//    free(contents);
     return NULL;
 }
 
@@ -91,31 +99,47 @@ static ReturnValue sendFileTitle(Message *msg) {
 
     ReturnValue result = MPServerSend(fileTitleMsg);
     free(fileTitleMsg);
+    CHECK_ERROR_RETURN_ERROR(result);
+
+    // Wait for client reply
+    Message *clientReply = MPServerListen();
+    MSG_CHECK_VALID_GOTO_CLEANUP(clientReply);
+    Command replyCommand = clientReply->command;
+    messageFree(clientReply);
+    if (replyCommand != GET_FILE)
+        goto cleanup;
+
     return result;
+
+    cleanup:
+    messageFree(clientReply);
+    return PROJECT_ERROR;
 }
 
-static void serverSendFile(Message *msg) {
-    if (!messageValidateFormat(msg)) {
+static void serverSendFile(Message *msg)
+{
+    if (!messageValidateFormat(msg))
+    {
         PRINT_ERROR_MSG_AND_FUNCTION_NAME("serverSendFile", "Bad msg format");
         return;
     }
-
     char *filePath = msg->contents;
 
     Message *fileMsg = NULL;
     FILE *pFile = NULL;
     ReturnValue result = PROJECT_ERROR;
 
-    // open the file to be sent
+    // Open the file to be sent
     pFile = fopen(filePath, FILE_READ_BINARY_MODE);
     CHECK_NULL_GOTO_CLEANUP(pFile);
 
-    // first msg to send is always the file's title
+    // First msg to send is always the file's title
     result = sendFileTitle(msg);
     CHECK_ERROR_GOTO_CLEANUP(result);
 
-    // then, send the file itself (using multiple msgs, if needed)
-    while (true) {
+    // Then, send the file itself (using multiple msgs, if needed)
+    while (true)
+    {
         fileMsg = serverLoadFileIntoMsgFormat(pFile);
         CHECK_NULL_GOTO_CLEANUP(fileMsg);
 
@@ -124,6 +148,17 @@ static void serverSendFile(Message *msg) {
 
         messageFree(fileMsg);
         fileMsg = NULL;
+
+        // Wait for client reply
+        Message *clientReply = MPServerListen();
+        MSG_CHECK_VALID_GOTO_CLEANUP(clientReply);
+        Command replyCommand = clientReply->command;
+        messageFree(clientReply);
+        if (replyCommand != GET_FILE)
+        {
+            result = PROJECT_ERROR;
+            goto cleanup;
+        }
 
         sleep(1); // TODO make sure if this is needed
     }
