@@ -6,6 +6,10 @@
 
 // -------------------------- macros -------------------------
 
+#define SUCCESS_STR "Success"
+#define FAILURE_STR "Failure"
+#define SUCCESS_OR_FAILURE_STR_LENGTH 7
+
 #define CHECK_MSG_NULL_RETURN_NULL(msg) do { \
            CHECK_NULL_RETURN_NULL(msg); \
            CHECK_NULL_RETURN_NULL((msg)->contents); \
@@ -99,10 +103,8 @@ char *messageToCString(Message *msg, unsigned int *msgStrLength)
 
     memcpy(msgStr, msg, sizeof(Message));
     memcpy(msgStr + sizeof(Message), msg->contents, msg->contentsLength);
-    // TODO add a validating element - compare?
-
     msgStr[msgLength] = EOL_CHAR;
-//    msgStr[msgLength] = NULL_CHAR; TODO TRY ME
+
     *msgStrLength = msgLength;
     return msgStr;
 }
@@ -178,4 +180,15 @@ ReturnValue messageToPrintCString(Message *msg, char *buffer)
                     msg->contentsLength, msg->contents);
 
     return PROJECT_SUCCESS;
+}
+
+Message *messageSetSuccessOrFailure(Sender sender, Command command, bool isSuccess)
+{
+    if (!messageValidateSender(sender) || !messageValidateCommand(command))
+        return NULL;
+
+    if (isSuccess)
+        return messageSet(sender, command, SUCCESS_OR_FAILURE_STR_LENGTH, SUCCESS_STR);
+
+    return messageSet(sender, command, SUCCESS_OR_FAILURE_STR_LENGTH, FAILURE_STR);
 }

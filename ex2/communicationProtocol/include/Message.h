@@ -87,4 +87,6 @@ unsigned int messageGetContentsLength(Message *msg);
 
 ReturnValue messageToPrintCString(Message *msg, char *buffer);
 
+Message *messageSetSuccessOrFailure(Sender sender, Command command, bool isSuccess);
+
 

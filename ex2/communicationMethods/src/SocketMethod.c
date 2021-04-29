@@ -92,7 +92,6 @@ static unsigned int socketReceive(SOCKET socket, char *buffer)
     CHECK_INVALID_SOCKET_RETURN_ZERO(socket);
     CHECK_NULL_RETURN_ZERO(buffer);
 
-    // TODO make sure to validate the length of the incoming msg: look for the null char!
     // Notice: if the msg is larger than the buffer, the buffer is filled and recv generates an error
     unsigned int totalBytesReceived = recv(socket, buffer, MAX_MSG_LENGTH, 0);
     if (totalBytesReceived == SOCKET_ERROR || totalBytesReceived == 0 || totalBytesReceived == MAX_MSG_LENGTH)
@@ -174,7 +173,7 @@ ReturnValue socketServerCloseConnection()
     return socketCloseConnection(clientSocket);
 }
 
-unsigned int socketListen(char *buffer)
+unsigned int socketServerListen(char *buffer)
 {
     CHECK_INVALID_SOCKET_RETURN_ZERO(clientSocket);
     CHECK_NULL_RETURN_ZERO(buffer);

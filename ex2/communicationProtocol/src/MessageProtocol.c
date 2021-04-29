@@ -6,12 +6,6 @@
 #include "MessageProtocol.h"
 #include "CommunicationMethods.h"
 
-// ------------------------------ macros ------------------------------
-
-#define MP_SUCCESS_MSG "Success"
-#define MP_FAILURE_MSG "Failure"
-#define MP_SUCCESS_FAILURE_MSG_LENGTH 7 //TODO CHANGE THIS
-
 // ------------------------------ global variables ------------------------------
 
 static bool isServer = false;
@@ -190,13 +184,9 @@ ReturnValue MPServerSend(Message *msg)
     return result;
 }
 
-
 void MPServerSendSuccessOrFailure(ReturnValue result)
 {
-    Message *msg = messageSet(SERVER,
-                              REPLY,
-                              MP_SUCCESS_FAILURE_MSG_LENGTH,
-                              (result == PROJECT_SUCCESS) ? MP_SUCCESS_MSG : MP_FAILURE_MSG);
+    Message *msg = messageSetSuccessOrFailure(SERVER, REPLY, (result == PROJECT_SUCCESS));
     MPServerSend(msg);
     free(msg);
 }

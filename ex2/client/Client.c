@@ -15,24 +15,18 @@ static ReturnValue clientHandleFileDataStream(FILE *pFile)
     void *fileData = NULL;
     unsigned int totalBytesToBeWritten = 0, totalBytesWritten = 0;
     ReturnValue result = PROJECT_ERROR;
-    Message *msgSuccess = messageSet(CLIENT, GET_FILE, 7, "SUCCESS");
+    Message *msgSuccess = messageSetSuccessOrFailure(CLIENT, GET_FILE, true);
     MSG_CHECK_VALID_GOTO_CLEANUP(msgSuccess);
 
     while (true)
     {
-        // get the msg by replying with success first todo edit this
+        // get the msg by replying with success first
         currentFileDataMsg = MPClientSend(msgSuccess);
         MSG_CHECK_VALID_GOTO_CLEANUP(currentFileDataMsg);
 
         // make sure we are still getting file data
         if (messageGetCommand(currentFileDataMsg) != GET_FILE)
             break;
-
-//        // todo delete this
-//        printf("\nSending...\n");
-//        for (int i = 0; i < currentFileDataMsg->contentsLength; i++)
-//            printf("%hhX", currentFileDataMsg->contents[i]);
-//        printf("\nTotal of  %d chars.\n", currentFileDataMsg->contentsLength);
 
         // Write data to local file
         fileData = messageGetContents(currentFileDataMsg);
