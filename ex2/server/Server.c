@@ -75,10 +75,7 @@ static void serverWrite(Message *msg) {
 
 static ReturnValue sendFileTitle(Message *msg) {
     if (!messageValidateFormat(msg))
-    {
-        PRINT_ERROR_MSG_AND_FUNCTION_NAME("sendFileTitle", "Bad msg format");
-        return PROJECT_ERROR;
-    }
+        PRINT_ERROR_WITH_FUNCTION_AND_RETURN_ERROR("sendFileTitle", "Bad msg format");
 
     // Extract file title and extension from the msg
     char *fileTitle = basename(msg->contents);
@@ -150,10 +147,7 @@ static ReturnValue serverStreamFile(FILE *pFile)
 static void serverSendFile(Message *msg)
 {
     if (!messageValidateFormat(msg))
-    {
-        PRINT_ERROR_MSG_AND_FUNCTION_NAME("serverSendFile", "Bad msg format");
-        return;
-    }
+        PRINT_ERROR_WITH_FUNCTION_AND_RETURN("serverSendFile", "Bad msg format");
     char *filePath = msg->contents;
 
     FILE *pFile = NULL;
@@ -186,10 +180,8 @@ static void serverAbort(Message *msg)
 
 static void serverHandleMessage(Message *msg)
 {
-    if (!messageValidateFormat(msg)) {
-        PRINT_ERROR_MSG_AND_FUNCTION_NAME("serverHandleMessage", "Bad msg format");
-        return;
-    }
+    if (!messageValidateFormat(msg))
+        PRINT_ERROR_WITH_FUNCTION_AND_RETURN("serverHandleMessage", "Bad msg format");
 
     Command currentCommand = messageGetCommand(msg);
     switch (currentCommand) {
@@ -206,7 +198,7 @@ static void serverHandleMessage(Message *msg)
             serverAbort(msg);
             break;
         default:
-            PRINT_ERROR_MSG_AND_FUNCTION_NAME("serverHandleMessage", "Bad COMMAND");
+            PRINT_ERROR_WITH_FUNCTION("serverHandleMessage", "Bad COMMAND");
             break;
     }
 }

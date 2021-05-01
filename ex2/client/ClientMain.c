@@ -22,11 +22,13 @@ ReturnValue validateInput(int argc, char const *argv[])
 
 int main(int argc, char const *argv[])
 {
-    if (validateInput(argc, argv) == PROJECT_ERROR)
-        return PROJECT_ERROR;
+    ReturnValue result = PROJECT_ERROR;
 
-    ReturnValue result = initConfigurations(argv[1]);
-    CHECK_ERROR_RETURN_ERROR(result);
+    result = validateInput(argc, argv);
+    CHECK_ERROR_PRINT_AND_RETURN_ERROR(result, "validateInput");
+
+    result = initConfigurations(argv[1]);
+    CHECK_ERROR_PRINT_AND_RETURN_ERROR(result, "initConfigurations");
 
     result = clientInitialize(getCommunicationMethodCode());
     CHECK_ERROR_PRINT_AND_RETURN_ERROR(result, "clientInitialize");

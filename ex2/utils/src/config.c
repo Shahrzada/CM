@@ -28,10 +28,8 @@ static char *loadJSONStringFromFile(const char *configFilePath)
     // open file for reading
     FILE *pFile = fopen(configFilePath, FILE_READ_MODE);
     if (pFile == NULL)
-    {
-        PRINT_ERROR_MSG_AND_FUNCTION_NAME("loadJSONStringFromFile", "Failed to open the file");
-        return NULL;
-    }
+        PRINT_ERROR_WITH_FUNCTION_AND_RETURN_NULL("loadJSONStringFromFile", "Failed to open the file");
+
 
     // get JSON as string
     char buffer[MAX_JSON_FILE_SIZE] = {0};

@@ -93,6 +93,26 @@ typedef enum {
                  return PROJECT_ERROR; }                                   \
            } while(0)
 
-#define PRINT_ERROR_MSG_AND_FUNCTION_NAME(functionName, msg) do { \
+#define PRINT_ERROR_WITH_FUNCTION(functionName, msg) do { \
            printf("[PROJECT_ERROR]: In %s - %s.\n", (functionName),(msg)); \
+           } while(0)
+
+#define PRINT_ERROR_WITH_FUNCTION_AND_RETURN(functionName, msg) do { \
+           printf("[PROJECT_ERROR]: In %s - %s.\n", (functionName),(msg)); \
+           return; \
+           } while(0)
+
+#define PRINT_ERROR_WITH_FUNCTION_AND_RETURN_ERROR(functionName, msg) do { \
+           printf("[PROJECT_ERROR]: In %s - %s.\n", (functionName),(msg)); \
+           return PROJECT_ERROR; \
+           } while(0)
+
+#define PRINT_ERROR_WITH_FUNCTION_AND_RETURN_NULL(functionName, msg) do { \
+           printf("[PROJECT_ERROR]: In %s - %s.\n", (functionName),(msg)); \
+           return NULL; \
+           } while(0)
+
+#define PRINT_ERROR_WITH_FUNCTION_AND_RETURN_ZERO(functionName, msg) do { \
+           printf("[PROJECT_ERROR]: In %s - %s.\n", (functionName),(msg)); \
+           return 0; \
            } while(0)

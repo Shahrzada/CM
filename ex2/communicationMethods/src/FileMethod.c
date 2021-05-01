@@ -121,10 +121,7 @@ static unsigned int fileReceive(char *buffer, const char *fileName)
     // open file for reading
     FILE *pFile = fopen(fileName, FILE_READ_MODE);
     if (pFile == NULL)
-    {
-        PRINT_ERROR_MSG_AND_FUNCTION_NAME("fileReceive", "Failed to open the file");
-        return 0;
-    }
+        PRINT_ERROR_WITH_FUNCTION_AND_RETURN_ZERO("fileReceive", "Failed to open the file");
 
     // get first msg
     if (fgets(buffer, MAX_MSG_LENGTH, pFile) == NULL)
@@ -148,10 +145,7 @@ static unsigned int fileListen(char *buffer, const char *fileName)
     struct stat fileStat;
     int result = stat(fileName, &fileStat);
     if (result != 0)
-    {
-        PRINT_ERROR_MSG_AND_FUNCTION_NAME("fileListen", "Couldn't check file stat");
-        return 0;
-    }
+        PRINT_ERROR_WITH_FUNCTION_AND_RETURN_ZERO("fileListen", "Couldn't check file stat");
 
     while (true)
     {
@@ -214,10 +208,7 @@ static ReturnValue fileSetEmptyFileSize()
     }
 
     if (result != 0)
-    {
-        PRINT_ERROR_MSG_AND_FUNCTION_NAME("fileSetEmptyFileSize", "Couldn't check file stat");
-        return PROJECT_ERROR;
-    }
+        PRINT_ERROR_WITH_FUNCTION_AND_RETURN_ERROR("fileSetEmptyFileSize", "Couldn't check file stat");
 
     if (isServer)
         serverFileEmptySize = fileStat.st_size;
@@ -238,10 +229,7 @@ ReturnValue fileServerInitConnection()
     CHECK_NULL_RETURN_ERROR(fileServerCommunicationFilePath);
     FILE *pFile = fopen(fileServerCommunicationFilePath, FILE_WRITE_UPDATE_MODE);
     if (pFile == NULL)
-    {
-        PRINT_ERROR_MSG_AND_FUNCTION_NAME("fileServerInitConnection", "Failed to open the file");
-        return PROJECT_ERROR;
-    }
+        PRINT_ERROR_WITH_FUNCTION_AND_RETURN_ERROR("fileServerInitConnection", "Failed to open the file");
 
     fclose(pFile);
     return fileSetEmptyFileSize();
@@ -275,10 +263,7 @@ ReturnValue fileClientInitConnection()
     CHECK_NULL_RETURN_ERROR(fileClientCommunicationFilePath);
     pFile = fopen(fileClientCommunicationFilePath, FILE_WRITE_UPDATE_MODE);
     if (pFile == NULL)
-    {
-        PRINT_ERROR_MSG_AND_FUNCTION_NAME("fileClientInitConnection", "Failed to open the file");
-        return PROJECT_ERROR;
-    }
+        PRINT_ERROR_WITH_FUNCTION_AND_RETURN_ERROR("fileClientInitConnection", "Failed to open the file");
 
     fclose(pFile);
     return fileSetEmptyFileSize();

@@ -69,7 +69,7 @@ server_communication_method *serverCMethodSet(CommunicationMethodCode cMethod)
          * result = initServerCMethod(relevant functions);
          * break;**/
         default:
-            PRINT_ERROR_MSG_AND_FUNCTION_NAME("serverCMethodSet", "Bad cMethod");
+            PRINT_ERROR_WITH_FUNCTION("serverCMethodSet", "Bad cMethod");
             break;
     }
 
@@ -101,7 +101,7 @@ client_communication_method *clientCMethodSet(CommunicationMethodCode cMethod)
          * result = initClientCMethod(relevant functions);
          * break;**/
         default:
-            PRINT_ERROR_MSG_AND_FUNCTION_NAME("clientCMethodSet", "Bad cMethod");
+            PRINT_ERROR_WITH_FUNCTION("clientCMethodSet", "Bad cMethod");
             break;
     }
 
