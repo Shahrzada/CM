@@ -30,19 +30,16 @@ static ReturnValue initServerCMethod(server_communication_method *serverCMethod,
 static ReturnValue initClientCMethod(client_communication_method *clientCMethod,
                                      client_init_connection_function_t *clientInitConnectionFunction,
                                      client_close_connection_function_t *clientCloseConnectionFunction,
-                                     client_send_function_t *sendFunction,
-                                     client_receive_function_t *clientReceiveFunction)
+                                     client_send_function_t *sendFunction)
 {
     CHECK_NULL_RETURN_ERROR(clientCMethod);
     CHECK_NULL_RETURN_ERROR(clientInitConnectionFunction);
     CHECK_NULL_RETURN_ERROR(clientCloseConnectionFunction);
     CHECK_NULL_RETURN_ERROR(sendFunction);
-    CHECK_NULL_RETURN_ERROR(clientReceiveFunction);
 
     clientCMethod->clientInitConnectionFunction = clientInitConnectionFunction;
     clientCMethod->clientCloseConnectionFunction = clientCloseConnectionFunction;
     clientCMethod->sendFunction = sendFunction;
-    clientCMethod->clientReceiveFunction = clientReceiveFunction;
 
     return PROJECT_SUCCESS;
 }
@@ -66,7 +63,7 @@ server_communication_method *serverCMethodSet(CommunicationMethodCode cMethod)
                                        socketServerCloseConnection, socketServerListen, socketServerSend);
             break;
         /**case NEW_METHOD:
-         * result = initServerCMethod(relevant functions);
+         * result = initServerCMethod(relevant functions...);
          * break;**/
         default:
             PRINT_ERROR_WITH_FUNCTION("serverCMethodSet", "Bad cMethod");
@@ -91,14 +88,14 @@ client_communication_method *clientCMethodSet(CommunicationMethodCode cMethod)
     {
         case FILE_METHOD:
             result = initClientCMethod(clientCMethod, fileClientInitConnection,
-                                       fileClientCloseConnection, fileClientSend, fileClientReceive);
+                                       fileClientCloseConnection, fileClientSend);
             break;
         case SOCKET_METHOD:
             result = initClientCMethod(clientCMethod, socketClientInitConnection,
-                                       socketClientCloseConnection, socketClientSend, socketClientReceive);
+                                       socketClientCloseConnection, socketClientSend);
             break;
         /**case NEW_METHOD:
-         * result = initClientCMethod(relevant functions);
+         * result = initClientCMethod(relevant functions...);
          * break;**/
         default:
             PRINT_ERROR_WITH_FUNCTION("clientCMethodSet", "Bad cMethod");

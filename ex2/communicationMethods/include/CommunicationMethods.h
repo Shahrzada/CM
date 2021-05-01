@@ -40,7 +40,6 @@ typedef ReturnValue (server_send_function_t)(const char *, unsigned int);
 typedef ReturnValue (client_init_connection_function_t)();
 typedef ReturnValue (client_close_connection_function_t)();
 typedef unsigned int (client_send_function_t)(const char *, unsigned int, char *);
-typedef unsigned int (client_receive_function_t)(char *);
 
 /**
  * The server_communication_method holds pointers to the relevant
@@ -61,7 +60,6 @@ typedef struct {
     client_init_connection_function_t *clientInitConnectionFunction;
     client_close_connection_function_t *clientCloseConnectionFunction;
     client_send_function_t *sendFunction;
-    client_receive_function_t *clientReceiveFunction;
 } client_communication_method;
 
 // ------------------------------ functions -----------------------------

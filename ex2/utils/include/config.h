@@ -14,3 +14,9 @@ char *getClientCommunicationFilePath();
 char *getClientTempCommunicationFilePath();
 char *getServerLogCommunicationFilePath();
 char *getClientLogCommunicationFilePath();
+
+char *getServerName();
+int getServerPort();
+
+char *getClientServerName();
+int getClientServerPort();

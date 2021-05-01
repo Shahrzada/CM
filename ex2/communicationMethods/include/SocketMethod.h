@@ -30,6 +30,3 @@ ReturnValue socketServerSend(const char *msg, unsigned int msgLength);
 ReturnValue socketClientInitConnection();
 ReturnValue socketClientCloseConnection();
 unsigned int socketClientSend(const char *msg, unsigned int msgLength, char *buffer);
-unsigned int socketClientReceive(char *buffer);
-
-

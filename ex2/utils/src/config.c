@@ -7,10 +7,10 @@
 /* for mains */
 static CommunicationMethodCode communicationMethodCode = EMPTY_METHOD;
 
-/* For Server.c */
+/* For Server */
 static char fileToTransferPath[MAX_JSON_VALUE_LENGTH] = {0};
 
-/* For FileMethod.c */
+/* For FileMethod */
 static char serverCommunicationFilePath[MAX_JSON_VALUE_LENGTH] = {0};
 static char serverTempCommunicationFilePath[MAX_JSON_VALUE_LENGTH] = {0};
 
@@ -19,6 +19,13 @@ static char clientTempCommunicationFilePath[MAX_JSON_VALUE_LENGTH] = {0};
 
 static char serverLogCommunicationFilePath[MAX_JSON_VALUE_LENGTH] = {0};
 static char clientLogCommunicationFilePath[MAX_JSON_VALUE_LENGTH] = {0};
+
+/* For SocketMethod */
+static char serverName[MAX_JSON_VALUE_LENGTH] = {0};
+static int serverPort = 0;
+
+static char clientServerName[MAX_JSON_VALUE_LENGTH] = {0};
+static int clientServerPort = 0;
 
 
 static char *loadJSONStringFromFile(const char *configFilePath)
@@ -93,6 +100,28 @@ static ReturnValue copyStringIntoPathHolders(const nx_json *json)
     result = copyStringIntoPathHolder(clientLogCommunicationFilePath, json, "clientLogCommunicationFilePath");
     CHECK_ERROR_RETURN_ERROR(result);
 
+    result = copyStringIntoPathHolder(serverName, json, "serverName");
+    CHECK_ERROR_RETURN_ERROR(result);
+
+    result = copyStringIntoPathHolder(clientServerName, json, "clientServerName");
+    CHECK_ERROR_RETURN_ERROR(result);
+
+    return PROJECT_SUCCESS;
+}
+
+static ReturnValue copyNumbersIntoGlobals(const nx_json *json)
+{
+    CHECK_NULL_RETURN_ERROR(json);
+
+    CHECK_NULL_RETURN_ERROR(nx_json_get(json, "communicationMethodCode"));
+    communicationMethodCode = nx_json_get(json, "communicationMethodCode")->num.u_value;
+
+    CHECK_NULL_RETURN_ERROR(nx_json_get(json, "serverPort"));
+    serverPort = (int) nx_json_get(json, "serverPort")->num.u_value;
+
+    CHECK_NULL_RETURN_ERROR(nx_json_get(json, "clientServerPort"));
+    clientServerPort = (int) nx_json_get(json, "clientServerPort")->num.u_value;
+
     return PROJECT_SUCCESS;
 }
 
@@ -108,10 +137,9 @@ ReturnValue initConfigurations(const char *configFilePath)
     // Parse the expected arguments
     const nx_json *json = nx_json_parse(JSONString, 0);
 
-    // Get the communication method first
-    if (nx_json_get(json, "communicationMethodCode") == NULL)
-        goto cleanup;
-    communicationMethodCode = nx_json_get(json, "communicationMethodCode")->num.u_value;
+    // Copy int globals
+    result = copyNumbersIntoGlobals(json);
+    CHECK_ERROR_GOTO_CLEANUP(result);
 
     // Then copy paths into the global path holders
     result = copyStringIntoPathHolders(json);
@@ -179,4 +207,28 @@ char *getClientLogCommunicationFilePath()
     if (strnlen(clientLogCommunicationFilePath, MAX_JSON_VALUE_LENGTH) == 0)
         return NULL;
     return clientLogCommunicationFilePath;
+}
+
+char *getServerName()
+{
+    if (strnlen(serverName, MAX_JSON_VALUE_LENGTH) == 0)
+        return NULL;
+    return serverName;
+}
+
+int getServerPort()
+{
+    return serverPort;
+}
+
+char *getClientServerName()
+{
+    if (strnlen(clientServerName, MAX_JSON_VALUE_LENGTH) == 0)
+        return NULL;
+    return clientServerName;
+}
+
+int getClientServerPort()
+{
+    return clientServerPort;
 }

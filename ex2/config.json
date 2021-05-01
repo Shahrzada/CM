@@ -1,10 +1,14 @@
 {
-  "communicationMethodCode" : 1,
+  "communicationMethodCode" : 0,
   "fileToTransferPath" : "C:\\Users\\ADMIN\\CLionProjects\\bebi\\ex2\\test.png",
   "serverCommunicationFilePath" : "server_bebi.txt",
   "serverTempCommunicationFilePath" : "server_bebi_temp.txt",
   "clientCommunicationFilePath" : "client_bebi.txt",
   "clientTempCommunicationFilePath" : "client_bebi_temp.txt",
   "serverLogCommunicationFilePath" : "server_log.txt",
-  "clientLogCommunicationFilePath" : "client_log.txt"
+  "clientLogCommunicationFilePath" : "client_log.txt",
+  "serverName" : "127.0.0.1",
+  "serverPort" : 5656,
+  "clientServerName" : "127.0.0.1",
+  "clientServerPort" : 5656
 }
