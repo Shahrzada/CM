@@ -1,0 +1,21 @@
+# How to use
+
+**Run**
+ex2-server <config.json path>
+ex2-client <config.json path>
+
+**Paths**
+If you're interested at changing the program's different file paths,
+you can find it in the config.json file.
+
+**Communication Methods**
+For changing the communication method, change the "communicationMethodCode"
+attribute in the config.json to one of the following:
+0: Sockets (using TCP).
+1: File.
+
+**File Transfer**
+For changing the file you would like to transfer, change the
+"fileToTransferPath" attribute in the config.json.
+
+**<3**
