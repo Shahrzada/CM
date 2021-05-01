@@ -15,11 +15,13 @@ static client_communication_method *clientCMethod = NULL;
 
 // ------------------------------ private functions -----------------------------
 
+// CR: nice, I like this addition
 static ReturnValue MPWriteToLog(Message *msg)
 {
     CHECK_NULL_RETURN_ERROR(msg);
     ReturnValue result = PROJECT_ERROR;
 
+    // CR: this should be in a function
     // Get log file path
     char *logPath = NULL;
     if (isServer)
@@ -57,7 +59,7 @@ static Message *MPDecodeAndPrint(char *encodedMsg)
     // Decode the msg and create a Message object for the client
     Message *msg = messageDecodeStringIntoMsg(encodedMsg, Base64decode);
     MSG_CHECK_VALID_RETURN_NULL(msg);
-
+    // CR: write* to stdout for the user and this comment is useless
     // Print to stdout for the user
     if (isServer)
         printf("\nServer received:\n");
@@ -93,7 +95,7 @@ static char *MPPrintAndEncode(Message *msg)
 
 ReturnValue MPServerInitConnection(CommunicationMethodCode cMethodCode)
 {
-    isServer = true;
+    isServer = true; // CR: do you really need this variable?
     if (serverCMethod == NULL)
         serverCMethod = serverCMethodSet(cMethodCode);
     CHECK_NULL_RETURN_ERROR(serverCMethod);
@@ -150,6 +152,7 @@ void MPServerSendSuccessOrFailure(ReturnValue result)
     Message *msg = messageSetSuccessOrFailure(SERVER, REPLY, (result == PROJECT_SUCCESS));
     CHECK_NULL_RETURN(msg);
     MPServerSend(msg); // ignoring result due to being void
+    // CR: but why is it void? it can't fail?
     free(msg);
 }
 
@@ -192,7 +195,7 @@ Message *MPClientSend(Message *msg)
     CHECK_NULL_RETURN_NULL(encodedMsg);
 
     unsigned int encodedMsgLength = strnlen(encodedMsg, MAX_MSG_LENGTH);
-    if (encodedMsgLength == MAX_MSG_LENGTH)
+    if (encodedMsgLength == MAX_MSG_LENGTH) // CR: if message legnth is MAX_MSG_LENGTH that means you exceed your buffer...
     {
         free(encodedMsg);
         PRINT_ERROR_WITH_FUNCTION_AND_RETURN_NULL("MPClientSend", "Bad encoded msg");

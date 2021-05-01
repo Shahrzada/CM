@@ -8,6 +8,7 @@ ReturnValue sendSomeMsgs();
 
 ReturnValue validateInput(int argc, char const *argv[])
 {
+     // CR: bad bebi
     if (argc != TOTAL_INPUT_PARAMETERS)
         return PROJECT_ERROR;
 

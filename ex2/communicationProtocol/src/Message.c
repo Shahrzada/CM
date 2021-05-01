@@ -112,7 +112,8 @@ Message *messageFromCString(const char *msgStr, unsigned int msgLength)
     msg = (Message *) malloc(sizeof(Message));
     CHECK_NULL_RETURN_NULL(msg);
     memcpy(msg, msgStr, sizeof(Message));
-
+    // CR: this is the place that you can see that not including contents in the same struct as Message
+    //     means that you need to do a double malloc for every message
     // Copy contents & update the msgs' pointer
     unsigned int contentsLength = msgLength - sizeof(Message);
     contents = (char *) malloc(contentsLength + NULL_CHAR_SIZE);
@@ -123,6 +124,7 @@ Message *messageFromCString(const char *msgStr, unsigned int msgLength)
     msg->contents = contents;
 
     // Validation is important
+    // CR: Kapara on you bebi
     if (!messageValidateFormat(msg))
         goto cleanup;
 
@@ -177,7 +179,7 @@ Message *messageSetSuccessOrFailure(Sender sender, Command command, bool isSucce
     if (!messageValidateSender(sender) || !messageValidateCommand(command))
         return NULL;
 
-    if (isSuccess)
+    if (isSuccess) // CR: unite these two lines, use the ? operator
         return messageSet(sender, command, SUCCESS_OR_FAILURE_STR_LENGTH, SUCCESS_STR);
 
     return messageSet(sender, command, SUCCESS_OR_FAILURE_STR_LENGTH, FAILURE_STR);
@@ -194,7 +196,7 @@ char *messageIntoEncodedString(Message *msg, encoding_function *encodingFunction
     CHECK_NULL_RETURN_NULL(msgStr);
 
     // Encode le msg
-    char *encodedMsg = (char *) malloc(MAX_MSG_LENGTH);
+    char *encodedMsg = (char *) malloc(MAX_MSG_LENGTH); // CR: Null byte?
     CHECK_NULL_RETURN_NULL(encodedMsg);
 
     int encodedMsgLength = encodingFunction(encodedMsg, msgStr, (int)msgStrLength);
@@ -205,7 +207,7 @@ char *messageIntoEncodedString(Message *msg, encoding_function *encodingFunction
         PRINT_ERROR_WITH_FUNCTION_AND_RETURN_NULL("messageIntoEncodedString", "Error with encoding");
     }
 
-    encodedMsg = realloc(encodedMsg, encodedMsgLength);
+    encodedMsg = realloc(encodedMsg, encodedMsgLength); // CR: nobody cares about this
     return encodedMsg;
 }
 
@@ -216,7 +218,7 @@ Message *messageDecodeStringIntoMsg(char *encodedMsg, decoding_function *decodin
     Message *msg = NULL;
 
     // decode the data
-    char decodedMsg[MAX_MSG_LENGTH];
+    char decodedMsg[MAX_MSG_LENGTH]; // CR: NULL byte?
     unsigned int msgLength = decodingFunction(decodedMsg, encodedMsg);
     CHECK_ZERO_RETURN_NULL(msgLength);
 

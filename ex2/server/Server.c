@@ -34,7 +34,8 @@ static Message *serverLoadFileIntoMsgFormat(FILE *pFile) {
     int maxMsgLength = MAX_FILE_MSG_LENGTH - MSG_FORMAT_LENGTH + NULL_CHAR_SIZE;
     char buffer[maxMsgLength];
     int counter = serverLoadFileIntoBuffer(buffer, maxMsgLength, pFile);
-
+    // CR: comments like this are more hurtful than helpful, good code requires little to no comments.
+    //     the one above can stay, the one below should disappear
     // Reached EOF
     if (counter == 0)
         goto cleanup;
@@ -60,8 +61,11 @@ _Noreturn static void serverClose(bool errorExitFlag) {
 
     exit(PROJECT_SUCCESS);
 }
+// CR: why is this void? what if the server fails.
+//     you have way too many function that aren't reporting if they succussed or not
 
 static void serverRead() {
+    // CR: what? what is this comment?
     // Assuming we did some reading from somewhere
     MPServerSendSuccessOrFailure(PROJECT_SUCCESS);
 }
@@ -118,7 +122,9 @@ static ReturnValue serverStreamFile(FILE *pFile)
         if (fileMsg == NULL)
         {
             result = PROJECT_SUCCESS;
-            goto cleanup;
+            goto cleanup; 
+            // CR: goto in happy flow is a bit wired, this shouldve been a break;
+            //     or better yet change the condition
         }
 
         result = MPServerSend(fileMsg);

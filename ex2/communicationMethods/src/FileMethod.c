@@ -27,8 +27,9 @@ static bool isServer = false;
 static size_t serverFileEmptySize = 0;
 static size_t clientFileEmptySize = 0;
 
+// CR: why did you need to move from one file to two files?
 const char *fileServerCommunicationFilePath = NULL;
-const char *fileServerTempCommunicationFilePath = NULL;
+const char *fileServerTempCommunicationFilePath = NULL; 
 const char *fileClientCommunicationFilePath = NULL;
 const char *fileClientTempCommunicationFilePath = NULL;
 
@@ -59,7 +60,7 @@ static ReturnValue fileRemoveMsgFromFile(const char *fileName)
     FILE *srcFile  = fopen(fileName, FILE_READ_MODE);
     if (srcFile == NULL)
         return PROJECT_ERROR;
-
+    // CR: use ? operator
     if (isServer)
     {
         CHECK_NULL_RETURN_ERROR(fileServerTempCommunicationFilePath);
@@ -82,7 +83,7 @@ static ReturnValue fileRemoveMsgFromFile(const char *fileName)
     char *line = (fgets(buffer, MAX_MSG_LENGTH, srcFile));
 
     // And copy all other msgs
-    while (true)
+    while (true) // CR: maybe this should be a do while? or check in the condition
     {
         line = (fgets(buffer, MAX_MSG_LENGTH, srcFile));
         if (line == NULL)

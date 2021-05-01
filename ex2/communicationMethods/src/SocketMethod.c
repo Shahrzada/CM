@@ -98,7 +98,9 @@ static unsigned int socketReceive(SOCKET socket, char *buffer)
     CHECK_NULL_RETURN_ZERO(buffer);
 
     // Notice: if the msg is larger than the buffer, the buffer is filled and recv generates an error
+    // CR: 0 is still a magic number, because I dont know what it means without checking recv signature
     unsigned int totalBytesReceived = recv(socket, buffer, MAX_MSG_LENGTH, 0);
+    // CR: why is totalBytesReceived == MAX_MSG_LENGTH an error?
     if (totalBytesReceived == SOCKET_ERROR || totalBytesReceived == 0 || totalBytesReceived == MAX_MSG_LENGTH)
     {
         SHUTDOWN_AND_CLOSE_SOCKET(socket);
