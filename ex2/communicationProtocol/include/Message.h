@@ -27,6 +27,9 @@ struct _Message {
 };
 typedef struct _Message Message;
 
+typedef int (encoding_function)(char *, const char *, int);
+typedef int (decoding_function)(char *, const char *);
+
 // -------------------------- macros -------------------------
 
 #define MSG_FORMAT_LENGTH 4
@@ -47,20 +50,18 @@ typedef struct _Message Message;
  * @brief allocates and creates a formatted msg for the protocol given its params.
  * The caller of this function is responsible to freeing the memory of the msg.
  *
- * @return the formatted msg as a char* if succeeded, NULL ow.
+ * @return a Message object according to the input if succeeded, NULL ow.
  */
-
 Message *messageSet(Sender sender, Command command, unsigned int contentsLength, char *contents);
+
 void messageFree(Message *msg);
+
+/** Verifies the sender, command and the the msg length is withing the MAX_MSG_LENGTH */
 bool messageValidateFormat(Message *msg);
+
+/** If succeeded, returns the char * and updates msgStrLength accordingly, returns NULL ow. */
 char *messageToCString(Message *msg, unsigned int *msgStrLength);
 Message *messageFromCString(const char *msgStr, unsigned int msgLength);
-
-/**
- * @brief checks for NULL and validates the prefix is according to the format
- *
- * @return true if the msg is formatted correctly, false ow.
- */
 
 /**
  * @brief extracts the sender from the msg according the format
@@ -83,10 +84,18 @@ Command messageGetCommand(Message *msg);
  */
 char *messageGetContents(Message *msg);
 
+/** Returns the length of the contents of the msg */
 unsigned int messageGetContentsLength(Message *msg);
 
-ReturnValue messageToPrintCString(Message *msg, char *buffer);
+/** Unloads the msg object into a readable cstring for human eyes
+ * (mainly for logs). We assume the buffer is large enough. **/
+ReturnValue messageToPrintableCString(Message *msg, char *buffer);
 
+/**
+ * Creates a simple [][][]Success or [][][]Failure msg object.
+ * The caller of this function is responsible to freeing the memory of the msg.
+ */
 Message *messageSetSuccessOrFailure(Sender sender, Command command, bool isSuccess);
 
-
+char *messageIntoEncodedString(Message *msg, encoding_function *encodingFunction);
+Message *messageDecodeStringIntoMsg(char *encodedMsg, decoding_function *decodingFunction);

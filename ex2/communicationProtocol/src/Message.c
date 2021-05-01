@@ -10,16 +10,6 @@
 #define FAILURE_STR "Failure"
 #define SUCCESS_OR_FAILURE_STR_LENGTH 7
 
-#define CHECK_MSG_NULL_RETURN_NULL(msg) do { \
-           CHECK_NULL_RETURN_NULL(msg); \
-           CHECK_NULL_RETURN_NULL((msg)->contents); \
-           } while(0)
-
-#define CHECK_MSG_NULL_RETURN_ZERO(msg) do { \
-           CHECK_NULL_RETURN_ZERO(msg); \
-           CHECK_NULL_RETURN_ZERO((msg)->contents); \
-           } while(0)
-
 // ------------------------------ private functions -----------------------------
 
 static bool messageValidateSender(Sender sender)
@@ -70,7 +60,6 @@ cleanup:
     free(msg);
     free(msgContents);
     return NULL;
-
 }
 
 void messageFree(Message *msg)
@@ -86,8 +75,8 @@ void messageFree(Message *msg)
 
 bool messageValidateFormat(Message *msg)
 {
-    CHECK_MSG_NULL_RETURN_NULL(msg);
-    return (messageValidateSender(msg->sender)
+    return (msg != NULL
+            && messageValidateSender(msg->sender)
             && messageValidateCommand(msg->command)
             && messageValidateContentsLength(msg->contentsLength));
 }
@@ -99,9 +88,12 @@ char *messageToCString(Message *msg, unsigned int *msgStrLength)
 
     size_t msgLength = sizeof(Message) + msg->contentsLength;
     char *msgStr = (char *) malloc(sizeof(char) * (msgLength + NULL_CHAR_SIZE));
-    CHECK_NULL_RETURN_ZERO(msgStr);
+    CHECK_NULL_RETURN_NULL(msgStr);
 
+    // We first copy the Message object memory into the array
     memcpy(msgStr, msg, sizeof(Message));
+
+    // The we attach a copy of the contents themselves
     memcpy(msgStr + sizeof(Message), msg->contents, msg->contentsLength);
     msgStr[msgLength] = EOL_CHAR;
 
@@ -112,34 +104,34 @@ char *messageToCString(Message *msg, unsigned int *msgStrLength)
 Message *messageFromCString(const char *msgStr, unsigned int msgLength)
 {
     CHECK_NULL_RETURN_NULL(msgStr);
+    CHECK_ZERO_RETURN_NULL(msgLength);
+    Message *msg = NULL;
+    char *contents = NULL;
 
     // Copy Message data
-    Message *msg = (Message *) malloc(sizeof(Message));
+    msg = (Message *) malloc(sizeof(Message));
     CHECK_NULL_RETURN_NULL(msg);
     memcpy(msg, msgStr, sizeof(Message));
 
-    // Copy contents & update the pointer
+    // Copy contents & update the msgs' pointer
     unsigned int contentsLength = msgLength - sizeof(Message);
-    char *contents = (char *) malloc(contentsLength + NULL_CHAR_SIZE);
-    if (contents == NULL)
-    {
-        free(msg);
-        return NULL;
-    }
+    contents = (char *) malloc(contentsLength + NULL_CHAR_SIZE);
+    CHECK_NULL_GOTO_CLEANUP(contents);
 
     memcpy(contents, msgStr + sizeof(Message), contentsLength);
     contents[contentsLength] = NULL_CHAR;
     msg->contents = contents;
 
-    // Validate
+    // Validation is important
     if (!messageValidateFormat(msg))
-    {
-        free(msg);
-        free(contents);
-        return NULL;
-    }
+        goto cleanup;
 
     return msg;
+
+    cleanup:
+    free(msg);
+    free(contents);
+    return NULL;
 }
 
 Sender messageGetSender(Message *msg)
@@ -168,14 +160,12 @@ unsigned int messageGetContentsLength(Message *msg)
     return msg->contentsLength;
 }
 
-ReturnValue messageToPrintCString(Message *msg, char *buffer)
+ReturnValue messageToPrintableCString(Message *msg, char *buffer)
 {
     MSG_CHECK_VALID_RETURN_ERROR(msg);
     CHECK_NULL_RETURN_ERROR(buffer);
 
-    sprintf(buffer, "[TIME=%lu]:[SENDER=%d][COMMAND=%d][LENGTH=%d]"
-                    "\n\t\t[MSG AS CSTRING=%s]\n",
-//                    "\n\t\t[The msg as hex string]:\t[%s]\n",
+    sprintf(buffer, "[TIME=%lu]:[SENDER=%d][COMMAND=%d][LENGTH=%d]\n\t\t[MSG AS CSTRING=%s]\n",
                     (unsigned long)time(NULL), msg->sender, msg->command,
                     msg->contentsLength, msg->contents);
 
@@ -191,4 +181,45 @@ Message *messageSetSuccessOrFailure(Sender sender, Command command, bool isSucce
         return messageSet(sender, command, SUCCESS_OR_FAILURE_STR_LENGTH, SUCCESS_STR);
 
     return messageSet(sender, command, SUCCESS_OR_FAILURE_STR_LENGTH, FAILURE_STR);
+}
+
+char *messageIntoEncodedString(Message *msg, encoding_function *encodingFunction)
+{
+    MSG_CHECK_VALID_RETURN_NULL(msg);
+    CHECK_NULL_RETURN_NULL(encodingFunction);
+
+    // Get the msg as a cString
+    unsigned int msgStrLength = 0;
+    char *msgStr = messageToCString(msg, &msgStrLength);
+    CHECK_NULL_RETURN_NULL(msgStr);
+
+    // Encode le msg
+    char *encodedMsg = (char *) malloc(MAX_MSG_LENGTH);
+    CHECK_NULL_RETURN_NULL(encodedMsg);
+
+    int encodedMsgLength = encodingFunction(encodedMsg, msgStr, (int)msgStrLength);
+    free(msgStr);
+    if (encodedMsgLength == 0)
+    {
+        free(encodedMsg);
+        PRINT_ERROR_WITH_FUNCTION_AND_RETURN_NULL("messageIntoEncodedString", "Error with encoding");
+    }
+
+    encodedMsg = realloc(encodedMsg, encodedMsgLength);
+    return encodedMsg;
+}
+
+Message *messageDecodeStringIntoMsg(char *encodedMsg, decoding_function *decodingFunction)
+{
+    CHECK_NULL_RETURN_NULL(encodedMsg);
+    CHECK_NULL_RETURN_NULL(decodingFunction);
+    Message *msg = NULL;
+
+    // decode the data
+    char decodedMsg[MAX_MSG_LENGTH];
+    unsigned int msgLength = decodingFunction(decodedMsg, encodedMsg);
+    CHECK_ZERO_RETURN_NULL(msgLength);
+
+    // create the msg object
+    return messageFromCString(decodedMsg, msgLength);
 }

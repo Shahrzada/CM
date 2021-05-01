@@ -50,6 +50,8 @@ typedef enum {
 #define DOT_CHAR '.'
 #define ZERO_CHAR '0'
 
+#define EMPTY_STRING ""
+
 #define NULL_CHAR_SIZE 1
 #define EOT_CHAR_SIZE 1
 

@@ -78,10 +78,3 @@ ReturnValue MPClientCloseConnection(ReturnValue result);
  * @return the reply msg from the server if succeeded, NULL ow.
  */
 Message *MPClientSend(Message *msg);
-
-/**
- * @brief get the earliest unread msg from the server
- *
- * @return the msg from the server if succeeded, NULL ow.
- */
-Message *MPClientReceive();
