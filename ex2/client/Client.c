@@ -51,16 +51,13 @@ static ReturnValue clientGetFile(Message *reply)
 {
     MSG_CHECK_VALID_RETURN_VALUE(reply, PROJECT_ERROR);
 
-    // first msg is always the file's title
     char *fileTitle = messageGetContents(reply);
     CHECK_NULL_RETURN_VALUE(fileTitle, PROJECT_ERROR);
 
-    // Create and open the file
     FILE *pFile = fopen(fileTitle, FILE_WRITE_BINARY_MODE);
     if (pFile == NULL)
         PRINT_ERROR_WITH_FUNCTION_AND_RETURN_ERROR("clientGetFile", "Couldn't open the file");
 
-    // Write the incoming file data
     ReturnValue result = clientHandleFileDataStream(pFile);
 
     fclose(pFile);
@@ -98,7 +95,6 @@ ReturnValue clientSendCommand(Command commandType, unsigned int contentsLength, 
     Message *msg = messageSet(CLIENT, commandType, contentsLength, contents);
     MSG_CHECK_VALID_RETURN_VALUE(msg, PROJECT_ERROR);
 
-    // send the message and wait to handle its reply
     Message *reply = MPClientSend(msg);
     MSG_CHECK_VALID_GOTO_CLEANUP(reply);
 

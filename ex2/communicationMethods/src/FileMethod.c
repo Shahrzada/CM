@@ -98,12 +98,10 @@ static unsigned int fileReceive(char *buffer, const char *fileName)
     CHECK_NULL_RETURN_VALUE(buffer, 0);
     CHECK_NULL_RETURN_VALUE(fileName, 0);
 
-    // open file for reading
     FILE *pFile = fopen(fileName, FILE_READ_MODE);
     if (pFile == NULL)
         PRINT_ERROR_WITH_FUNCTION_AND_RETURN_ZERO("fileReceive", "Failed to open the file");
 
-    // get first msg
     if (fgets(buffer, MAX_MSG_LENGTH, pFile) == NULL)
     {
         fclose(pFile);
@@ -121,7 +119,7 @@ static unsigned int fileListen(char *buffer, const char *fileName)
     CHECK_NULL_RETURN_VALUE(buffer, 0);
     CHECK_NULL_RETURN_VALUE(fileName, 0);
 
-    // stat helps us checking for new msgs without opening it (using file info)
+    // stat helps us checking for new msgs without opening it (using file size)
     struct stat fileStat;
     int result = stat(fileName, &fileStat);
     if (result != 0)
@@ -142,11 +140,9 @@ static ReturnValue fileSend(const char *msg, const char *fileName)
     CHECK_NULL_RETURN_VALUE(msg, PROJECT_ERROR);
     CHECK_NULL_RETURN_VALUE(fileName, PROJECT_ERROR);
 
-    // open file for appending
     FILE *pFile = fopen(fileName, FILE_APPEND_MODE);
     CHECK_FILE_NULL_PRINT_OPEN_ERROR_GOTO_CLEANUP(pFile);
 
-    // write given msg
     int writingResult = fputs(msg, pFile);
     CHECK_NEGATIVE_PRINT_WRITE_ERROR_GOTO_CLEANUP(writingResult);
     fclose(pFile);
@@ -182,7 +178,6 @@ ReturnValue fileServerInitConnection()
     ReturnValue result = initFilePaths();
     CHECK_ERROR_RETURN_VALUE(result, PROJECT_ERROR);
 
-    // create the file for communicating
     CHECK_NULL_RETURN_VALUE(fileServerCommunicationFilePath, PROJECT_ERROR);
     FILE *pFile = fopen(fileServerCommunicationFilePath, FILE_WRITE_UPDATE_MODE);
     if (pFile == NULL)
@@ -236,12 +231,10 @@ unsigned int fileClientSend(const char *msg, unsigned int msgLength, char *buffe
     CHECK_NULL_RETURN_VALUE(msg, 0);
     CHECK_NULL_RETURN_VALUE(buffer, 0);
 
-    // send the msg
     CHECK_NULL_RETURN_VALUE(fileServerCommunicationFilePath, PROJECT_ERROR);
     ReturnValue result = fileSend(msg, fileServerCommunicationFilePath);
     CHECK_ERROR_RETURN_VALUE(result, 0);
 
-    // wait for server reply
     CHECK_NULL_RETURN_VALUE(fileClientCommunicationFilePath, PROJECT_ERROR);
     return fileListen(buffer, fileClientCommunicationFilePath);
 }

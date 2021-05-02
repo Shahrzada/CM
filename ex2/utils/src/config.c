@@ -6,8 +6,6 @@
 
 /* for mains */
 static CommunicationMethodCode communicationMethodCode = EMPTY_METHOD;
-
-/* For Server */
 static char fileToTransferPath[MAX_JSON_VALUE_LENGTH] = {0};
 
 /* For FileMethod */
@@ -32,13 +30,10 @@ static char *loadJSONStringFromFile(const char *configFilePath)
 {
     CHECK_NULL_RETURN_VALUE(configFilePath, NULL);
 
-    // open file for reading
     FILE *pFile = fopen(configFilePath, FILE_READ_MODE);
     if (pFile == NULL)
         PRINT_ERROR_WITH_FUNCTION_AND_RETURN_NULL("loadJSONStringFromFile", "Failed to open the file");
 
-
-    // get JSON as string
     char buffer[MAX_JSON_FILE_SIZE] = {0};
     unsigned int counter = 0;
     int ch = 0;
@@ -51,7 +46,6 @@ static char *loadJSONStringFromFile(const char *configFilePath)
 
     fclose(pFile);
 
-    // copy to allocated memory
     char *JSONString = (char *) malloc(sizeof(char) * (counter + NULL_CHAR_SIZE));
     CHECK_NULL_RETURN_VALUE(JSONString, NULL);
 
