@@ -8,26 +8,24 @@
 
 // ------------------------------ global variables ------------------------------
 
-static bool isServer = false;
+#define IS_SERVER (serverCMethod == NULL)
 
 static server_communication_method *serverCMethod = NULL;
 static client_communication_method *clientCMethod = NULL;
 
 // ------------------------------ private functions -----------------------------
 
-// CR: nice, I like this addition
+static char *MPGetLogFilePath()
+{
+    return (IS_SERVER) ? getServerLogCommunicationFilePath() : getClientLogCommunicationFilePath();
+}
+
 static ReturnValue MPWriteToLog(Message *msg)
 {
     CHECK_NULL_RETURN_ERROR(msg);
     ReturnValue result = PROJECT_ERROR;
 
-    // CR: this should be in a function
-    // Get log file path
-    char *logPath = NULL;
-    if (isServer)
-        logPath = getServerLogCommunicationFilePath();
-    else
-        logPath = getClientLogCommunicationFilePath();
+    char *logPath = MPGetLogFilePath();
     CHECK_NULL_RETURN_ERROR(logPath);
 
     // Open log file for appending
@@ -56,18 +54,12 @@ static Message *MPDecodeAndPrint(char *encodedMsg)
 {
     CHECK_NULL_RETURN_NULL(encodedMsg);
 
-    // Decode the msg and create a Message object for the client
     Message *msg = messageDecodeStringIntoMsg(encodedMsg, Base64decode);
     MSG_CHECK_VALID_RETURN_NULL(msg);
-    // CR: write* to stdout for the user and this comment is useless
-    // Print to stdout for the user
-    if (isServer)
-        printf("\nServer received:\n");
-    else
-        printf("\nClient received:\n");
+
+    (IS_SERVER) ? printf("\nServer received:\n") : printf("\nClient received:\n");
     PRINT_MSG(msg);
 
-    // Update the log
     MPWriteToLog(msg);
 
     return msg;
@@ -77,17 +69,11 @@ static char *MPPrintAndEncode(Message *msg)
 {
     CHECK_NULL_RETURN_NULL(msg);
 
-    // Print to stdout for the user
-    if (isServer)
-        printf("\nServer is sending:\n");
-    else
-        printf("\nClient is sending:\n");
+    (IS_SERVER) ? printf("\nServer is sending:\n") : printf("\nClient is sending:\n");
     PRINT_MSG(msg);
 
-    // Update the log
     MPWriteToLog(msg);
 
-    // And actually encode the msg
     return messageIntoEncodedString(msg, Base64encode);
 }
 
@@ -95,7 +81,6 @@ static char *MPPrintAndEncode(Message *msg)
 
 ReturnValue MPServerInitConnection(CommunicationMethodCode cMethodCode)
 {
-    isServer = true; // CR: do you really need this variable?
     if (serverCMethod == NULL)
         serverCMethod = serverCMethodSet(cMethodCode);
     CHECK_NULL_RETURN_ERROR(serverCMethod);
@@ -115,12 +100,10 @@ Message *MPServerListen()
 {
     CHECK_NULL_RETURN_NULL(serverCMethod);
 
-    // Get the incoming encoded msg
     char encodedMsg[MAX_MSG_LENGTH];
     unsigned int encodedMsgLength = serverCMethod->listenFunction(encodedMsg);
     CHECK_ZERO_RETURN_NULL(encodedMsgLength);
 
-    // Decode it and create a msg object for the server
     return MPDecodeAndPrint(encodedMsg);
 }
 
@@ -130,7 +113,6 @@ ReturnValue MPServerSend(Message *msg)
     MSG_CHECK_VALID_RETURN_ERROR(msg);
     char *encodedMsg = NULL;
 
-    // Encode the msg
     encodedMsg = MPPrintAndEncode(msg);
     CHECK_NULL_RETURN_ERROR(encodedMsg);
 
@@ -141,19 +123,18 @@ ReturnValue MPServerSend(Message *msg)
         PRINT_ERROR_WITH_FUNCTION_AND_RETURN_ERROR("MPServerSend", "Bad encoded msg");
     }
 
-    // Send it
     ReturnValue result = serverCMethod->sendFunction(encodedMsg, encodedMsgLength);
     free(encodedMsg);
     return result;
 }
 
-void MPServerSendSuccessOrFailure(ReturnValue result)
+ReturnValue MPServerSendSuccessOrFailure(ReturnValue result)
 {
     Message *msg = messageSetSuccessOrFailure(SERVER, REPLY, (result == PROJECT_SUCCESS));
-    CHECK_NULL_RETURN(msg);
-    MPServerSend(msg); // ignoring result due to being void
-    // CR: but why is it void? it can't fail?
+    CHECK_NULL_RETURN_ERROR(msg);
+    ReturnValue sendResult = MPServerSend(msg);
     free(msg);
+    return sendResult;
 }
 
 ReturnValue MPClientInitConnection(CommunicationMethodCode cMethodCode)

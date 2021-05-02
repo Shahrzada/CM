@@ -49,18 +49,18 @@ ReturnValue sendSomeMsgs()
     result = clientSendCommand(WRITE, 25, "BEBBBI   222         IIII");
     CHECK_ERROR_RETURN_ERROR(result);
 
-    result = clientSendCommand(READ, 26, "BEBBBI1135411222  \n  IIII");
-    CHECK_ERROR_RETURN_ERROR(result);
-
-    // send a file
-    char *filePath = getFileToTransferPath();
-    CHECK_NULL_RETURN_ERROR(filePath);
-
-    unsigned int filePathLength = strnlen(filePath, MAX_JSON_VALUE_LENGTH);
-    CHECK_ZERO_RETURN_ERROR(filePathLength);
-
-    result = clientSendCommand(GET_FILE, filePathLength, filePath);
-    CHECK_ERROR_RETURN_ERROR(result);
+//    result = clientSendCommand(READ, 26, "BEBBBI1135411222  \n  IIII");
+//    CHECK_ERROR_RETURN_ERROR(result);
+//
+//    // send a file
+//    char *filePath = getFileToTransferPath();
+//    CHECK_NULL_RETURN_ERROR(filePath);
+//
+//    unsigned int filePathLength = strnlen(filePath, MAX_JSON_VALUE_LENGTH);
+//    CHECK_ZERO_RETURN_ERROR(filePathLength);
+//
+//    result = clientSendCommand(GET_FILE, filePathLength, filePath);
+//    CHECK_ERROR_RETURN_ERROR(result);
 
     // send abort
     result = clientSendCommand(ABORT, 7, "Goodbye");

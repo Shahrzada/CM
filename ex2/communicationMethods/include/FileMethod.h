@@ -30,4 +30,3 @@ ReturnValue fileServerSend(const char *msg, unsigned int msgLength);
 ReturnValue fileClientInitConnection();
 ReturnValue fileClientCloseConnection();
 unsigned int fileClientSend(const char *msg, unsigned int msgLength, char *buffer);
-unsigned int fileClientReceive(char *buffer);

@@ -13,6 +13,7 @@
 #define DEFAULT_SOCKET_TYPE SOCK_STREAM
 #define DEFAULT_PROTOCOL IPPROTO_TCP
 #define MAXIMUM_ALLOWED_CONNECTIONS 1
+#define NO_FLAGS 0
 
 // -------------------------- macros -------------------------
 
@@ -45,8 +46,6 @@
 
 // ------------------------------ global variables -----------------------------
 
-bool isServer = false;
-
 static SOCKET clientSocket = INVALID_SOCKET;
 static SOCKET connectionSocket = INVALID_SOCKET;
 
@@ -71,24 +70,25 @@ static ReturnValue initWinSock()
     return PROJECT_SUCCESS;
 }
 
-static ReturnValue initServerNameAndPort()
+static ReturnValue initServerNameAndPortForServer()
 {
-    if (isServer)
-    {
-        serverName = getServerName();
-        CHECK_NULL_RETURN_ERROR(serverName);
+    serverName = getServerName();
+    CHECK_NULL_RETURN_ERROR(serverName);
 
-        serverPort = getServerPort();
-        CHECK_ZERO_RETURN_ERROR(serverPort);
-    }
-    else
-    {
-        clientServerName = getClientServerName();
-        CHECK_NULL_RETURN_ERROR(clientServerName);
+    serverPort = getServerPort();
+    CHECK_ZERO_RETURN_ERROR(serverPort);
 
-        clientServerPort = getClientServerPort();
-        CHECK_ZERO_RETURN_ERROR(clientServerPort);
-    }
+    return PROJECT_SUCCESS;
+}
+
+static ReturnValue initServerNameAndPortForClient()
+{
+    clientServerName = getClientServerName();
+    CHECK_NULL_RETURN_ERROR(clientServerName);
+
+    clientServerPort = getClientServerPort();
+    CHECK_ZERO_RETURN_ERROR(clientServerPort);
+
     return PROJECT_SUCCESS;
 }
 
@@ -98,10 +98,8 @@ static unsigned int socketReceive(SOCKET socket, char *buffer)
     CHECK_NULL_RETURN_ZERO(buffer);
 
     // Notice: if the msg is larger than the buffer, the buffer is filled and recv generates an error
-    // CR: 0 is still a magic number, because I dont know what it means without checking recv signature
-    unsigned int totalBytesReceived = recv(socket, buffer, MAX_MSG_LENGTH, 0);
-    // CR: why is totalBytesReceived == MAX_MSG_LENGTH an error?
-    if (totalBytesReceived == SOCKET_ERROR || totalBytesReceived == 0 || totalBytesReceived == MAX_MSG_LENGTH)
+    unsigned int totalBytesReceived = recv(socket, buffer, MAX_MSG_LENGTH, NO_FLAGS);
+    if (totalBytesReceived == SOCKET_ERROR || totalBytesReceived == 0)
     {
         SHUTDOWN_AND_CLOSE_SOCKET(socket);
         PRINT_ERROR_CALL_WSACLEANUP_RETURN_ZERO("Server/Client", "recv()", totalBytesReceived);
@@ -136,21 +134,17 @@ static ReturnValue socketCloseConnection(SOCKET socket)
 
 ReturnValue socketServerInitConnection()
 {
-    isServer = true;
-
     ReturnValue result = initWinSock();
     CHECK_ERROR_RETURN_ERROR(result);
 
-    result = initServerNameAndPort();
+    result = initServerNameAndPortForServer();
     CHECK_ERROR_RETURN_ERROR(result);
 
-    // Initialize the socket object for the server + Resolve the local address and port
     struct sockaddr_in local;
     local.sin_family = DEFAULT_ADDRESS_FAMILY;
     local.sin_addr.s_addr = INADDR_ANY;
     local.sin_port = htons(serverPort);
 
-    // Create a SOCKET for the server to listen for client connections
     SOCKET listenSocket = socket(DEFAULT_ADDRESS_FAMILY, DEFAULT_SOCKET_TYPE, DEFAULT_PROTOCOL);
     if (listenSocket == INVALID_SOCKET)
     {
@@ -158,15 +152,12 @@ ReturnValue socketServerInitConnection()
         return PROJECT_ERROR;
     }
 
-    // Binding - setup the TCP listening socket
     int returnValue = bind(listenSocket, (struct sockaddr*)&local, sizeof(local));
     CHECK_SOCKET_ERROR_GOTO_CLEANUP(returnValue);
 
-    // Start listening
     returnValue = listen(listenSocket, MAXIMUM_ALLOWED_CONNECTIONS);
     CHECK_SOCKET_ERROR_GOTO_CLEANUP(returnValue);
 
-    // Accepting a single Connection
     clientSocket = accept(listenSocket, NULL, NULL);
     CHECK_INVALID_SOCKET_GOTO_CLEANUP(clientSocket);
 
@@ -204,10 +195,9 @@ ReturnValue socketClientInitConnection() {
     ReturnValue result = initWinSock();
     CHECK_ERROR_RETURN_ERROR(result);
 
-    result = initServerNameAndPort();
+    result = initServerNameAndPortForClient();
     CHECK_ERROR_RETURN_ERROR(result);
 
-    // Get host
     struct hostent *hp;
     hp = gethostbyname(clientServerName);
     if (hp == NULL)
@@ -216,14 +206,12 @@ ReturnValue socketClientInitConnection() {
         return PROJECT_ERROR;
     }
 
-    // Copy the resolved information into the sockaddr_in struct
     struct sockaddr_in server;
     memset(&server, 0, sizeof(server));
     memcpy(&(server.sin_addr), hp->h_addr, hp->h_length);
     server.sin_family = hp->h_addrtype;
     server.sin_port = htons(clientServerPort);
 
-    // Create the connection socket
     connectionSocket = socket(DEFAULT_ADDRESS_FAMILY, DEFAULT_SOCKET_TYPE, DEFAULT_PROTOCOL);
     if (connectionSocket == INVALID_SOCKET)
     {
@@ -231,7 +219,6 @@ ReturnValue socketClientInitConnection() {
         return PROJECT_ERROR;
     }
 
-    // Connect to server
     int connectionResult = connect(connectionSocket, (struct sockaddr*)&server, sizeof(server));
     if (connectionResult == SOCKET_ERROR)
     {
@@ -255,7 +242,6 @@ unsigned int socketClientSend(const char *msg, unsigned int msgLength, char *buf
     CHECK_NULL_RETURN_ZERO(msg);
     CHECK_NULL_RETURN_ZERO(buffer);
 
-    // Send msg to server
     ReturnValue result = socketSend(msg, msgLength, connectionSocket);
     if (result == PROJECT_ERROR)
     {
@@ -263,6 +249,5 @@ unsigned int socketClientSend(const char *msg, unsigned int msgLength, char *buf
         PRINT_ERROR_CALL_WSACLEANUP_RETURN_ZERO("Client", "send()", WSAGetLastError());
     }
 
-    // wait for a reply
     return socketReceive(connectionSocket, buffer);
 }

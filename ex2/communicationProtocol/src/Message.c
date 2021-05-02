@@ -207,7 +207,6 @@ char *messageIntoEncodedString(Message *msg, encoding_function *encodingFunction
         PRINT_ERROR_WITH_FUNCTION_AND_RETURN_NULL("messageIntoEncodedString", "Error with encoding");
     }
 
-    encodedMsg = realloc(encodedMsg, encodedMsgLength); // CR: nobody cares about this
     return encodedMsg;
 }
 

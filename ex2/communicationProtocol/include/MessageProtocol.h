@@ -53,7 +53,7 @@ ReturnValue MPServerSend(Message *msg);
  * @brief send the formatted PROJECT_SUCCESS or FAILURE server msg according
  * to the input result value.
  */
-void MPServerSendSuccessOrFailure(ReturnValue result);
+ReturnValue MPServerSendSuccessOrFailure(ReturnValue result);
 
 /**
  * @brief initializes the client connection according to the communication

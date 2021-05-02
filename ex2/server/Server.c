@@ -51,33 +51,26 @@ static Message *serverLoadFileIntoMsgFormat(FILE *pFile) {
     return NULL;
 }
 
-_Noreturn static void serverClose(bool errorExitFlag) {
+_Noreturn static void serverClose(bool errorExitFlag)
+{
     MPServerCloseConnection();
-
-    if (errorExitFlag)
-        printf("\nAn error occurred, closing...\n");
-    else
-        printf("\nServer got ABORT command, closing...\n");
-
+    (errorExitFlag) ? printf("\nAn error occurred, closing...\n") : printf("\nServer got ABORT command, closing...\n");
     exit(PROJECT_SUCCESS);
 }
-// CR: why is this void? what if the server fails.
-//     you have way too many function that aren't reporting if they succussed or not
 
-static void serverRead() {
-    // CR: what? what is this comment?
-    // Assuming we did some reading from somewhere
-    MPServerSendSuccessOrFailure(PROJECT_SUCCESS);
+static ReturnValue serverRead()
+{
+    return MPServerSendSuccessOrFailure(PROJECT_SUCCESS);
 }
 
-static void serverWrite(Message *msg) {
-    CHECK_NULL_RETURN(msg);
-
-    // Assuming server wrote content to somewhere, and succeeded.
-    MPServerSendSuccessOrFailure(PROJECT_SUCCESS);
+static ReturnValue serverWrite(Message *msg)
+{
+    CHECK_NULL_RETURN_ERROR(msg);
+    return MPServerSendSuccessOrFailure(PROJECT_SUCCESS);
 }
 
-static ReturnValue sendFileTitle(Message *msg) {
+static ReturnValue sendFileTitle(Message *msg)
+{
     if (!messageValidateFormat(msg))
         PRINT_ERROR_WITH_FUNCTION_AND_RETURN_ERROR("sendFileTitle", "Bad msg format");
 
@@ -150,10 +143,10 @@ static ReturnValue serverStreamFile(FILE *pFile)
     return result;
 }
 
-static void serverSendFile(Message *msg)
+static ReturnValue serverSendFile(Message *msg)
 {
     if (!messageValidateFormat(msg))
-        PRINT_ERROR_WITH_FUNCTION_AND_RETURN("serverSendFile", "Bad msg format");
+        PRINT_ERROR_WITH_FUNCTION_AND_RETURN_ERROR("serverSendFile", "Bad msg format");
     char *filePath = msg->contents;
 
     FILE *pFile = NULL;
@@ -173,6 +166,7 @@ static void serverSendFile(Message *msg)
     cleanup:
     fclose(pFile);
     MPServerSendSuccessOrFailure(result);
+    return result;
 }
 
 static void serverAbort(Message *msg)
@@ -190,15 +184,17 @@ static void serverHandleMessage(Message *msg)
         PRINT_ERROR_WITH_FUNCTION_AND_RETURN("serverHandleMessage", "Bad msg format");
 
     Command currentCommand = messageGetCommand(msg);
-    switch (currentCommand) {
+    ReturnValue result;
+    switch (currentCommand)
+    {
         case READ:
-            serverRead();
+            result = serverRead();
             break;
         case WRITE:
-            serverWrite(msg);
+            result = serverWrite(msg);
             break;
         case GET_FILE:
-            serverSendFile(msg);
+            result = serverSendFile(msg);
             break;
         case ABORT:
             serverAbort(msg);
@@ -207,6 +203,8 @@ static void serverHandleMessage(Message *msg)
             PRINT_ERROR_WITH_FUNCTION("serverHandleMessage", "Bad COMMAND");
             break;
     }
+    if (result == PROJECT_ERROR)
+        serverClose(true);
 }
 
 static void serverHandleError(Message *msg)
@@ -222,11 +220,15 @@ static void serverHandleError(Message *msg)
 
 // ------------------------------ functions -----------------------------
 
-ReturnValue serverInitialize(CommunicationMethodCode cMethod) {
+ReturnValue serverInitialize(CommunicationMethodCode cMethod)
+{
+    printf("\nInitializing server...\n");
     return MPServerInitConnection(cMethod);
 }
 
-_Noreturn void serverListen() {
+_Noreturn void serverListen()
+{
+    printf("Server is listening...\n");
     while (true)
     {
         Message *msg = MPServerListen();

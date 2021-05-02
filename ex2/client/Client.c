@@ -3,7 +3,7 @@
 
 #include "Client.h"
 #include "MessageProtocol.h"
-#include "utils/include/base64.h"
+#include "base64.h"
 
 // ------------------------------ private functions -----------------------------
 
@@ -49,8 +49,8 @@ static ReturnValue clientHandleFileDataStream(FILE *pFile)
     result = PROJECT_SUCCESS;
 
 cleanup:
-    free(msgSuccess);
-    free(currentFileDataMsg);
+    messageFree(currentFileDataMsg);
+    messageFree(msgSuccess);
     return result;
 }
 

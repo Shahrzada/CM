@@ -22,12 +22,13 @@
 
 // ------------------------------ global variables -----------------------------
 
+// CR: This was not deleted because there's no other way to gather who is the server
+//      because both access the same file.
 static bool isServer = false;
 
 static size_t serverFileEmptySize = 0;
 static size_t clientFileEmptySize = 0;
 
-// CR: why did you need to move from one file to two files?
 const char *fileServerCommunicationFilePath = NULL;
 const char *fileServerTempCommunicationFilePath = NULL; 
 const char *fileClientCommunicationFilePath = NULL;
@@ -55,22 +56,17 @@ static ReturnValue initFilePaths()
 static ReturnValue fileRemoveMsgFromFile(const char *fileName)
 {
     CHECK_NULL_RETURN_ERROR(fileName);
+    CHECK_NULL_RETURN_ERROR(fileServerTempCommunicationFilePath);
+    CHECK_NULL_RETURN_ERROR(fileClientTempCommunicationFilePath);
+
     FILE *tempFile = NULL;
 
     FILE *srcFile  = fopen(fileName, FILE_READ_MODE);
     if (srcFile == NULL)
         return PROJECT_ERROR;
-    // CR: use ? operator
-    if (isServer)
-    {
-        CHECK_NULL_RETURN_ERROR(fileServerTempCommunicationFilePath);
-        tempFile = fopen(fileServerTempCommunicationFilePath, FILE_WRITE_UPDATE_MODE);
-    }
-    else
-    {
-        CHECK_NULL_RETURN_ERROR(fileClientTempCommunicationFilePath);
-        tempFile = fopen(fileClientTempCommunicationFilePath, FILE_WRITE_UPDATE_MODE);
-    }
+
+    tempFile = (isServer) ? fopen(fileServerTempCommunicationFilePath, FILE_WRITE_UPDATE_MODE)
+                          : fopen(fileClientTempCommunicationFilePath, FILE_WRITE_UPDATE_MODE);
 
     if (tempFile == NULL)
     {
@@ -82,34 +78,19 @@ static ReturnValue fileRemoveMsgFromFile(const char *fileName)
     char buffer[MAX_MSG_LENGTH] = {0};
     char *line = (fgets(buffer, MAX_MSG_LENGTH, srcFile));
 
-    // And copy all other msgs
-    while (true) // CR: maybe this should be a do while? or check in the condition
-    {
-        line = (fgets(buffer, MAX_MSG_LENGTH, srcFile));
-        if (line == NULL)
-            break;
+    // And copy all other msgs into the temp file
+    while (fgets(buffer, MAX_MSG_LENGTH, srcFile) != NULL)
         fputs(buffer, tempFile);
-    }
 
     fclose(srcFile);
     fclose(tempFile);
 
-    // Delete src file
     int result = remove(fileName);
     if (result != 0)
         return PROJECT_ERROR;
 
-    // And rename temp file as src
-    if (isServer)
-    {
-        CHECK_NULL_RETURN_ERROR(fileServerTempCommunicationFilePath);
-        result = rename(fileServerTempCommunicationFilePath, fileName);
-    }
-    else
-    {
-        CHECK_NULL_RETURN_ERROR(fileClientTempCommunicationFilePath);
-        result = rename(fileClientTempCommunicationFilePath, fileName);
-    }
+    result = (isServer) ? rename(fileServerTempCommunicationFilePath, fileName)
+                        : rename(fileClientTempCommunicationFilePath, fileName);
 
     return (result != 0) ? PROJECT_ERROR : PROJECT_SUCCESS;
 }
@@ -148,26 +129,13 @@ static unsigned int fileListen(char *buffer, const char *fileName)
     if (result != 0)
         PRINT_ERROR_WITH_FUNCTION_AND_RETURN_ZERO("fileListen", "Couldn't check file stat");
 
+    size_t fileSize = (isServer) ? serverFileEmptySize : clientFileEmptySize;
     while (true)
     {
         sleep(1);
         stat(fileName, &fileStat);
-        if (isServer)
-        {
-            if (serverFileEmptySize < fileStat.st_size)
-            {
-                CHECK_NULL_RETURN_ERROR(fileServerCommunicationFilePath);
-                return fileReceive(buffer, fileServerCommunicationFilePath);
-            }
-        }
-        else
-        {
-            if (clientFileEmptySize < fileStat.st_size)
-            {
-                CHECK_NULL_RETURN_ERROR(fileClientCommunicationFilePath);
-                return fileReceive(buffer, fileClientCommunicationFilePath);
-            }
-        }
+        if (fileSize < fileStat.st_size)
+            return fileReceive(buffer, fileName);
     }
 }
 
@@ -194,30 +162,20 @@ static ReturnValue fileSend(const char *msg, const char *fileName)
 
 static ReturnValue fileSetEmptyFileSize()
 {
+    CHECK_NULL_RETURN_ERROR(fileServerCommunicationFilePath);
+    CHECK_NULL_RETURN_ERROR(fileClientCommunicationFilePath);
     struct stat fileStat;
     int result = -1;
 
-    if (isServer)
-    {
-        CHECK_NULL_RETURN_ERROR(fileServerCommunicationFilePath);
-        result = stat(fileServerCommunicationFilePath, &fileStat);
-    }
-    else
-    {
-        CHECK_NULL_RETURN_ERROR(fileClientCommunicationFilePath);
-        result = stat(fileClientCommunicationFilePath, &fileStat);
-    }
-
+    result = (isServer) ? stat(fileServerCommunicationFilePath, &fileStat)
+                        : stat(fileClientCommunicationFilePath, &fileStat);
     if (result != 0)
         PRINT_ERROR_WITH_FUNCTION_AND_RETURN_ERROR("fileSetEmptyFileSize", "Couldn't check file stat");
 
-    if (isServer)
-        serverFileEmptySize = fileStat.st_size;
-    else
-        clientFileEmptySize = fileStat.st_size;
-
+    (isServer) ? (serverFileEmptySize = fileStat.st_size) : (clientFileEmptySize = fileStat.st_size);
     return PROJECT_SUCCESS;
 }
+
 // ------------------------------ functions -----------------------------
 
 ReturnValue fileServerInitConnection()
@@ -288,10 +246,4 @@ unsigned int fileClientSend(const char *msg, unsigned int msgLength, char *buffe
     // wait for server reply
     CHECK_NULL_RETURN_ERROR(fileClientCommunicationFilePath);
     return fileListen(buffer, fileClientCommunicationFilePath);
-}
-
-unsigned int fileClientReceive(char *buffer)
-{
-    CHECK_NULL_RETURN_ERROR(fileClientCommunicationFilePath);
-    return fileReceive(buffer, fileClientCommunicationFilePath);
 }
