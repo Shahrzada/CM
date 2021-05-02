@@ -102,7 +102,8 @@ Message *MPServerListen()
 
     char encodedMsg[MAX_MSG_LENGTH];
     unsigned int encodedMsgLength = serverCMethod->listenFunction(encodedMsg);
-    CHECK_ZERO_RETURN_NULL(encodedMsgLength);
+    if (encodedMsgLength == 0 || encodedMsgLength == MAX_MSG_LENGTH)
+        return NULL;
 
     return MPDecodeAndPrint(encodedMsg);
 }
@@ -111,9 +112,8 @@ ReturnValue MPServerSend(Message *msg)
 {
     CHECK_NULL_RETURN_ERROR(serverCMethod);
     MSG_CHECK_VALID_RETURN_ERROR(msg);
-    char *encodedMsg = NULL;
 
-    encodedMsg = MPPrintAndEncode(msg);
+    char *encodedMsg = MPPrintAndEncode(msg);
     CHECK_NULL_RETURN_ERROR(encodedMsg);
 
     unsigned int encodedMsgLength = strnlen(encodedMsg, MAX_MSG_LENGTH);
@@ -175,7 +175,7 @@ Message *MPClientSend(Message *msg)
     CHECK_NULL_RETURN_NULL(encodedMsg);
 
     unsigned int encodedMsgLength = strnlen(encodedMsg, MAX_MSG_LENGTH);
-    if (encodedMsgLength == MAX_MSG_LENGTH)
+    if (encodedMsgLength == 0 || encodedMsgLength == MAX_MSG_LENGTH)
     {
         free(encodedMsg);
         PRINT_ERROR_WITH_FUNCTION_AND_RETURN_NULL("MPClientSend", "Bad encoded msg");
@@ -184,7 +184,7 @@ Message *MPClientSend(Message *msg)
     char encodedReply[MAX_MSG_LENGTH];
     unsigned int encodedReplyLength = clientCMethod->sendFunction(encodedMsg, encodedMsgLength, encodedReply);
     free(encodedMsg);
-    if (encodedReplyLength == 0)
+    if (encodedReplyLength == 0 || encodedReplyLength == MAX_MSG_LENGTH)
         return NULL;
 
     return MPDecodeAndPrint(encodedReply);

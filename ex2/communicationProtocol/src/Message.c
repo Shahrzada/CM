@@ -25,7 +25,7 @@ static bool messageValidateCommand(Command command)
 
 static bool messageValidateContentsLength(unsigned int contentsLength)
 {
-    return (contentsLength < MAX_MSG_LENGTH - sizeof(Message));
+    return (contentsLength < MAX_MSG_LENGTH - sizeof(Message) - NULL_CHAR_SIZE);
 }
 
 // ------------------------------ functions -----------------------------
@@ -75,7 +75,7 @@ char *messageToCString(Message *msg, unsigned int *msgStrLength)
     char *msgStr = (char *) malloc(sizeof(char) * (msgLength + NULL_CHAR_SIZE));
     CHECK_NULL_RETURN_NULL(msgStr);
 
-    memcpy(msgStr, (char *) msg, msgLength); //todo try without casting
+    memcpy(msgStr, msg, msgLength);
     msgStr[msgLength] = EOL_CHAR;
 
     *msgStrLength = msgLength;
@@ -156,12 +156,12 @@ char *messageIntoEncodedString(Message *msg, encoding_function *encodingFunction
     char *msgStr = messageToCString(msg, &msgStrLength);
     CHECK_NULL_RETURN_NULL(msgStr);
 
-    char *encodedMsg = (char *) malloc(MAX_MSG_LENGTH); // CR: Null byte?
+    char *encodedMsg = (char *) malloc(MAX_MSG_LENGTH);
     CHECK_NULL_RETURN_NULL(encodedMsg);
 
     int encodedMsgLength = encodingFunction(encodedMsg, msgStr, (int)msgStrLength);
     free(msgStr);
-    if (encodedMsgLength == 0)
+    if (encodedMsgLength == 0 || encodedMsgLength == MAX_MSG_LENGTH)
     {
         free(encodedMsg);
         PRINT_ERROR_WITH_FUNCTION_AND_RETURN_NULL("messageIntoEncodedString", "Error with encoding");
@@ -174,13 +174,10 @@ Message *messageDecodeStringIntoMsg(char *encodedMsg, decoding_function *decodin
 {
     CHECK_NULL_RETURN_NULL(encodedMsg);
     CHECK_NULL_RETURN_NULL(decodingFunction);
-    Message *msg = NULL;
 
-    // decode the data
-    char decodedMsg[MAX_MSG_LENGTH]; // CR: NULL byte?
+    char decodedMsg[MAX_MSG_LENGTH];
     unsigned int msgLength = decodingFunction(decodedMsg, encodedMsg);
     CHECK_ZERO_RETURN_NULL(msgLength);
 
-    // create the msg object
     return messageFromCString(decodedMsg, msgLength);
 }
