@@ -25,14 +25,14 @@ static char *MPGetLogFilePath()
 
 static ReturnValue MPWriteToLog(Message *msg)
 {
-    CHECK_NULL_RETURN_ERROR(msg);
+    CHECK_NULL_RETURN_VALUE(msg, PROJECT_ERROR);
     ReturnValue result = PROJECT_ERROR;
 
     char *logPath = MPGetLogFilePath();
-    CHECK_NULL_RETURN_ERROR(logPath);
+    CHECK_NULL_RETURN_VALUE(logPath, PROJECT_ERROR);
 
     FILE *pFile = fopen(logPath, FILE_APPEND_MODE);
-    CHECK_NULL_RETURN_ERROR(pFile);
+    CHECK_NULL_RETURN_VALUE(pFile, PROJECT_ERROR);
 
     size_t bufferSize = msg->contentsLength + MSG_PRINT_FORMAT_LENGTH;
     char buffer[bufferSize + NULL_CHAR_SIZE];
@@ -52,10 +52,10 @@ static ReturnValue MPWriteToLog(Message *msg)
 
 static Message *MPDecodeAndPrint(char *encodedMsg)
 {
-    CHECK_NULL_RETURN_NULL(encodedMsg);
+    CHECK_NULL_RETURN_VALUE(encodedMsg, NULL);
 
     Message *msg = messageDecodeStringIntoMsg(encodedMsg, Base64decode);
-    MSG_CHECK_VALID_RETURN_NULL(msg);
+    MSG_CHECK_VALID_RETURN_VALUE(msg, NULL);
 
     (IS_SERVER) ? printf("\nServer received:\n") : printf("\nClient received:\n");
     PRINT_MSG(msg);
@@ -67,7 +67,7 @@ static Message *MPDecodeAndPrint(char *encodedMsg)
 
 static char *MPPrintAndEncode(Message *msg)
 {
-    CHECK_NULL_RETURN_NULL(msg);
+    CHECK_NULL_RETURN_VALUE(msg, NULL);
 
     (IS_SERVER) ? printf("\nServer is sending:\n") : printf("\nClient is sending:\n");
     PRINT_MSG(msg);
@@ -83,13 +83,13 @@ ReturnValue MPServerInitConnection(CommunicationMethodCode cMethodCode)
 {
     if (serverCMethod == NULL)
         serverCMethod = serverCMethodSet(cMethodCode);
-    CHECK_NULL_RETURN_ERROR(serverCMethod);
+    CHECK_NULL_RETURN_VALUE(serverCMethod, PROJECT_ERROR);
     return serverCMethod->serverInitConnectionFunction();
 }
 
 ReturnValue MPServerCloseConnection()
 {
-    CHECK_NULL_RETURN_ERROR(serverCMethod);
+    CHECK_NULL_RETURN_VALUE(serverCMethod, PROJECT_ERROR);
     ReturnValue result = serverCMethod->serverCloseConnectionFunction();
     free(serverCMethod);
     serverCMethod = NULL;
@@ -98,7 +98,7 @@ ReturnValue MPServerCloseConnection()
 
 Message *MPServerListen()
 {
-    CHECK_NULL_RETURN_NULL(serverCMethod);
+    CHECK_NULL_RETURN_VALUE(serverCMethod, NULL);
 
     char encodedMsg[MAX_MSG_LENGTH];
     unsigned int encodedMsgLength = serverCMethod->listenFunction(encodedMsg);
@@ -110,11 +110,11 @@ Message *MPServerListen()
 
 ReturnValue MPServerSend(Message *msg)
 {
-    CHECK_NULL_RETURN_ERROR(serverCMethod);
-    MSG_CHECK_VALID_RETURN_ERROR(msg);
+    CHECK_NULL_RETURN_VALUE(serverCMethod, PROJECT_ERROR);
+    MSG_CHECK_VALID_RETURN_VALUE(msg, PROJECT_ERROR);
 
     char *encodedMsg = MPPrintAndEncode(msg);
-    CHECK_NULL_RETURN_ERROR(encodedMsg);
+    CHECK_NULL_RETURN_VALUE(encodedMsg, PROJECT_ERROR);
 
     unsigned int encodedMsgLength = strnlen(encodedMsg, MAX_MSG_LENGTH);
     if (encodedMsgLength == 0 || encodedMsgLength == MAX_MSG_LENGTH)
@@ -131,7 +131,7 @@ ReturnValue MPServerSend(Message *msg)
 ReturnValue MPServerSendSuccessOrFailure(ReturnValue result)
 {
     Message *msg = messageSetSuccessOrFailure(SERVER, REPLY, (result == PROJECT_SUCCESS));
-    CHECK_NULL_RETURN_ERROR(msg);
+    CHECK_NULL_RETURN_VALUE(msg, PROJECT_ERROR);
     ReturnValue sendResult = MPServerSend(msg);
     free(msg);
     return sendResult;
@@ -141,13 +141,13 @@ ReturnValue MPClientInitConnection(CommunicationMethodCode cMethodCode)
 {
     if (clientCMethod == NULL)
         clientCMethod = clientCMethodSet(cMethodCode);
-    CHECK_NULL_RETURN_ERROR(clientCMethod);
+    CHECK_NULL_RETURN_VALUE(clientCMethod, PROJECT_ERROR);
     return clientCMethod->clientInitConnectionFunction();
 }
 
 ReturnValue MPClientCloseConnection(ReturnValue result)
 {
-    CHECK_NULL_RETURN_ERROR(clientCMethod);
+    CHECK_NULL_RETURN_VALUE(clientCMethod, PROJECT_ERROR);
     ReturnValue closingResult = PROJECT_ERROR;
 
     if (result == PROJECT_ERROR)
@@ -168,11 +168,11 @@ ReturnValue MPClientCloseConnection(ReturnValue result)
 
 Message *MPClientSend(Message *msg)
 {
-    CHECK_NULL_RETURN_NULL(clientCMethod);
-    MSG_CHECK_VALID_RETURN_NULL(msg);
+    CHECK_NULL_RETURN_VALUE(clientCMethod, NULL);
+    MSG_CHECK_VALID_RETURN_VALUE(msg, NULL);
 
     char *encodedMsg = MPPrintAndEncode(msg);
-    CHECK_NULL_RETURN_NULL(encodedMsg);
+    CHECK_NULL_RETURN_VALUE(encodedMsg, NULL);
 
     unsigned int encodedMsgLength = strnlen(encodedMsg, MAX_MSG_LENGTH);
     if (encodedMsgLength == 0 || encodedMsgLength == MAX_MSG_LENGTH)

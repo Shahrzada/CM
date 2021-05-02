@@ -12,8 +12,8 @@
 // ------------------------------ private functions -----------------------------
 
 static int serverLoadFileIntoBuffer(char *buf, int bufLength, FILE *pFile) {
-    CHECK_NULL_RETURN_ZERO(buf);
-    CHECK_NULL_RETURN_ZERO(pFile);
+    CHECK_NULL_RETURN_VALUE(buf, 0);
+    CHECK_NULL_RETURN_VALUE(pFile, 0);
 
     int ch = 0, counter = 0;
     while (counter < bufLength) {
@@ -26,9 +26,9 @@ static int serverLoadFileIntoBuffer(char *buf, int bufLength, FILE *pFile) {
 }
 
 static Message *serverLoadFileIntoMsgFormat(FILE *pFile) {
-    CHECK_NULL_RETURN_NULL(pFile);
+    CHECK_NULL_RETURN_VALUE(pFile, NULL);
     Message *msg = (Message *) malloc(sizeof(Message));
-    CHECK_NULL_RETURN_NULL(msg);
+    CHECK_NULL_RETURN_VALUE(msg, NULL);
 
     int maxMsgLength = MAX_FILE_MSG_LENGTH - MSG_FORMAT_LENGTH + NULL_CHAR_SIZE;
     char buffer[maxMsgLength];
@@ -61,7 +61,7 @@ static ReturnValue serverRead()
 
 static ReturnValue serverWrite(Message *msg)
 {
-    CHECK_NULL_RETURN_ERROR(msg);
+    CHECK_NULL_RETURN_VALUE(msg, PROJECT_ERROR);
     return MPServerSendSuccessOrFailure(PROJECT_SUCCESS);
 }
 
@@ -71,16 +71,16 @@ static ReturnValue sendFileTitle(Message *msg)
         PRINT_ERROR_WITH_FUNCTION_AND_RETURN_ERROR("sendFileTitle", "Bad msg format");
 
     char *fileTitle = basename(msg->contents);
-    CHECK_NULL_RETURN_ERROR(fileTitle);
+    CHECK_NULL_RETURN_VALUE(fileTitle, PROJECT_ERROR);
     unsigned int fileTitleLength = strnlen(fileTitle, MAX_JSON_VALUE_LENGTH);
-    CHECK_ZERO_RETURN_ERROR(fileTitleLength);
+    CHECK_ZERO_RETURN_VALUE(fileTitleLength, PROJECT_ERROR);
 
     Message *fileTitleMsg = messageSet(SERVER, GET_FILE, fileTitleLength, fileTitle);
-    CHECK_NULL_RETURN_ERROR(fileTitleMsg);
+    CHECK_NULL_RETURN_VALUE(fileTitleMsg, PROJECT_ERROR);
 
     ReturnValue result = MPServerSend(fileTitleMsg);
     free(fileTitleMsg);
-    CHECK_ERROR_RETURN_ERROR(result);
+    CHECK_ERROR_RETURN_VALUE(result, PROJECT_ERROR);
 
     Message *clientReply = MPServerListen();
     MSG_CHECK_VALID_GOTO_CLEANUP(clientReply);
@@ -98,7 +98,7 @@ static ReturnValue sendFileTitle(Message *msg)
 
 static ReturnValue serverStreamFile(FILE *pFile)
 {
-    CHECK_NULL_RETURN_ERROR(pFile);
+    CHECK_NULL_RETURN_VALUE(pFile, PROJECT_ERROR);
     Message *fileMsg = NULL;
     ReturnValue result = PROJECT_ERROR;
 

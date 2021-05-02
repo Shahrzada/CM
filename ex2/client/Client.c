@@ -9,7 +9,7 @@
 
 static ReturnValue clientHandleFileDataStream(FILE *pFile)
 {
-    CHECK_NULL_RETURN_ERROR(pFile);
+    CHECK_NULL_RETURN_VALUE(pFile, PROJECT_ERROR);
 
     Message *currentFileDataMsg = NULL;
     void *fileData = NULL;
@@ -19,31 +19,24 @@ static ReturnValue clientHandleFileDataStream(FILE *pFile)
     Message *msgSuccess = messageSetSuccessOrFailure(CLIENT, GET_FILE, true);
     MSG_CHECK_VALID_GOTO_CLEANUP(msgSuccess);
 
-    while (true)
+    currentFileDataMsg = MPClientSend(msgSuccess);
+    MSG_CHECK_VALID_GOTO_CLEANUP(currentFileDataMsg);
+
+    while (messageGetCommand(currentFileDataMsg) == GET_FILE)
     {
-        // get the next msg by replying with success first
-        currentFileDataMsg = MPClientSend(msgSuccess);
-        MSG_CHECK_VALID_GOTO_CLEANUP(currentFileDataMsg);
-
-        // make sure we are still getting a file data msg
-        if (messageGetCommand(currentFileDataMsg) != GET_FILE)
-            break;
-
-        // Get the data and its length
         fileData = messageGetContents(currentFileDataMsg);
         CHECK_NULL_GOTO_CLEANUP(fileData);
 
         totalBytesToBeWritten = messageGetContentsLength(currentFileDataMsg);
         CHECK_ZERO_GOTO_CLEANUP(totalBytesToBeWritten);
 
-        // Write the data to the local file
         totalBytesWritten = fwrite(fileData, 1, totalBytesToBeWritten, pFile);
         if (totalBytesWritten != totalBytesToBeWritten)
             goto cleanup;
 
-        // Free current msg and avoid a dangling pointer
         messageFree(currentFileDataMsg);
-        currentFileDataMsg = NULL;
+        currentFileDataMsg = MPClientSend(msgSuccess);
+        MSG_CHECK_VALID_GOTO_CLEANUP(currentFileDataMsg);
     }
 
     result = PROJECT_SUCCESS;
@@ -56,11 +49,11 @@ cleanup:
 
 static ReturnValue clientGetFile(Message *reply)
 {
-    MSG_CHECK_VALID_RETURN_ERROR(reply);
+    MSG_CHECK_VALID_RETURN_VALUE(reply, PROJECT_ERROR);
 
     // first msg is always the file's title
     char *fileTitle = messageGetContents(reply);
-    CHECK_NULL_RETURN_ERROR(fileTitle);
+    CHECK_NULL_RETURN_VALUE(fileTitle, PROJECT_ERROR);
 
     // Create and open the file
     FILE *pFile = fopen(fileTitle, FILE_WRITE_BINARY_MODE);
@@ -76,7 +69,7 @@ static ReturnValue clientGetFile(Message *reply)
 
 static ReturnValue handleReply(Message *reply)
 {
-    MSG_CHECK_VALID_RETURN_ERROR(reply);
+    MSG_CHECK_VALID_RETURN_VALUE(reply, PROJECT_ERROR);
 
     // we do not validate the reply atm, only handle file downloading
     if (messageGetCommand(reply) == GET_FILE)
@@ -99,11 +92,11 @@ ReturnValue clientClose(ReturnValue result)
 
 ReturnValue clientSendCommand(Command commandType, unsigned int contentsLength, char *contents)
 {
-    CHECK_NULL_RETURN_ERROR(contents);
+    CHECK_NULL_RETURN_VALUE(contents, PROJECT_ERROR);
     ReturnValue result = PROJECT_ERROR;
 
     Message *msg = messageSet(CLIENT, commandType, contentsLength, contents);
-    MSG_CHECK_VALID_RETURN_ERROR(msg);
+    MSG_CHECK_VALID_RETURN_VALUE(msg, PROJECT_ERROR);
 
     // send the message and wait to handle its reply
     Message *reply = MPClientSend(msg);

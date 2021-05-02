@@ -35,13 +35,11 @@ typedef int (decoding_function)(char *, const char *);
 #define MSG_FORMAT_LENGTH 4
 #define MSG_PRINT_FORMAT_LENGTH 100
 
-#define PRINT_MSG(msg) do {printf("[%d][%d][%d]:%s\n", (msg)->sender, (msg)->command, (msg)->contentsLength, (msg)->contents);} while(0)
-// CR: you made so much macros that now its too confusing, it wouldve been better to make 1 macro
-//     MSG_CHECK_VALID_RETURN_VALUE, then let the user decide what to return
-#define MSG_CHECK_VALID_RETURN_NULL(msg) do {if (!messageValidateFormat(msg)) return NULL;} while(0)
-#define MSG_CHECK_VALID_RETURN_ERROR(msg) do {if (!messageValidateFormat(msg)) return PROJECT_ERROR;} while(0)
-#define MSG_CHECK_VALID_RETURN_ZERO(msg) do {if (!messageValidateFormat(msg)) return 0;} while(0)
+#define MSG_CHECK_VALID_RETURN_VALUE(msg, value) do {if (!messageValidateFormat(msg)) return (value);} while(0)
+#define MSG_CHECK_VALID_RETURN(msg) do {if (!messageValidateFormat(msg)) return;} while(0)
 #define MSG_CHECK_VALID_GOTO_CLEANUP(msg) do {if (!messageValidateFormat(msg)) goto cleanup;} while(0)
+
+#define PRINT_MSG(msg) do {printf("[%d][%d][%d]:%s\n", (msg)->sender, (msg)->command, (msg)->contentsLength, (msg)->contents);} while(0)
 
 // ------------------------------ functions -----------------------------
 

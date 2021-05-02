@@ -13,11 +13,11 @@ static ReturnValue initServerCMethod(server_communication_method *serverCMethod,
                                      server_close_connection_function_t *serverCloseConnectionFunction,
                                      listen_function_t *listenFunction, server_send_function_t *sendFunction)
 {
-    CHECK_NULL_RETURN_ERROR(serverCMethod);
-    CHECK_NULL_RETURN_ERROR(serverInitConnectionFunction);
-    CHECK_NULL_RETURN_ERROR(serverCloseConnectionFunction);
-    CHECK_NULL_RETURN_ERROR(listenFunction);
-    CHECK_NULL_RETURN_ERROR(sendFunction);
+    CHECK_NULL_RETURN_VALUE(serverCMethod, PROJECT_ERROR);
+    CHECK_NULL_RETURN_VALUE(serverInitConnectionFunction, PROJECT_ERROR);
+    CHECK_NULL_RETURN_VALUE(serverCloseConnectionFunction, PROJECT_ERROR);
+    CHECK_NULL_RETURN_VALUE(listenFunction, PROJECT_ERROR);
+    CHECK_NULL_RETURN_VALUE(sendFunction, PROJECT_ERROR);
 
     serverCMethod->serverInitConnectionFunction = serverInitConnectionFunction;
     serverCMethod->serverCloseConnectionFunction = serverCloseConnectionFunction;
@@ -32,10 +32,10 @@ static ReturnValue initClientCMethod(client_communication_method *clientCMethod,
                                      client_close_connection_function_t *clientCloseConnectionFunction,
                                      client_send_function_t *sendFunction)
 {
-    CHECK_NULL_RETURN_ERROR(clientCMethod);
-    CHECK_NULL_RETURN_ERROR(clientInitConnectionFunction);
-    CHECK_NULL_RETURN_ERROR(clientCloseConnectionFunction);
-    CHECK_NULL_RETURN_ERROR(sendFunction);
+    CHECK_NULL_RETURN_VALUE(clientCMethod, PROJECT_ERROR);
+    CHECK_NULL_RETURN_VALUE(clientInitConnectionFunction, PROJECT_ERROR);
+    CHECK_NULL_RETURN_VALUE(clientCloseConnectionFunction, PROJECT_ERROR);
+    CHECK_NULL_RETURN_VALUE(sendFunction, PROJECT_ERROR);
 
     clientCMethod->clientInitConnectionFunction = clientInitConnectionFunction;
     clientCMethod->clientCloseConnectionFunction = clientCloseConnectionFunction;
@@ -49,7 +49,7 @@ static ReturnValue initClientCMethod(client_communication_method *clientCMethod,
 server_communication_method *serverCMethodSet(CommunicationMethodCode cMethod)
 {
     server_communication_method *serverCMethod = (server_communication_method *) malloc(sizeof(server_communication_method));
-    CHECK_NULL_RETURN_NULL(serverCMethod);
+    CHECK_NULL_RETURN_VALUE(serverCMethod, NULL);
 
     ReturnValue result = PROJECT_ERROR;
     switch (cMethod)
@@ -81,7 +81,7 @@ cleanup:
 client_communication_method *clientCMethodSet(CommunicationMethodCode cMethod)
 {
     client_communication_method *clientCMethod = (client_communication_method *) malloc(sizeof(client_communication_method));
-    CHECK_NULL_RETURN_NULL(clientCMethod);
+    CHECK_NULL_RETURN_VALUE(clientCMethod, NULL);
 
     ReturnValue result = PROJECT_ERROR;
     switch (cMethod)

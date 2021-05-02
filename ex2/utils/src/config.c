@@ -30,7 +30,7 @@ static int clientServerPort = 0;
 
 static char *loadJSONStringFromFile(const char *configFilePath)
 {
-    CHECK_NULL_RETURN_NULL(configFilePath);
+    CHECK_NULL_RETURN_VALUE(configFilePath, NULL);
 
     // open file for reading
     FILE *pFile = fopen(configFilePath, FILE_READ_MODE);
@@ -53,7 +53,7 @@ static char *loadJSONStringFromFile(const char *configFilePath)
 
     // copy to allocated memory
     char *JSONString = (char *) malloc(sizeof(char) * (counter + NULL_CHAR_SIZE));
-    CHECK_NULL_RETURN_NULL(JSONString);
+    CHECK_NULL_RETURN_VALUE(JSONString, NULL);
 
     memcpy(JSONString, buffer, sizeof(char) * counter);
     JSONString[counter] = NULL_CHAR;
@@ -63,9 +63,9 @@ static char *loadJSONStringFromFile(const char *configFilePath)
 
 static ReturnValue copyStringIntoPathHolder(char *pathHolder, const nx_json *json, char *key)
 {
-    CHECK_NULL_RETURN_ERROR(pathHolder);
-    CHECK_NULL_RETURN_ERROR(json);
-    CHECK_NULL_RETURN_ERROR(key);
+    CHECK_NULL_RETURN_VALUE(pathHolder, PROJECT_ERROR);
+    CHECK_NULL_RETURN_VALUE(json, PROJECT_ERROR);
+    CHECK_NULL_RETURN_VALUE(key, PROJECT_ERROR);
 
     if (nx_json_get(json, key) == NULL)
         return PROJECT_ERROR;
@@ -76,50 +76,50 @@ static ReturnValue copyStringIntoPathHolder(char *pathHolder, const nx_json *jso
 
 static ReturnValue copyStringIntoPathHolders(const nx_json *json)
 {
-    CHECK_NULL_RETURN_ERROR(json);
+    CHECK_NULL_RETURN_VALUE(json, PROJECT_ERROR);
     ReturnValue result = PROJECT_ERROR;
 
     result = copyStringIntoPathHolder(fileToTransferPath, json, "fileToTransferPath");
-    CHECK_ERROR_RETURN_ERROR(result);
+    CHECK_ERROR_RETURN_VALUE(result, PROJECT_ERROR);
 
     result = copyStringIntoPathHolder(serverCommunicationFilePath, json, "serverCommunicationFilePath");
-    CHECK_ERROR_RETURN_ERROR(result);
+    CHECK_ERROR_RETURN_VALUE(result, PROJECT_ERROR);
 
     result = copyStringIntoPathHolder(serverTempCommunicationFilePath, json, "serverTempCommunicationFilePath");
-    CHECK_ERROR_RETURN_ERROR(result);
+    CHECK_ERROR_RETURN_VALUE(result, PROJECT_ERROR);
 
     result = copyStringIntoPathHolder(clientCommunicationFilePath, json, "clientCommunicationFilePath");
-    CHECK_ERROR_RETURN_ERROR(result);
+    CHECK_ERROR_RETURN_VALUE(result, PROJECT_ERROR);
 
     result = copyStringIntoPathHolder(clientTempCommunicationFilePath, json, "clientTempCommunicationFilePath");
-    CHECK_ERROR_RETURN_ERROR(result);
+    CHECK_ERROR_RETURN_VALUE(result, PROJECT_ERROR);
 
     result = copyStringIntoPathHolder(serverLogCommunicationFilePath, json, "serverLogCommunicationFilePath");
-    CHECK_ERROR_RETURN_ERROR(result);
+    CHECK_ERROR_RETURN_VALUE(result, PROJECT_ERROR);
 
     result = copyStringIntoPathHolder(clientLogCommunicationFilePath, json, "clientLogCommunicationFilePath");
-    CHECK_ERROR_RETURN_ERROR(result);
+    CHECK_ERROR_RETURN_VALUE(result, PROJECT_ERROR);
 
     result = copyStringIntoPathHolder(serverName, json, "serverName");
-    CHECK_ERROR_RETURN_ERROR(result);
+    CHECK_ERROR_RETURN_VALUE(result, PROJECT_ERROR);
 
     result = copyStringIntoPathHolder(clientServerName, json, "clientServerName");
-    CHECK_ERROR_RETURN_ERROR(result);
+    CHECK_ERROR_RETURN_VALUE(result, PROJECT_ERROR);
 
     return PROJECT_SUCCESS;
 }
 
 static ReturnValue copyNumbersIntoGlobals(const nx_json *json)
 {
-    CHECK_NULL_RETURN_ERROR(json);
+    CHECK_NULL_RETURN_VALUE(json, PROJECT_ERROR);
 
-    CHECK_NULL_RETURN_ERROR(nx_json_get(json, "communicationMethodCode"));
+    CHECK_NULL_RETURN_VALUE(nx_json_get(json, "communicationMethodCode"), PROJECT_ERROR);
     communicationMethodCode = nx_json_get(json, "communicationMethodCode")->num.u_value;
 
-    CHECK_NULL_RETURN_ERROR(nx_json_get(json, "serverPort"));
+    CHECK_NULL_RETURN_VALUE(nx_json_get(json, "serverPort"), PROJECT_ERROR);
     serverPort = (int) nx_json_get(json, "serverPort")->num.u_value;
 
-    CHECK_NULL_RETURN_ERROR(nx_json_get(json, "clientServerPort"));
+    CHECK_NULL_RETURN_VALUE(nx_json_get(json, "clientServerPort"), PROJECT_ERROR);
     clientServerPort = (int) nx_json_get(json, "clientServerPort")->num.u_value;
 
     return PROJECT_SUCCESS;
@@ -127,12 +127,12 @@ static ReturnValue copyNumbersIntoGlobals(const nx_json *json)
 
 ReturnValue initConfigurations(const char *configFilePath)
 {
-    CHECK_NULL_RETURN_ERROR(configFilePath);
+    CHECK_NULL_RETURN_VALUE(configFilePath, PROJECT_ERROR);
     ReturnValue result = PROJECT_ERROR;
 
     // Get JSON as string
     char *JSONString = loadJSONStringFromFile(configFilePath);
-    CHECK_NULL_RETURN_ERROR(JSONString);
+    CHECK_NULL_RETURN_VALUE(JSONString, PROJECT_ERROR);
 
     // Parse the expected arguments
     const nx_json *json = nx_json_parse(JSONString, 0);

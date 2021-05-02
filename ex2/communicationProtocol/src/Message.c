@@ -32,7 +32,7 @@ static bool messageValidateContentsLength(unsigned int contentsLength)
 
 Message *messageSet(Sender sender, Command command, unsigned int contentsLength, char *contents)
 {
-    CHECK_NULL_RETURN_NULL(contents);
+    CHECK_NULL_RETURN_VALUE(contents, NULL);
     if (!messageValidateCommand(command)|| !messageValidateSender(sender)
         || !messageValidateContentsLength(contentsLength))
         return NULL;
@@ -68,12 +68,12 @@ bool messageValidateFormat(Message *msg)
 
 char *messageToCString(Message *msg, unsigned int *msgStrLength)
 {
-    MSG_CHECK_VALID_RETURN_NULL(msg);
-    CHECK_NULL_RETURN_NULL(msgStrLength);
+    MSG_CHECK_VALID_RETURN_VALUE(msg, NULL);
+    CHECK_NULL_RETURN_VALUE(msgStrLength, NULL);
 
     size_t msgLength = sizeof(Message) + msg->contentsLength;
     char *msgStr = (char *) malloc(sizeof(char) * (msgLength + NULL_CHAR_SIZE));
-    CHECK_NULL_RETURN_NULL(msgStr);
+    CHECK_NULL_RETURN_VALUE(msgStr, NULL);
 
     memcpy(msgStr, msg, msgLength);
     msgStr[msgLength] = EOL_CHAR;
@@ -84,11 +84,11 @@ char *messageToCString(Message *msg, unsigned int *msgStrLength)
 
 Message *messageFromCString(const char *msgStr, unsigned int msgLength)
 {
-    CHECK_NULL_RETURN_NULL(msgStr);
-    CHECK_ZERO_RETURN_NULL(msgLength);
+    CHECK_NULL_RETURN_VALUE(msgStr, NULL);
+    CHECK_ZERO_RETURN_VALUE(msgLength, NULL);
 
     Message *msg = (Message *) malloc(sizeof(char) * (msgLength + NULL_CHAR_SIZE));
-    CHECK_NULL_RETURN_NULL(msg);
+    CHECK_NULL_RETURN_VALUE(msg, NULL);
     memcpy(msg, msgStr, msgLength);
 
     if (!messageValidateFormat(msg))
@@ -117,20 +117,20 @@ Command messageGetCommand(Message *msg)
 
 char *messageGetContents(Message *msg)
 {
-    MSG_CHECK_VALID_RETURN_NULL(msg);
+    MSG_CHECK_VALID_RETURN_VALUE(msg, NULL);
     return msg->contents;
 }
 
 unsigned int messageGetContentsLength(Message *msg)
 {
-    MSG_CHECK_VALID_RETURN_ZERO(msg);
+    MSG_CHECK_VALID_RETURN_VALUE(msg, 0);
     return msg->contentsLength;
 }
 
 ReturnValue messageToPrintableCString(Message *msg, char *buffer)
 {
-    MSG_CHECK_VALID_RETURN_ERROR(msg);
-    CHECK_NULL_RETURN_ERROR(buffer);
+    MSG_CHECK_VALID_RETURN_VALUE(msg, PROJECT_ERROR);
+    CHECK_NULL_RETURN_VALUE(buffer, PROJECT_ERROR);
 
     sprintf(buffer, "[TIME=%lu]:[SENDER=%d][COMMAND=%d][LENGTH=%d]\n\t\t[MSG AS CSTRING=%s]\n",
                     (unsigned long)time(NULL), msg->sender, msg->command,
@@ -149,15 +149,15 @@ Message *messageSetSuccessOrFailure(Sender sender, Command command, bool isSucce
 
 char *messageIntoEncodedString(Message *msg, encoding_function *encodingFunction)
 {
-    MSG_CHECK_VALID_RETURN_NULL(msg);
-    CHECK_NULL_RETURN_NULL(encodingFunction);
+    MSG_CHECK_VALID_RETURN_VALUE(msg, NULL);
+    CHECK_NULL_RETURN_VALUE(encodingFunction, NULL);
 
     unsigned int msgStrLength = 0;
     char *msgStr = messageToCString(msg, &msgStrLength);
-    CHECK_NULL_RETURN_NULL(msgStr);
+    CHECK_NULL_RETURN_VALUE(msgStr, NULL);
 
     char *encodedMsg = (char *) malloc(MAX_MSG_LENGTH);
-    CHECK_NULL_RETURN_NULL(encodedMsg);
+    CHECK_NULL_RETURN_VALUE(encodedMsg, NULL);
 
     int encodedMsgLength = encodingFunction(encodedMsg, msgStr, (int)msgStrLength);
     free(msgStr);
@@ -172,12 +172,12 @@ char *messageIntoEncodedString(Message *msg, encoding_function *encodingFunction
 
 Message *messageDecodeStringIntoMsg(char *encodedMsg, decoding_function *decodingFunction)
 {
-    CHECK_NULL_RETURN_NULL(encodedMsg);
-    CHECK_NULL_RETURN_NULL(decodingFunction);
+    CHECK_NULL_RETURN_VALUE(encodedMsg, NULL);
+    CHECK_NULL_RETURN_VALUE(decodingFunction, NULL);
 
     char decodedMsg[MAX_MSG_LENGTH];
     unsigned int msgLength = decodingFunction(decodedMsg, encodedMsg);
-    CHECK_ZERO_RETURN_NULL(msgLength);
+    CHECK_ZERO_RETURN_VALUE(msgLength, NULL);
 
     return messageFromCString(decodedMsg, msgLength);
 }

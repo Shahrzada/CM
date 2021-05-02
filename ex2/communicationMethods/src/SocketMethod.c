@@ -38,8 +38,8 @@
            CLOSE_SOCKET(socket); \
            } while(0)
 
-#define CHECK_INVALID_SOCKET_RETURN_ERROR(socket) do {if ((socket) == INVALID_SOCKET) return PROJECT_ERROR;} while(0)
-#define CHECK_INVALID_SOCKET_RETURN_ZERO(socket) do {if ((socket) == INVALID_SOCKET) return 0;} while(0)
+#define CHECK_INVALID_SOCKET_RETURN_VALUE(socket, value) do {if ((socket) == INVALID_SOCKET) return (value);} while(0)
+#define CHECK_INVALID_SOCKET_RETURN(socket) do {if ((socket) == INVALID_SOCKET) return;} while(0)
 #define CHECK_INVALID_SOCKET_GOTO_CLEANUP(socket) do {if ((socket) == INVALID_SOCKET) goto cleanup;} while(0)
 
 #define CHECK_SOCKET_ERROR_GOTO_CLEANUP(result) do {if ((result) == SOCKET_ERROR) goto cleanup;} while(0)
@@ -73,10 +73,10 @@ static ReturnValue initWinSock()
 static ReturnValue initServerNameAndPortForServer()
 {
     serverName = getServerName();
-    CHECK_NULL_RETURN_ERROR(serverName);
+    CHECK_NULL_RETURN_VALUE(serverName, PROJECT_ERROR);
 
     serverPort = getServerPort();
-    CHECK_ZERO_RETURN_ERROR(serverPort);
+    CHECK_ZERO_RETURN_VALUE(serverPort, PROJECT_ERROR);
 
     return PROJECT_SUCCESS;
 }
@@ -84,18 +84,18 @@ static ReturnValue initServerNameAndPortForServer()
 static ReturnValue initServerNameAndPortForClient()
 {
     clientServerName = getClientServerName();
-    CHECK_NULL_RETURN_ERROR(clientServerName);
+    CHECK_NULL_RETURN_VALUE(clientServerName, PROJECT_ERROR);
 
     clientServerPort = getClientServerPort();
-    CHECK_ZERO_RETURN_ERROR(clientServerPort);
+    CHECK_ZERO_RETURN_VALUE(clientServerPort, PROJECT_ERROR);
 
     return PROJECT_SUCCESS;
 }
 
 static unsigned int socketReceive(SOCKET socket, char *buffer)
 {
-    CHECK_INVALID_SOCKET_RETURN_ZERO(socket);
-    CHECK_NULL_RETURN_ZERO(buffer);
+    CHECK_INVALID_SOCKET_RETURN_VALUE(socket, 0);
+    CHECK_NULL_RETURN_VALUE(buffer, 0);
 
     // Notice: if the msg is larger than the buffer, the buffer is filled and recv generates an error
     unsigned int totalBytesReceived = recv(socket, buffer, MAX_MSG_LENGTH, NO_FLAGS);
@@ -109,8 +109,8 @@ static unsigned int socketReceive(SOCKET socket, char *buffer)
 
 static ReturnValue socketSend(const char *msg, unsigned int msgLength, SOCKET socket)
 {
-    CHECK_NULL_RETURN_ERROR(msg);
-    CHECK_INVALID_SOCKET_RETURN_ERROR(socket);
+    CHECK_NULL_RETURN_VALUE(msg, PROJECT_ERROR);
+    CHECK_INVALID_SOCKET_RETURN_VALUE(socket, PROJECT_ERROR);
 
     int returnValue = send(socket, msg, (int)msgLength, 0);
     if (returnValue == SOCKET_ERROR)
@@ -124,7 +124,7 @@ static ReturnValue socketSend(const char *msg, unsigned int msgLength, SOCKET so
 
 static ReturnValue socketCloseConnection(SOCKET socket)
 {
-    CHECK_INVALID_SOCKET_RETURN_ERROR(socket);
+    CHECK_INVALID_SOCKET_RETURN_VALUE(socket, PROJECT_ERROR);
     SHUTDOWN_AND_CLOSE_SOCKET(socket);
     WSACleanup();
     return PROJECT_SUCCESS;
@@ -135,10 +135,10 @@ static ReturnValue socketCloseConnection(SOCKET socket)
 ReturnValue socketServerInitConnection()
 {
     ReturnValue result = initWinSock();
-    CHECK_ERROR_RETURN_ERROR(result);
+    CHECK_ERROR_RETURN_VALUE(result, PROJECT_ERROR);
 
     result = initServerNameAndPortForServer();
-    CHECK_ERROR_RETURN_ERROR(result);
+    CHECK_ERROR_RETURN_VALUE(result, PROJECT_ERROR);
 
     struct sockaddr_in local;
     local.sin_family = DEFAULT_ADDRESS_FAMILY;
@@ -173,30 +173,30 @@ cleanup:
 
 ReturnValue socketServerCloseConnection()
 {
-    CHECK_INVALID_SOCKET_RETURN_ERROR(clientSocket);
+    CHECK_INVALID_SOCKET_RETURN_VALUE(clientSocket, PROJECT_ERROR);
     return socketCloseConnection(clientSocket);
 }
 
 unsigned int socketServerListen(char *buffer)
 {
-    CHECK_INVALID_SOCKET_RETURN_ZERO(clientSocket);
-    CHECK_NULL_RETURN_ZERO(buffer);
+    CHECK_INVALID_SOCKET_RETURN_VALUE(clientSocket, 0);
+    CHECK_NULL_RETURN_VALUE(buffer, 0);
     return socketReceive(clientSocket, buffer);
 }
 
 ReturnValue socketServerSend(const char *msg, unsigned int msgLength)
 {
-    CHECK_NULL_RETURN_ERROR(msg);
-    CHECK_INVALID_SOCKET_RETURN_ERROR(clientSocket);
+    CHECK_NULL_RETURN_VALUE(msg, PROJECT_ERROR);
+    CHECK_INVALID_SOCKET_RETURN_VALUE(clientSocket, PROJECT_ERROR);
     return socketSend(msg, msgLength, clientSocket);
 }
 
 ReturnValue socketClientInitConnection() {
     ReturnValue result = initWinSock();
-    CHECK_ERROR_RETURN_ERROR(result);
+    CHECK_ERROR_RETURN_VALUE(result, PROJECT_ERROR);
 
     result = initServerNameAndPortForClient();
-    CHECK_ERROR_RETURN_ERROR(result);
+    CHECK_ERROR_RETURN_VALUE(result, PROJECT_ERROR);
 
     struct hostent *hp;
     hp = gethostbyname(clientServerName);
@@ -232,15 +232,15 @@ ReturnValue socketClientInitConnection() {
 
 ReturnValue socketClientCloseConnection()
 {
-    CHECK_INVALID_SOCKET_RETURN_ERROR(connectionSocket);
+    CHECK_INVALID_SOCKET_RETURN_VALUE(connectionSocket, PROJECT_ERROR);
     return socketCloseConnection(connectionSocket);
 }
 
 unsigned int socketClientSend(const char *msg, unsigned int msgLength, char *buffer)
 {
-    CHECK_INVALID_SOCKET_RETURN_ZERO(connectionSocket);
-    CHECK_NULL_RETURN_ZERO(msg);
-    CHECK_NULL_RETURN_ZERO(buffer);
+    CHECK_INVALID_SOCKET_RETURN_VALUE(connectionSocket, 0);
+    CHECK_NULL_RETURN_VALUE(msg, 0);
+    CHECK_NULL_RETURN_VALUE(buffer, 0);
 
     ReturnValue result = socketSend(msg, msgLength, connectionSocket);
     if (result == PROJECT_ERROR)
