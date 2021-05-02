@@ -37,39 +37,24 @@ Message *messageSet(Sender sender, Command command, unsigned int contentsLength,
         || !messageValidateContentsLength(contentsLength))
         return NULL;
 
-    Message *msg = NULL;
-    char *msgContents = NULL;
-
-    msg = (Message *) malloc(sizeof(Message));
+    Message *msg = (Message *) malloc(sizeof(Message) + contentsLength + NULL_CHAR_SIZE);
     CHECK_NULL_GOTO_CLEANUP(msg);
-
-    msgContents = (char *) malloc(sizeof(char) * (contentsLength + NULL_CHAR_SIZE));
-    CHECK_NULL_GOTO_CLEANUP(msgContents);
-
-    memcpy(msgContents, contents, sizeof(char) * contentsLength);
-    msgContents[contentsLength] = NULL_CHAR;
 
     msg->sender = sender;
     msg->command = command;
     msg->contentsLength = contentsLength;
-    msg->contents = msgContents;
+    memcpy(msg->contents, contents, sizeof(char) * contentsLength);
+    msg->contents[contentsLength] = NULL_CHAR;
 
     return msg;
 
 cleanup:
     free(msg);
-    free(msgContents);
     return NULL;
 }
 
 void messageFree(Message *msg)
 {
-    if (msg == NULL)
-        return;
-
-    if (msg->contents != NULL)
-        free(msg->contents);
-
     free(msg);
 }
 
@@ -90,11 +75,7 @@ char *messageToCString(Message *msg, unsigned int *msgStrLength)
     char *msgStr = (char *) malloc(sizeof(char) * (msgLength + NULL_CHAR_SIZE));
     CHECK_NULL_RETURN_NULL(msgStr);
 
-    // We first copy the Message object memory into the array
-    memcpy(msgStr, msg, sizeof(Message));
-
-    // The we attach a copy of the contents themselves
-    memcpy(msgStr + sizeof(Message), msg->contents, msg->contentsLength);
+    memcpy(msgStr, (char *) msg, msgLength); //todo try without casting
     msgStr[msgLength] = EOL_CHAR;
 
     *msgStrLength = msgLength;
@@ -105,35 +86,19 @@ Message *messageFromCString(const char *msgStr, unsigned int msgLength)
 {
     CHECK_NULL_RETURN_NULL(msgStr);
     CHECK_ZERO_RETURN_NULL(msgLength);
-    Message *msg = NULL;
-    char *contents = NULL;
 
-    // Copy Message data
-    msg = (Message *) malloc(sizeof(Message));
+    Message *msg = (Message *) malloc(sizeof(char) * (msgLength + NULL_CHAR_SIZE));
     CHECK_NULL_RETURN_NULL(msg);
-    memcpy(msg, msgStr, sizeof(Message));
-    // CR: this is the place that you can see that not including contents in the same struct as Message
-    //     means that you need to do a double malloc for every message
-    // Copy contents & update the msgs' pointer
-    unsigned int contentsLength = msgLength - sizeof(Message);
-    contents = (char *) malloc(contentsLength + NULL_CHAR_SIZE);
-    CHECK_NULL_GOTO_CLEANUP(contents);
+    memcpy(msg, msgStr, msgLength);
 
-    memcpy(contents, msgStr + sizeof(Message), contentsLength);
-    contents[contentsLength] = NULL_CHAR;
-    msg->contents = contents;
-
-    // Validation is important
-    // CR: Kapara on you bebi
     if (!messageValidateFormat(msg))
-        goto cleanup;
+    {
+        free(msg);
+        return NULL;
+    }
 
+    msg->contents[msgLength - sizeof(Message)] =  NULL_CHAR;
     return msg;
-
-    cleanup:
-    free(msg);
-    free(contents);
-    return NULL;
 }
 
 Sender messageGetSender(Message *msg)
@@ -178,11 +143,8 @@ Message *messageSetSuccessOrFailure(Sender sender, Command command, bool isSucce
 {
     if (!messageValidateSender(sender) || !messageValidateCommand(command))
         return NULL;
-
-    if (isSuccess) // CR: unite these two lines, use the ? operator
-        return messageSet(sender, command, SUCCESS_OR_FAILURE_STR_LENGTH, SUCCESS_STR);
-
-    return messageSet(sender, command, SUCCESS_OR_FAILURE_STR_LENGTH, FAILURE_STR);
+    return (isSuccess) ? messageSet(sender, command, SUCCESS_OR_FAILURE_STR_LENGTH, SUCCESS_STR)
+                       : messageSet(sender, command, SUCCESS_OR_FAILURE_STR_LENGTH, FAILURE_STR);
 }
 
 char *messageIntoEncodedString(Message *msg, encoding_function *encodingFunction)
@@ -190,12 +152,10 @@ char *messageIntoEncodedString(Message *msg, encoding_function *encodingFunction
     MSG_CHECK_VALID_RETURN_NULL(msg);
     CHECK_NULL_RETURN_NULL(encodingFunction);
 
-    // Get the msg as a cString
     unsigned int msgStrLength = 0;
     char *msgStr = messageToCString(msg, &msgStrLength);
     CHECK_NULL_RETURN_NULL(msgStr);
 
-    // Encode le msg
     char *encodedMsg = (char *) malloc(MAX_MSG_LENGTH); // CR: Null byte?
     CHECK_NULL_RETURN_NULL(encodedMsg);
 

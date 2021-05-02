@@ -8,7 +8,7 @@ include_directories(ex2 ex2/client ex2/server)
 include_directories(ex2/communicationMethods/include ex2/communicationProtocol/include)
 include_directories(ex2/utils/include)
 
-add_executable(ex2-server
+add_executable(server
         ex2/Macros.h
         ex2/utils/src/base64.c
         ex2/utils/include/base64.h
@@ -33,7 +33,7 @@ add_executable(ex2-server
         ex2/server/Server.h
         ex2/server/ServerMain.c)
 
-add_executable(ex2-client
+add_executable(client
         ex2/Macros.h
         ex2/utils/src/base64.c
         ex2/utils/include/base64.h
@@ -59,6 +59,6 @@ add_executable(ex2-client
         ex2/client/ClientMain.c)
 
 if(WIN32)
-    target_link_libraries(ex2-server wsock32 ws2_32)
-    target_link_libraries(ex2-client wsock32 ws2_32)
+    target_link_libraries(server wsock32 ws2_32)
+    target_link_libraries(client wsock32 ws2_32)
 endif()

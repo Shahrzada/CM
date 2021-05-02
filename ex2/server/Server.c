@@ -1,13 +1,13 @@
 
 // ------------------------------ includes ------------------------------
 
-#include <unistd.h>
-#include <config.h>
-#include <libgen.h>
-
 #include "Server.h"
 #include "MessageProtocol.h"
 #include "base64.h"
+
+#include <unistd.h>
+#include <config.h>
+#include <libgen.h>
 
 // ------------------------------ private functions -----------------------------
 
@@ -30,17 +30,13 @@ static Message *serverLoadFileIntoMsgFormat(FILE *pFile) {
     Message *msg = (Message *) malloc(sizeof(Message));
     CHECK_NULL_RETURN_NULL(msg);
 
-    // Get max bytes of file (notice we read less than MAX_MSG_LENGTH due to encoding)
     int maxMsgLength = MAX_FILE_MSG_LENGTH - MSG_FORMAT_LENGTH + NULL_CHAR_SIZE;
     char buffer[maxMsgLength];
     int counter = serverLoadFileIntoBuffer(buffer, maxMsgLength, pFile);
-    // CR: comments like this are more hurtful than helpful, good code requires little to no comments.
-    //     the one above can stay, the one below should disappear
-    // Reached EOF
+
     if (counter == 0)
         goto cleanup;
 
-    // Create the msg format for the file data
     msg = messageSet(SERVER, GET_FILE, counter, buffer);
     CHECK_NULL_GOTO_CLEANUP(msg);
 
@@ -74,13 +70,11 @@ static ReturnValue sendFileTitle(Message *msg)
     if (!messageValidateFormat(msg))
         PRINT_ERROR_WITH_FUNCTION_AND_RETURN_ERROR("sendFileTitle", "Bad msg format");
 
-    // Extract file title and extension from the msg
     char *fileTitle = basename(msg->contents);
     CHECK_NULL_RETURN_ERROR(fileTitle);
     unsigned int fileTitleLength = strnlen(fileTitle, MAX_JSON_VALUE_LENGTH);
     CHECK_ZERO_RETURN_ERROR(fileTitleLength);
 
-    // Create a msg out of the data
     Message *fileTitleMsg = messageSet(SERVER, GET_FILE, fileTitleLength, fileTitle);
     CHECK_NULL_RETURN_ERROR(fileTitleMsg);
 
@@ -88,7 +82,6 @@ static ReturnValue sendFileTitle(Message *msg)
     free(fileTitleMsg);
     CHECK_ERROR_RETURN_ERROR(result);
 
-    // Wait for client reply
     Message *clientReply = MPServerListen();
     MSG_CHECK_VALID_GOTO_CLEANUP(clientReply);
     Command replyCommand = clientReply->command;
@@ -109,38 +102,25 @@ static ReturnValue serverStreamFile(FILE *pFile)
     Message *fileMsg = NULL;
     ReturnValue result = PROJECT_ERROR;
 
-    while (true)
+    while ((fileMsg = serverLoadFileIntoMsgFormat(pFile)) != NULL)
     {
-        fileMsg = serverLoadFileIntoMsgFormat(pFile);
-        if (fileMsg == NULL)
-        {
-            result = PROJECT_SUCCESS;
-            goto cleanup; 
-            // CR: goto in happy flow is a bit wired, this shouldve been a break;
-            //     or better yet change the condition
-        }
-
         result = MPServerSend(fileMsg);
-        CHECK_ERROR_GOTO_CLEANUP(result);
-
         messageFree(fileMsg);
         fileMsg = NULL;
+        CHECK_ERROR_GOTO_CLEANUP(result);
 
-        // Wait for client reply
         Message *clientReply = MPServerListen();
         MSG_CHECK_VALID_GOTO_CLEANUP(clientReply);
+
         Command replyCommand = clientReply->command;
         messageFree(clientReply);
         if (replyCommand != GET_FILE)
-        {
-            result = PROJECT_ERROR;
             goto cleanup;
-        }
     }
+    return PROJECT_SUCCESS;
 
     cleanup:
-    messageFree(fileMsg);
-    return result;
+    return PROJECT_ERROR;
 }
 
 static ReturnValue serverSendFile(Message *msg)
@@ -152,7 +132,6 @@ static ReturnValue serverSendFile(Message *msg)
     FILE *pFile = NULL;
     ReturnValue result = PROJECT_ERROR;
 
-    // Open the file to be sent
     pFile = fopen(filePath, FILE_READ_BINARY_MODE);
     CHECK_NULL_GOTO_CLEANUP(pFile);
 
@@ -160,7 +139,6 @@ static ReturnValue serverSendFile(Message *msg)
     result = sendFileTitle(msg);
     CHECK_ERROR_GOTO_CLEANUP(result);
 
-    // Then, send the file itself (using multiple msgs, if needed)
     result = serverStreamFile(pFile);
 
     cleanup:
@@ -184,7 +162,7 @@ static void serverHandleMessage(Message *msg)
         PRINT_ERROR_WITH_FUNCTION_AND_RETURN("serverHandleMessage", "Bad msg format");
 
     Command currentCommand = messageGetCommand(msg);
-    ReturnValue result;
+    ReturnValue result = PROJECT_ERROR;
     switch (currentCommand)
     {
         case READ:
@@ -209,7 +187,7 @@ static void serverHandleMessage(Message *msg)
 
 static void serverHandleError(Message *msg)
 {
-    printf("\n[ERROR]: Received bad msg:\n");
+    printf("\n[SERVER ERROR]: Received bad msg:\n");
     if (msg == NULL)
     {
         printf("Got null msg.\n");
@@ -232,12 +210,10 @@ _Noreturn void serverListen()
     while (true)
     {
         Message *msg = MPServerListen();
-
         if (!messageValidateFormat(msg))
             serverHandleError(msg);
 
         serverHandleMessage(msg);
-
         messageFree(msg);
         sleep(1);
     }

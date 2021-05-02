@@ -39,9 +39,9 @@ typedef enum {
     CLIENT,
 } Sender;
 
-// -------------------------- macros -------------------------
+enum ARGUMENTS{CONFIG_PATH = 1, TOTAL_ARGUMENTS};
 
-#define TOTAL_INPUT_PARAMETERS 2
+// -------------------------- macros -------------------------
 
 #define EOT_CHAR_ASCII_DEC_VALUE 4
 #define NULL_CHAR '\0'

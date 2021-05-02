@@ -1,14 +1,17 @@
 
 // ------------------------------ includes ------------------------------
 
-#include <base64.h>
-#include <config.h>
 #include "MessageProtocol.h"
 #include "CommunicationMethods.h"
 
-// ------------------------------ global variables ------------------------------
+#include <base64.h>
+#include <config.h>
 
-#define IS_SERVER (serverCMethod == NULL)
+// -------------------------- const definitions -------------------------
+
+#define IS_SERVER (serverCMethod != NULL)
+
+// ------------------------------ global variables ------------------------------
 
 static server_communication_method *serverCMethod = NULL;
 static client_communication_method *clientCMethod = NULL;
@@ -28,17 +31,14 @@ static ReturnValue MPWriteToLog(Message *msg)
     char *logPath = MPGetLogFilePath();
     CHECK_NULL_RETURN_ERROR(logPath);
 
-    // Open log file for appending
     FILE *pFile = fopen(logPath, FILE_APPEND_MODE);
     CHECK_NULL_RETURN_ERROR(pFile);
 
-    // Get the formatted string out of the msg
     size_t bufferSize = msg->contentsLength + MSG_PRINT_FORMAT_LENGTH;
     char buffer[bufferSize + NULL_CHAR_SIZE];
     result = messageToPrintableCString(msg, buffer);
     CHECK_ERROR_GOTO_CLEANUP(result);
 
-    // Write it to the log
     size_t totalBytesWritten = fwrite(buffer, 1, bufferSize, pFile);
     if (totalBytesWritten != bufferSize)
         goto cleanup;
@@ -150,13 +150,13 @@ ReturnValue MPClientCloseConnection(ReturnValue result)
     CHECK_NULL_RETURN_ERROR(clientCMethod);
     ReturnValue closingResult = PROJECT_ERROR;
 
-    if (result == PROJECT_ERROR)  // send the server an ABORT msg
+    if (result == PROJECT_ERROR)
     {
         Message *msg = messageSet(CLIENT, ABORT, 0, EMPTY_STRING);
         MSG_CHECK_VALID_GOTO_CLEANUP(msg);
         Message *reply = MPClientSend(msg);
-        messageFree(msg);
         messageFree(reply); // ignoring reply due to closing because of an error
+        messageFree(msg);
     }
 
     cleanup:
@@ -171,24 +171,21 @@ Message *MPClientSend(Message *msg)
     CHECK_NULL_RETURN_NULL(clientCMethod);
     MSG_CHECK_VALID_RETURN_NULL(msg);
 
-    // Encode the msg
     char *encodedMsg = MPPrintAndEncode(msg);
     CHECK_NULL_RETURN_NULL(encodedMsg);
 
     unsigned int encodedMsgLength = strnlen(encodedMsg, MAX_MSG_LENGTH);
-    if (encodedMsgLength == MAX_MSG_LENGTH) // CR: if message legnth is MAX_MSG_LENGTH that means you exceed your buffer...
+    if (encodedMsgLength == MAX_MSG_LENGTH)
     {
         free(encodedMsg);
         PRINT_ERROR_WITH_FUNCTION_AND_RETURN_NULL("MPClientSend", "Bad encoded msg");
     }
 
-    // Send it and wait for a reply
     char encodedReply[MAX_MSG_LENGTH];
     unsigned int encodedReplyLength = clientCMethod->sendFunction(encodedMsg, encodedMsgLength, encodedReply);
     free(encodedMsg);
     if (encodedReplyLength == 0)
         return NULL;
 
-    // Decode the reply and create a msg object for the client
     return MPDecodeAndPrint(encodedReply);
 }

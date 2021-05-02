@@ -23,7 +23,7 @@ struct _Message {
     Sender sender;
     Command command;
     unsigned int contentsLength;
-    char * contents; // CR: this shouldve been either a fixed size array of and 0 sized array
+    char contents[];
 };
 typedef struct _Message Message;
 
@@ -34,9 +34,6 @@ typedef int (decoding_function)(char *, const char *);
 
 #define MSG_FORMAT_LENGTH 4
 #define MSG_PRINT_FORMAT_LENGTH 100
-// CR: these scared me for a second but than I saw nobody is using them, delete these
-#define SERVER_SUCCESS_MSG "0,3,PROJECT_SUCCESS"
-#define SERVER_FAILURE_MSG "0,3,FAILURE"
 
 #define PRINT_MSG(msg) do {printf("[%d][%d][%d]:%s\n", (msg)->sender, (msg)->command, (msg)->contentsLength, (msg)->contents);} while(0)
 // CR: you made so much macros that now its too confusing, it wouldve been better to make 1 macro

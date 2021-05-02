@@ -22,8 +22,6 @@
 
 // ------------------------------ global variables -----------------------------
 
-// CR: This was not deleted because there's no other way to gather who is the server
-//      because both access the same file.
 static bool isServer = false;
 
 static size_t serverFileEmptySize = 0;
